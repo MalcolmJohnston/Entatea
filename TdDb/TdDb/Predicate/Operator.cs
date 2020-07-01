@@ -1,0 +1,17 @@
+﻿namespace TdDb.Predicate
+{
+    public enum Operator
+    {
+        Equal,
+        NotEqual,
+        Between,
+        In,
+        GreaterThan,
+        GreaterThanOrEqual,
+        LessThan,
+        LessThanOrEqual,
+        StartsWith,
+        EndsWith,
+        Contains
+    }
+}

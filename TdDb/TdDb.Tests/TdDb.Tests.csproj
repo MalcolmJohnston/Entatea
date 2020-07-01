@@ -1,0 +1,25 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <TargetFramework>netcoreapp3.1</TargetFramework>
+
+    <IsPackable>false</IsPackable>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <PackageReference Include="FluentMigrator" Version="3.2.7" />
+    <PackageReference Include="FluentMigrator.Runner" Version="3.2.7" />
+    <PackageReference Include="nunit" Version="3.12.0" />
+    <PackageReference Include="NUnit3TestAdapter" Version="3.15.1" />
+    <PackageReference Include="Microsoft.NET.Test.Sdk" Version="16.4.0" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\TdDb.DataAnnotations\TdDb.DataAnnotations.csproj" />
+    <ProjectReference Include="..\TdDb.Data\TdDb.Data.csproj" />
+    <ProjectReference Include="..\TdDb.InMemory\TdDb.InMemory.csproj" />
+    <ProjectReference Include="..\TdDb.SqlServer\TdDb.SqlServer.csproj" />
+    <ProjectReference Include="..\TdDb\TdDb.csproj" />
+  </ItemGroup>
+
+</Project>
