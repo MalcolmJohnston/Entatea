@@ -1,0 +1,61 @@
+﻿
+Microsoft Visual Studio Solution File, Format Version 12.00
+# Visual Studio Version 16
+VisualStudioVersion = 16.0.30011.22
+MinimumVisualStudioVersion = 10.0.40219.1
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Testadal", "Testadal\Testadal.csproj", "{A701D881-5295-4E82-957A-4322F95F8399}"
+EndProject
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Testadal.Annotations", "Testadal.Annotations\Testadal.Annotations.csproj", "{756003DF-E24A-4FFC-ABB9-53D621FDE3DB}"
+EndProject
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Testadal.Data", "Testadal.Data\Testadal.Data.csproj", "{D32A7649-8753-43BB-A03B-1DE14B4A6FDD}"
+EndProject
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Testadal.InMemory", "Testadal.InMemory\Testadal.InMemory.csproj", "{4D906D13-0141-4C7C-8A18-7E0E0F1C5495}"
+EndProject
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Testadal.SqlServer", "Testadal.SqlServer\Testadal.SqlServer.csproj", "{656B5AA5-97F7-4F4F-9FC7-68A9355985D0}"
+EndProject
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Testadal.Tests", "Testadal.Tests\Testadal.Tests.csproj", "{D2B6E4A9-EB94-4639-85BF-95BDD8FC5F30}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Testadal.MySql", "Testadal.MySql\Testadal.MySql.csproj", "{5A687F8C-D9FD-4FA3-8084-094A255D8BC7}"
+EndProject
+Global
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug|Any CPU = Debug|Any CPU
+		Release|Any CPU = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{A701D881-5295-4E82-957A-4322F95F8399}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{A701D881-5295-4E82-957A-4322F95F8399}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{A701D881-5295-4E82-957A-4322F95F8399}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{A701D881-5295-4E82-957A-4322F95F8399}.Release|Any CPU.Build.0 = Release|Any CPU
+		{756003DF-E24A-4FFC-ABB9-53D621FDE3DB}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{756003DF-E24A-4FFC-ABB9-53D621FDE3DB}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{756003DF-E24A-4FFC-ABB9-53D621FDE3DB}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{756003DF-E24A-4FFC-ABB9-53D621FDE3DB}.Release|Any CPU.Build.0 = Release|Any CPU
+		{D32A7649-8753-43BB-A03B-1DE14B4A6FDD}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{D32A7649-8753-43BB-A03B-1DE14B4A6FDD}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{D32A7649-8753-43BB-A03B-1DE14B4A6FDD}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{D32A7649-8753-43BB-A03B-1DE14B4A6FDD}.Release|Any CPU.Build.0 = Release|Any CPU
+		{4D906D13-0141-4C7C-8A18-7E0E0F1C5495}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{4D906D13-0141-4C7C-8A18-7E0E0F1C5495}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{4D906D13-0141-4C7C-8A18-7E0E0F1C5495}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{4D906D13-0141-4C7C-8A18-7E0E0F1C5495}.Release|Any CPU.Build.0 = Release|Any CPU
+		{656B5AA5-97F7-4F4F-9FC7-68A9355985D0}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{656B5AA5-97F7-4F4F-9FC7-68A9355985D0}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{656B5AA5-97F7-4F4F-9FC7-68A9355985D0}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{656B5AA5-97F7-4F4F-9FC7-68A9355985D0}.Release|Any CPU.Build.0 = Release|Any CPU
+		{D2B6E4A9-EB94-4639-85BF-95BDD8FC5F30}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{D2B6E4A9-EB94-4639-85BF-95BDD8FC5F30}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{D2B6E4A9-EB94-4639-85BF-95BDD8FC5F30}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{D2B6E4A9-EB94-4639-85BF-95BDD8FC5F30}.Release|Any CPU.Build.0 = Release|Any CPU
+		{5A687F8C-D9FD-4FA3-8084-094A255D8BC7}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{5A687F8C-D9FD-4FA3-8084-094A255D8BC7}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{5A687F8C-D9FD-4FA3-8084-094A255D8BC7}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{5A687F8C-D9FD-4FA3-8084-094A255D8BC7}.Release|Any CPU.Build.0 = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(SolutionProperties) = preSolution
+		HideSolutionNode = FALSE
+	EndGlobalSection
+	GlobalSection(ExtensibilityGlobals) = postSolution
+		SolutionGuid = {13C78142-5F80-44CA-B425-EC2E4CB3FEAD}
+	EndGlobalSection
+EndGlobal
