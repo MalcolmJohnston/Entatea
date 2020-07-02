@@ -2,6 +2,11 @@
 
   <PropertyGroup>
     <TargetFramework>netstandard2.0</TargetFramework>
+    <Authors>Malcolm Johnston</Authors>
+    <Company />
+    <Product>Testadal.InMemory</Product>
+    <PackageLicenseExpression>MIT</PackageLicenseExpression>
+    <PackageProjectUrl>https://github.com/MalcolmJohnston/testadal</PackageProjectUrl>
   </PropertyGroup>
 
   <ItemGroup>
