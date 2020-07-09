@@ -1,11 +1,13 @@
-﻿namespace Testadal.Predicate
+﻿using System.Collections.Generic;
+
+using Testadal.SqlBuilder;
+
+namespace Testadal.Predicate
 {
     public interface IPredicate
     {
-        string ColumnName { get; }
+        string GetSql(ISqlBuilder sqlBuilder, int parameterIndex , out int parameterCount);
 
-        string PropertyName { get; }
-
-        Operator Operator { get; }
+        IEnumerable<KeyValuePair<string, object>> GetParameters(int parameterIndex, out int parameterCount);
     }
 }

@@ -1,8 +1,6 @@
 ﻿using System.Reflection;
 using System.Linq;
 
-using Testadal.Data;
-
 namespace Testadal.Model
 {
     internal static class PropertyAttributeHelper

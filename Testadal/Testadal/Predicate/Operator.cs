@@ -1,10 +1,10 @@
-﻿namespace Testadal.Predicate
+﻿using System.Reflection;
+
+namespace Testadal.Predicate
 {
     public enum Operator
     {
         Equal,
-        NotEqual,
-        Between,
         In,
         GreaterThan,
         GreaterThanOrEqual,

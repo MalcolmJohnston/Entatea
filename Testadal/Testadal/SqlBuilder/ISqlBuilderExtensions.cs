@@ -3,7 +3,6 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 
-using Testadal.Data;
 using Testadal.Model;
 using Testadal.Predicate;
 
@@ -19,25 +18,28 @@ namespace Testadal.SqlBuilder
             return sortOrder == SortOrder.Ascending ? sqlBuilder.OrderByAscending : sqlBuilder.OrderByDescending;
         }
 
-        public static string GetDeleteSql<T>(this ISqlBuilder sqlBuilder)
+        public static string GetDeleteSql<T>(this ISqlBuilder sqlBuilder) where T : class
         {
             return $"DELETE FROM {sqlBuilder.GetTableIdentifier<T>()}";
         }
 
-        public static string GetWhereClause(this ISqlBuilder sqlBuilder, IList<IPredicate> operations)
+        public static string GetWhereClause(this ISqlBuilder sqlBuilder, IEnumerable<IPredicate> predicates)
         {
-            if (operations == null || operations.Count == 0)
+            int count = predicates.Count();
+            if (predicates == null || count == 0)
             {
                 return string.Empty;
             }
 
             StringBuilder sb = new StringBuilder("WHERE ");
-            for (int i = 0; i < operations.Count; i++)
+            int parameterIndex = 0;
+            for (int i = 0; i < count; i++)
             {
-                sb.Append(sqlBuilder.PredicateToSql(operations[i]));
+                sb.Append(predicates.ElementAt(i).GetSql(sqlBuilder, parameterIndex, out int parameterCount));
+                parameterIndex += parameterCount;
 
                 // exclude AND on last property
-                if ((i + 1) < operations.Count)
+                if ((i + 1) < count)
                 {
                     sb.Append(" AND ");
                 }
@@ -46,16 +48,12 @@ namespace Testadal.SqlBuilder
             return sb.ToString();
         }
 
-        public static string GetWhereClause(this ISqlBuilder sqlBuilder, ClassMap classMap, object whereConditions)
+        public static string GetWhereClause<T>(this ISqlBuilder sqlBuilder, object whereConditions) where T : class
         {
-            if (whereConditions == null)
-            {
-                throw new ArgumentException("Please specify some conditions to search by.");
-            }
-
             // build a list of properties for the WHERE clause
             // this will error if no properties are found that match our Type
-            IList<IPredicate> properties = classMap.ValidateWhereProperties(whereConditions);
+            ClassMap classMap = ClassMapper.GetClassMap<T>();
+            IList<IPredicate> properties = classMap.ValidateWhereProperties<T>(whereConditions);
 
             // return the WHERE clause
             return sqlBuilder.GetWhereClause(properties);
@@ -63,13 +61,32 @@ namespace Testadal.SqlBuilder
 
         public static string GetByIdWhereClause(this ISqlBuilder sqlBuilder, ClassMap classMap)
         {
-            return sqlBuilder.GetWhereClause(classMap.AllKeys.Select(x => new Equal(x.ColumnName, x.PropertyName))
-                                                             .ToList<IPredicate>());
+            return GetByPropertiesWhereClause(sqlBuilder, classMap.AllKeys);
         }
 
-        public static string GetOrderByClause(this ISqlBuilder sqlBuilder, ClassMap classMap, object sortOrders)
+        public static string GetByPropertiesWhereClause(this ISqlBuilder sqlBuilder, IEnumerable<PropertyMap> properties)
+        {
+            StringBuilder sb = new StringBuilder("WHERE ");
+
+            int count = properties.Count();
+            for (int i = 0; i < count; i++)
+            {
+                sb.Append($"{sqlBuilder.Encapsulate(properties.ElementAt(i).ColumnName)} = @p{i}");
+
+                // exclude AND on last property
+                if ((i + 1) < count)
+                {
+                    sb.Append(" AND ");
+                }
+            }
+
+            return sb.ToString();
+        }
+
+        public static string GetOrderByClause<T>(this ISqlBuilder sqlBuilder, object sortOrders) where T : class
         {
             // coalesce the dictionary
+            ClassMap classMap = ClassMapper.GetClassMap<T>();
             IDictionary<string, SortOrder> sortOrderDict = classMap.CoalesceSortOrderDictionary(sortOrders);
 
             // validate / return

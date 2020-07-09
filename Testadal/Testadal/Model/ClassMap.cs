@@ -8,7 +8,6 @@ using System.Reflection;
 using System.Runtime.CompilerServices;
 
 using Humanizer;
-using Testadal.Data;
 using Testadal.Predicate;
 
 namespace Testadal.Model
@@ -160,41 +159,44 @@ namespace Testadal.Model
         /// <param name="id">The identifier.</param>
         /// <exception cref="ArgumentException">Thrown if a key property is not passed on the object.</exception>
         /// <returns>The validated key property bag.</returns>
-        public IDictionary<string, object> ValidateKeyProperties(object id)
+        public IList<IPredicate> ValidateKeyProperties<T>(object id) where T : class
         {
-            if (id == null)
+            return ValidateKeyProperties<T>(id, this.AllKeys);
+        }
+
+        /// <summary>
+        /// Validates the assigned key properties are present.
+        /// </summary>
+        /// <param name="id">The identifier.</param>
+        /// <exception cref="ArgumentException">Thrown if a key property is not passed on the object.</exception>
+        /// <returns>The validated key property bag.</returns>
+        public IList<IPredicate> ValidateAssignedKeyProperties<T>(object id) where T : class
+        {
+            if (this.AssignedKeys.Count() == 0)
             {
-                throw new ArgumentException("Passed identifier object is null.");
+                return new List<IPredicate>();
             }
 
-            // create dictionary
-            ExpandoObject eo = new ExpandoObject();
-            IDictionary<string, object> keys = eo as IDictionary<string, object>;
+            return ValidateKeyProperties<T>(id, this.AssignedKeys);
+        }
 
-            // if we have a single key on our dto and the passed id object is the same type as the key
-            // then return a dictionary indexed on the key property name
-            if (this.AllKeys.Count() == 1 && this.AllKeys.Single().PropertyInfo.PropertyType == id.GetType())
+        private IList<IPredicate> ValidateKeyProperties<T>(object propertyBag, IEnumerable<PropertyMap> properties) where T : class
+        {
+            if (propertyBag == null)
             {
-                keys.Add(this.AllKeys.Single().PropertyName, id);
+                throw new ArgumentException("Passed object is null.");
             }
-            else
+
+            // if we have a single key on our dto and passed id is the same type as the key, return the predicate
+            if (this.AllKeys.Count() == 1 && this.AllKeys.Single().PropertyInfo.PropertyType == propertyBag.GetType())
             {
-                // otherwise iterate through all properties and check we have all key properties
-                PropertyInfo[] propertyInfos = id.GetType().GetProperties();
-                foreach (PropertyMap propertyMap in this.AllKeys)
+                return new List<IPredicate>()
                 {
-                    PropertyInfo pi = propertyInfos.Where(x => x.Name == propertyMap.PropertyName).SingleOrDefault();
-
-                    if (pi == null)
-                    {
-                        throw new ArgumentException($"Failed to find key property {propertyMap.PropertyName}.");
-                    }
-
-                    keys.Add(propertyMap.PropertyName, pi.GetValue(id));
-                }
+                    PredicateFactory.Equals<T>(this.AllKeys.Single().PropertyName, propertyBag)
+                };
             }
 
-            return eo;
+            return this.ValidateWhereProperties<T>(this.CoalesceKeyToDictionary(propertyBag));
         }
 
         /// <summary>
@@ -217,7 +219,16 @@ namespace Testadal.Model
             // if we have an expando object or dictionary already then return it
             if (propertyBag is IDictionary<string, object>)
             {
-                return propertyBag as IDictionary<string, object>;
+                IDictionary<string, object> dict = propertyBag as IDictionary<string, object>;
+                foreach (string key in dict.Keys)
+                {
+                    if (!this.AllProperties.TryGetValue(key, out PropertyMap pm))
+                    {
+                        throw new ArgumentException($"Failed to find property {key}.");
+                    }
+                }
+
+                return dict;
             }
 
             IDictionary<string, object> obj = new Dictionary<string, object>();
@@ -252,12 +263,18 @@ namespace Testadal.Model
                 throw new ArgumentException("Passed property bag is null.");
             }
 
+            // if we have a single key on our dto and passed id is the same type as the key, return the dictionary
+            if (this.AllKeys.Count() == 1 && this.AllKeys.Single().PropertyInfo.PropertyType == propertyBag.GetType())
+            {
+                return new Dictionary<string, object>() { { this.AllKeys.Single().PropertyName, propertyBag } };
+            }
+
+            // otherwise, check we have all key properties
             IDictionary<string, object> key = new Dictionary<string, object>();
             PropertyInfo[] propertyInfos = propertyBag.GetType().GetProperties();
             foreach (PropertyMap propertyMap in this.AllKeys)
             {
                 PropertyInfo pi = propertyInfos.Where(x => x.Name == propertyMap.PropertyName).SingleOrDefault();
-
                 if (pi == null)
                 {
                     throw new ArgumentException($"Failed to find key property {propertyMap.PropertyName}.");
@@ -329,20 +346,17 @@ namespace Testadal.Model
         /// or
         /// Failed to find property {property.Name}.
         /// </exception>
-        public IList<IPredicate> ValidateWhereProperties(object whereConditions)
+        public IList<IPredicate> ValidateWhereProperties<T>(object whereConditions) where T : class
         {
-            // coalesce the object to a dictionary
-            IDictionary<string, object> whereDict = this.CoalesceToDictionary(whereConditions);
-
             // check we have some conditions to create
+            IDictionary<string, object> whereDict = this.CoalesceToDictionary(whereConditions);
             if (whereDict.Count == 0)
             {
-                throw new ArgumentException("Please pass where conditions.");
+                return new List<IPredicate>();
             }
 
             // setup our list of property mappings that we will create the where clause from
             List<IPredicate> whereOperations = new List<IPredicate>();
-
             foreach (string propertyName in whereDict.Keys)
             {
                 PropertyMap propertyMap = this.SelectProperties
@@ -359,12 +373,12 @@ namespace Testadal.Model
 
                 if (propertyMap.PropertyInfo.PropertyType.IsAssignableFrom(valueType))
                 {
-                    IPredicate op = new Equal(propertyMap.ColumnName, propertyName);
+                    IPredicate op = PredicateFactory.Equals<T>(propertyName, whereDict[propertyName]);
                     whereOperations.Add(op);
                 }
                 else
                 {
-                    IPredicate op = new Predicate.In(propertyMap.ColumnName, propertyName);
+                    IPredicate op = PredicateFactory.In<T>(propertyName, whereDict[propertyName]);
                     whereOperations.Add(op);
                 }
             }

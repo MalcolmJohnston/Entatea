@@ -6,7 +6,6 @@ using System.Threading.Tasks;
 
 using NUnit.Framework;
 
-using Testadal.Data;
 using Testadal.InMemory;
 using Testadal.MySql;
 using Testadal.SqlServer;

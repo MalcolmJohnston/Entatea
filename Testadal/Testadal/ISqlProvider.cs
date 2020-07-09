@@ -1,25 +1,29 @@
-﻿namespace Testadal
+﻿using System.Collections.Generic;
+
+using Testadal.Predicate;
+
+namespace Testadal
 {
     public interface ISqlProvider
     {
-        string GetSelectCountSql<T>(object whereConditions);
+        string GetSelectCountSql<T>(IEnumerable<IPredicate> whereConditions) where T : class;
 
-        string GetSelectAllSql<T>();
+        string GetSelectAllSql<T>() where T : class;
 
-        string GetSelectByIdSql<T>();
+        string GetSelectByIdSql<T>() where T : class;
 
-        string GetSelectWhereSql<T>(object whereConditions);
+        string GetSelectWhereSql<T>(IEnumerable<IPredicate> whereConditions) where T : class;
 
-        string GetSelectWhereSql<T>(object whereConditions, object sortOrders, int firstRow, int lastRow);
+        string GetSelectWhereSql<T>(IEnumerable<IPredicate> whereConditions, object sortOrders, int firstRow, int lastRow) where T : class;
 
-        string GetInsertSql<T>();
+        string GetInsertSql<T>() where T : class;
 
-        string GetUpdateSql<T>(object updateProperties);
+        string GetUpdateSql<T>(object updateProperties) where T : class;
 
-        string GetDeleteByIdSql<T>();
+        string GetDeleteByIdSql<T>() where T : class;
 
-        string GetDeleteWhereSql<T>(object whereConditions);
+        string GetDeleteWhereSql<T>(IEnumerable<IPredicate> whereConditions) where T : class;
 
-        string GetSelectNextIdSql<T>();
+        string GetSelectNextIdSql<T>() where T : class;
     }
 }

@@ -1,6 +1,8 @@
 ﻿using System;
+using System.Collections.Generic;
 
 using Testadal.Cache;
+using Testadal.Predicate;
 using Testadal.SqlBuilder;
 
 namespace Testadal
@@ -20,52 +22,52 @@ namespace Testadal
             this.cache = cache;
         }
 
-        public string GetDeleteByIdSql<T>()
+        public string GetDeleteByIdSql<T>() where T : class
         {
             return GetFromOrAddToCache(cache.GetDeleteByIdSql<T>, builder.GetDeleteByIdSql<T>, cache.SetDeleteByIdSql<T>);
         }
 
-        public string GetDeleteWhereSql<T>(object whereConditions)
+        public string GetDeleteWhereSql<T>(IEnumerable<IPredicate> whereConditions) where T : class
         {
             return builder.GetDeleteWhereSql<T>(whereConditions);
         }
 
-        public string GetInsertSql<T>()
+        public string GetInsertSql<T>() where T : class
         {
             return GetFromOrAddToCache(cache.GetInsertSql<T>, builder.GetInsertSql<T>, cache.SetInsertSql<T>);
         }
 
-        public string GetSelectNextIdSql<T>()
+        public string GetSelectNextIdSql<T>() where T : class
         {
             return GetFromOrAddToCache(cache.GetSelectNextIdSql<T>, builder.GetSelectNextIdSql<T>, cache.SetSelectNextIdSql<T>);
         }
 
-        public string GetSelectAllSql<T>()
+        public string GetSelectAllSql<T>() where T : class
         {
             return GetFromOrAddToCache(cache.GetSelectAllSql<T>, builder.GetSelectAllSql<T>, cache.SetSelectAllSql<T>);
         }
 
-        public string GetSelectByIdSql<T>()
+        public string GetSelectByIdSql<T>() where T : class
         {
             return GetFromOrAddToCache(cache.GetSelectByIdSql<T>, builder.GetSelectByIdSql<T>, cache.SetSelectByIdSql<T>);
         }
 
-        public string GetSelectCountSql<T>(object whereConditions)
+        public string GetSelectCountSql<T>(IEnumerable<IPredicate> whereConditions) where T : class
         {
             return builder.GetSelectCountSql<T>(whereConditions);
         }
 
-        public string GetSelectWhereSql<T>(object whereConditions)
+        public string GetSelectWhereSql<T>(IEnumerable<IPredicate> whereConditions) where T : class
         {
             return builder.GetSelectWhereSql<T>(whereConditions);
         }
 
-        public string GetSelectWhereSql<T>(object whereConditions, object sortOrders, int firstRow, int lastRow)
+        public string GetSelectWhereSql<T>(IEnumerable<IPredicate> whereConditions, object sortOrders, int firstRow, int lastRow) where T : class
         {
             return builder.GetSelectWhereSql<T>(whereConditions, sortOrders, firstRow, lastRow);
         }
 
-        public string GetUpdateSql<T>(object updateProperties)
+        public string GetUpdateSql<T>(object updateProperties) where T : class
         {
             return builder.GetUpdateSql<T>(updateProperties);
         }

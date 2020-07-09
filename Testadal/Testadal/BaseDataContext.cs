@@ -5,8 +5,10 @@ using System.Linq;
 using System.Threading.Tasks;
 
 using Dapper;
+
 using Testadal.Cache;
 using Testadal.Model;
+using Testadal.Predicate;
 using Testadal.SqlBuilder;
 
 namespace Testadal
@@ -25,7 +27,7 @@ namespace Testadal
             this.sqlProvider = new SqlProvider(sqlBuilder, sqlCache);
         }
 
-        public async Task<T> Create<T>(T entity)
+        public async Task<T> Create<T>(T entity) where T : class
         {
             ClassMap classMap = ClassMapper.GetClassMap<T>();
 
@@ -35,7 +37,8 @@ namespace Testadal
                 if (classMap.HasSequentialKey)
                 {
                     // read the next id from the database
-                    object id = await conn.ExecuteScalarAsync(sqlProvider.GetSelectNextIdSql<T>(), entity).ConfigureAwait(false);
+                    var parameters = classMap.ValidateAssignedKeyProperties<T>(entity).GetParameters();
+                    object id = await conn.ExecuteScalarAsync(sqlProvider.GetSelectNextIdSql<T>(), parameters).ConfigureAwait(false);
 
                     // set the sequential key on our entity
                     classMap.SequentialKey.PropertyInfo.SetValue(
@@ -89,22 +92,22 @@ namespace Testadal
             }
         }
 
-        public async Task<T> Read<T>(object id)
+        public async Task<T> Read<T>(object id) where T : class
         {
             ClassMap classMap = ClassMapper.GetClassMap<T>();
 
             // validate that all key properties are passed
-            id = classMap.ValidateKeyProperties(id);
+            IList<IPredicate> predicates = classMap.ValidateKeyProperties<T>(id);
 
             using (IDbConnection conn = this.connectionProvider.GetConnection())
             {
-                return (await conn.QueryAsync<T>(sqlProvider.GetSelectByIdSql<T>(), id)
+                return (await conn.QueryAsync<T>(sqlProvider.GetSelectByIdSql<T>(), predicates.GetParameters())
                     .ConfigureAwait(false))
                     .SingleOrDefault();
             }
         }
 
-        public async Task<IEnumerable<T>> ReadAll<T>()
+        public async Task<IEnumerable<T>> ReadAll<T>() where T : class
         {
             using (IDbConnection conn = this.connectionProvider.GetConnection())
             {
@@ -113,34 +116,41 @@ namespace Testadal
             }
         }
 
-        public async Task<IEnumerable<T>> ReadList<T>(object whereConditions)
+        public async Task<IEnumerable<T>> ReadList<T>(object whereConditions) where T : class
         {
             ClassMap classMap = ClassMapper.GetClassMap<T>();
 
             // validate all properties passed
-            classMap.ValidateWhereProperties(classMap.CoalesceToDictionary(whereConditions));
+            IList<IPredicate> predicates = classMap.ValidateWhereProperties<T>(classMap.CoalesceToDictionary(whereConditions));
 
             using (IDbConnection conn = this.connectionProvider.GetConnection())
             {
                 return await conn.QueryAsync<T>(
-                    this.sqlProvider.GetSelectWhereSql<T>(whereConditions),
-                    whereConditions).ConfigureAwait(false);
+                    this.sqlProvider.GetSelectWhereSql<T>(predicates),
+                    predicates.GetParameters()).ConfigureAwait(false);
             }
         }
 
-        public async Task<PagedList<T>> ReadList<T>(object whereConditions, object sortOrders, int pageSize, int pageNumber)
+        public async Task<PagedList<T>> ReadList<T>(object whereConditions, object sortOrders, int pageSize, int pageNumber) where T : class
         {
             // create the paging variables
             int firstRow = ((pageNumber - 1) * pageSize) + 1;
             int lastRow = firstRow + (pageSize - 1);
 
+            ClassMap map = ClassMapper.GetClassMap<T>();
+
             using (IDbConnection conn = this.connectionProvider.GetConnection())
             {
                 // read the count
-                int total = await conn.ExecuteScalarAsync<int>(sqlProvider.GetSelectCountSql<T>(whereConditions), whereConditions);
+                IList<IPredicate> predicates = map.ValidateWhereProperties<T>(whereConditions);
+                var parameters = predicates.GetParameters();
+
+                int total = await conn.ExecuteScalarAsync<int>(sqlProvider.GetSelectCountSql<T>(predicates), parameters);
 
                 // read the rows
-                IEnumerable<T> results = await conn.QueryAsync<T>(sqlProvider.GetSelectWhereSql<T>(whereConditions, sortOrders, firstRow, lastRow), whereConditions);
+                IEnumerable<T> results = await conn.QueryAsync<T>(
+                    sqlProvider.GetSelectWhereSql<T>(predicates, sortOrders, firstRow, lastRow),
+                    parameters);
 
                 return new PagedList<T>()
                 {
@@ -153,46 +163,62 @@ namespace Testadal
             }
         }
 
-        public async Task<T> Update<T>(object properties)
+        public async Task<T> Update<T>(object properties) where T : class
         {
             ClassMap classMap = ClassMapper.GetClassMap<T>();
 
-            // coalesce key property
-            IDictionary<string, object> id = classMap.CoalesceKeyToDictionary(properties);
+            // coalesce all properties into update dictionary
+            IDictionary<string, object> updDictionary = classMap.CoalesceToDictionary(properties);
+            
+            // coalesce key properties
+            IDictionary<string, object> keyDictionary = classMap.CoalesceKeyToDictionary(properties);
+
+            // remove key properties from update dictionary
+            keyDictionary.Keys.ToList().ForEach(x => updDictionary.Remove(x));
+            
+            // get the parameters for the WHERE clause
+            IDictionary<string, object> keyParameters = classMap.ValidateKeyProperties<T>(properties).GetParameters();
+
+            // add the WHERE clause parameters to our update dictionary
+            updDictionary = updDictionary.Union(keyParameters).ToDictionary(x => x.Key, x => x.Value);
 
             using (IDbConnection conn = this.connectionProvider.GetConnection())
             {
                 // execute the update
-                await conn.ExecuteAsync(sqlProvider.GetUpdateSql<T>(properties), properties).ConfigureAwait(false);
+                await conn.ExecuteAsync(sqlProvider.GetUpdateSql<T>(properties), updDictionary).ConfigureAwait(false);
 
-                return (await conn.QueryAsync<T>(sqlProvider.GetSelectByIdSql<T>(), id).ConfigureAwait(false)).SingleOrDefault();
+                return (await conn.QueryAsync<T>(sqlProvider.GetSelectByIdSql<T>(), keyParameters).ConfigureAwait(false)).SingleOrDefault();
             }
         }
 
-        public async Task Delete<T>(object id)
+        public async Task Delete<T>(object id) where T : class
         {
             ClassMap classMap = ClassMapper.GetClassMap<T>();
 
             // validate the key properties
-            id = classMap.ValidateKeyProperties(id);
+            IList<IPredicate> predicates = classMap.ValidateKeyProperties<T>(id);
 
             using (IDbConnection conn = this.connectionProvider.GetConnection())
             {
-                await conn.QueryAsync<T>(sqlProvider.GetDeleteByIdSql<T>(), id).ConfigureAwait(false);
+                await conn.QueryAsync<T>(sqlProvider.GetDeleteByIdSql<T>(), predicates.GetParameters()).ConfigureAwait(false);
             }
         }
 
-        public async Task DeleteList<T>(object whereConditions)
+        public async Task DeleteList<T>(object whereConditions) where T : class
         {
             ClassMap classMap = ClassMapper.GetClassMap<T>();
 
             // validate the key properties
-            classMap.ValidateWhereProperties(whereConditions);
+            IList<IPredicate> predicates = classMap.ValidateWhereProperties<T>(whereConditions);
+            if (predicates.Count == 0)
+            {
+                throw new ArgumentException("Please pass where conditions.");
+            }
 
             using (IDbConnection conn = this.connectionProvider.GetConnection())
             {
                 // delete
-                await conn.QueryAsync<T>(sqlProvider.GetDeleteWhereSql<T>(whereConditions), whereConditions).ConfigureAwait(false);
+                await conn.QueryAsync<T>(sqlProvider.GetDeleteWhereSql<T>(predicates), predicates.GetParameters()).ConfigureAwait(false);
             }
         }
     }

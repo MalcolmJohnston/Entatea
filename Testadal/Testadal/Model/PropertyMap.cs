@@ -1,8 +1,6 @@
 ﻿using System;
 using System.Reflection;
 
-using Testadal.Data;
-
 namespace Testadal.Model
 {
     /// <summary>

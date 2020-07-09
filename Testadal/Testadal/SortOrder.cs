@@ -1,4 +1,4 @@
-﻿namespace Testadal.Data
+﻿namespace Testadal
 {
     public enum SortOrder
     {

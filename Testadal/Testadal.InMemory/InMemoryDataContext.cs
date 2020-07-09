@@ -8,10 +8,8 @@ using System.Linq.Dynamic.Core;
 using System.Linq.Expressions;
 
 using System.Reflection;
-using System.Text;
 using System.Threading.Tasks;
 
-using Testadal.Data;
 using Testadal.Model;
 
 namespace Testadal.InMemory
@@ -31,13 +29,13 @@ namespace Testadal.InMemory
         /// </summary>
         /// <typeparam name="T">The type of the test data.</typeparam>
         /// <param name="data">The data.</param>
-        public void AddOrUpdate<T>(IEnumerable<T> data)
+        public void AddOrUpdate<T>(IEnumerable<T> data) where T : class
         {
             this.dataStore[typeof(T).FullName] = new List<T>(data);
         }
 
         /// <inheritdoc />
-        public Task<T> Create<T>(T entity)
+        public Task<T> Create<T>(T entity) where T : class
         {
             // get the type map
             ClassMap classMap = ClassMapper.GetClassMap<T>();
@@ -121,7 +119,7 @@ namespace Testadal.InMemory
         }
 
         /// <inheritdoc />
-        public Task Delete<T>(object id)
+        public Task Delete<T>(object id) where T : class
         {
             // get the existing object
             T obj = this.Read<T>(id).GetAwaiter().GetResult();
@@ -138,11 +136,16 @@ namespace Testadal.InMemory
         }
 
         /// <inheritdoc />
-        public Task DeleteList<T>(object whereConditions)
+        public Task DeleteList<T>(object whereConditions) where T : class
         {
-            // get the existing objects
-            IEnumerable<T> objects = new List<T>(this.ReadList<T>(whereConditions).GetAwaiter().GetResult());
+            // check we have some conditions
+            IDictionary<string, object> whereDict = ClassMapper.GetClassMap<T>().CoalesceToDictionary(whereConditions);
+            if (whereDict.Count == 0)
+            {
+                throw new ArgumentException("Please pass where conditions.");
+            }
 
+            IEnumerable<T> objects = new List<T>(this.ReadList<T>(whereDict).GetAwaiter().GetResult());
             if (objects.Count() > 0)
             {
                 IList<T> list = this.GetData<T>();
@@ -156,19 +159,19 @@ namespace Testadal.InMemory
         }
 
         /// <inheritdoc />
-        public Task<T> Read<T>(object id)
+        public Task<T> Read<T>(object id) where T : class
         {
             // get the type map
             ClassMap classMap = ClassMapper.GetClassMap<T>();
 
             // validate the key
-            id = classMap.ValidateKeyProperties(id);
+            IDictionary<string, object> key = classMap.CoalesceKeyToDictionary(id);
 
-            return Task.FromResult(this.ReadWhere<T>((IDictionary<string, object>)id).SingleOrDefault());
+            return Task.FromResult(this.ReadWhere<T>(key).SingleOrDefault());
         }
 
         /// <inheritdoc />
-        public Task<IEnumerable<T>> ReadAll<T>()
+        public Task<IEnumerable<T>> ReadAll<T>() where T : class
         {
             if (this.dataStore.ContainsKey(typeof(T).FullName))
             {
@@ -179,20 +182,19 @@ namespace Testadal.InMemory
         }
 
         /// <inheritdoc />
-        public Task<IEnumerable<T>> ReadList<T>(object whereConditions)
+        public Task<IEnumerable<T>> ReadList<T>(object whereConditions) where T : class
         {
             // get the type map
             ClassMap classMap = ClassMapper.GetClassMap<T>();
 
             // validate the where conditions
             whereConditions = classMap.CoalesceToDictionary(whereConditions);
-            classMap.ValidateWhereProperties(whereConditions);
 
             return Task.FromResult(this.ReadWhere<T>((IDictionary<string, object>)whereConditions));
         }
 
         /// <inheritdoc />
-        public Task<PagedList<T>> ReadList<T>(object whereConditions, object sortOrders, int pageSize, int pageNumber)
+        public Task<PagedList<T>> ReadList<T>(object whereConditions, object sortOrders, int pageSize, int pageNumber) where T : class
         {
             ClassMap classMap = ClassMapper.GetClassMap<T>();
 
@@ -250,13 +252,13 @@ namespace Testadal.InMemory
         }
 
         /// <inheritdoc />
-        public Task<T> Update<T>(object properties)
+        public Task<T> Update<T>(object properties) where T : class
         {
             // get the type map
             ClassMap classMap = ClassMapper.GetClassMap<T>();
 
             // validate the key
-            IDictionary<string, object> id = classMap.ValidateKeyProperties(properties);
+            IDictionary<string, object> id = classMap.CoalesceKeyToDictionary(properties);
 
             // get the existing object
             T obj = this.ReadWhere<T>(id).SingleOrDefault();
@@ -298,7 +300,7 @@ namespace Testadal.InMemory
             return Task.FromResult(obj);
         }
 
-        private IList<T> GetData<T>()
+        private IList<T> GetData<T>() where T : class
         {
             string cacheKey = typeof(T).FullName;
 
@@ -310,7 +312,7 @@ namespace Testadal.InMemory
             return this.dataStore[cacheKey] as IList<T>;
         }
 
-        private IEnumerable<T> ReadWhere<T>(IDictionary<string, object> properties)
+        private IEnumerable<T> ReadWhere<T>(IDictionary<string, object> properties) where T : class
         {
             // get the type map
             ClassMap classMap = ClassMapper.GetClassMap<T>();

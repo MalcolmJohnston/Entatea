@@ -1,0 +1,41 @@
+﻿using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Linq.Expressions;
+using System.Reflection;
+
+using Testadal.Model;
+using Testadal.SqlBuilder;
+
+namespace Testadal.Predicate
+{
+    public class FieldPredicate<T> : ComparePredicate, IFieldPredicate
+        where T : class
+    {
+        public string PropertyName { get; set; }
+        public object Value { get; set; }
+
+        public string GetSql(ISqlBuilder sqlBuilder, int parameterIndex, out int parameterCount)
+        {
+            parameterCount = 1;
+
+            string columnName = sqlBuilder.GetColumnName<T>(PropertyName);
+            if (Value == null)
+            {
+                return $"{columnName} IS {(Not ? "NOT " : string.Empty)}NULL)";
+            }
+
+            return $"{columnName} {GetOperatorString()} @p{parameterIndex}";
+        }
+
+        public IEnumerable<KeyValuePair<string, object>> GetParameters(int parameterIndex, out int parameterCount)
+        {
+            parameterCount = 1;
+
+            return new KeyValuePair<string, object>[]
+            {
+                new KeyValuePair<string, object>($"@p{parameterIndex}", this.Value)
+            };
+        }
+    }
+}

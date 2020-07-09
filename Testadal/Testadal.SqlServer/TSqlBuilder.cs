@@ -3,6 +3,7 @@ using System.Linq;
 using System.Text;
 
 using Testadal.Model;
+using Testadal.Predicate;
 using Testadal.SqlBuilder;
 
 namespace Testadal.SqlServer
@@ -48,16 +49,15 @@ namespace Testadal.SqlServer
             return sb.ToString();
         }
 
-        public override string GetSelectWhereSql<T>(object whereConditions, object sortOrders, int firstRow, int lastRow)
+        public override string GetSelectWhereSql<T>(IEnumerable<IPredicate> whereConditions, object sortOrders, int firstRow, int lastRow)
         {
             ClassMap classMap = ClassMapper.GetClassMap<T>();
 
             // build the WHERE clause (if any specified)
-            IDictionary<string, object> whereConditionsDict = classMap.CoalesceToDictionary(whereConditions);
-            string where = whereConditionsDict.Any() ? this.GetWhereClause(classMap, whereConditions) : string.Empty;
+            string where = this.GetWhereClause(whereConditions);
 
             // build the ORDER BY clause (always required and will default to primary key columns ascending, if none specified)
-            string orderBy = this.GetOrderByClause(classMap, sortOrders);
+            string orderBy = this.GetOrderByClause<T>(sortOrders);
 
             // build paging sql
             return $@"SELECT {string.Join(", ", classMap.SelectProperties.Select(x => this.EncapsulateSelect(x)))}

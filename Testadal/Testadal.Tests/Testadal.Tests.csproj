@@ -24,8 +24,6 @@
   </ItemGroup>
 
   <ItemGroup>
-    <ProjectReference Include="..\Testadal.Annotations\Testadal.Annotations.csproj" />
-    <ProjectReference Include="..\Testadal.Data\Testadal.Data.csproj" />
     <ProjectReference Include="..\Testadal.InMemory\Testadal.InMemory.csproj" />
     <ProjectReference Include="..\Testadal.MySql\Testadal.MySql.csproj" />
     <ProjectReference Include="..\Testadal.SqlServer\Testadal.SqlServer.csproj" />

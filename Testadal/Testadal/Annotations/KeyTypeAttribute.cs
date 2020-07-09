@@ -1,7 +1,5 @@
 ﻿using System;
 
-using Testadal.Data;
-
 namespace Testadal.Annotations
 {
     /// <summary>

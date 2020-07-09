@@ -1,4 +1,4 @@
-﻿namespace Testadal.Data
+﻿namespace Testadal
 {
     /// <summary>
     /// Enumeration of supported primary key types for SQL generation.

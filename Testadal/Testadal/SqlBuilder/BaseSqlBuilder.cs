@@ -40,7 +40,7 @@ namespace Testadal.SqlBuilder
             return columnName;
         }
 
-        public virtual string GetTableIdentifier<T>()
+        public virtual string GetTableIdentifier<T>() where T : class
         {
             ClassMap classMap = ClassMapper.GetClassMap<T>();
             return this.GetTableIdentifier(classMap);
@@ -52,21 +52,21 @@ namespace Testadal.SqlBuilder
             return string.Format(this.EncapsulationFormat, classMap.TableName.ToLower());
         }
 
-        public virtual string GetDeleteByIdSql<T>()
+        public virtual string GetDeleteByIdSql<T>() where T : class
         {
             ClassMap classMap = ClassMapper.GetClassMap<T>();
             return $"DELETE FROM {this.GetTableIdentifier(classMap)} {this.GetByIdWhereClause(classMap)}";
         }
 
-        public virtual string GetDeleteWhereSql<T>(object whereConditions)
+        public virtual string GetDeleteWhereSql<T>(IEnumerable<IPredicate> whereConditions) where T : class
         {
             ClassMap classMap = ClassMapper.GetClassMap<T>();
-            return $"DELETE FROM {this.GetTableIdentifier(classMap)} {this.GetWhereClause(classMap, whereConditions)}";
+            return $"DELETE FROM {this.GetTableIdentifier(classMap)} {this.GetWhereClause(whereConditions)}";
         }
 
-        public abstract string GetInsertSql<T>();
+        public abstract string GetInsertSql<T>() where T : class;
 
-        public virtual string GetSelectAllSql<T>()
+        public virtual string GetSelectAllSql<T>() where T : class
         {
             ClassMap classMap = ClassMapper.GetClassMap<T>();
 
@@ -79,7 +79,7 @@ namespace Testadal.SqlBuilder
             return sb.ToString();
         }
 
-        public virtual string GetSelectByIdSql<T>()
+        public virtual string GetSelectByIdSql<T>() where T : class
         {
             ClassMap classMap = ClassMapper.GetClassMap<T>();
 
@@ -91,23 +91,22 @@ namespace Testadal.SqlBuilder
             return sb.ToString();
         }
 
-        public virtual string GetSelectCountSql<T>(object whereConditions)
+        public virtual string GetSelectCountSql<T>(IEnumerable<IPredicate> whereConditions) where T : class
         {
             ClassMap classMap = ClassMapper.GetClassMap<T>();
 
             StringBuilder sb = new StringBuilder($"SELECT COUNT(*) FROM {this.GetTableIdentifier(classMap)}");
 
-            IDictionary<string, object> whereConditionsDict = classMap.CoalesceToDictionary(whereConditions);
-            if (whereConditionsDict.Any())
+            if (whereConditions.Any())
             {
                 sb.Append(" ");
-                sb.Append(this.GetWhereClause(classMap, whereConditions));
+                sb.Append(this.GetWhereClause(whereConditions));
             }
 
             return sb.ToString();
         }
 
-        public virtual string GetSelectNextIdSql<T>()
+        public virtual string GetSelectNextIdSql<T>() where T : class
         {
             ClassMap classMap = ClassMapper.GetClassMap<T>();
 
@@ -122,29 +121,24 @@ namespace Testadal.SqlBuilder
 
             if (classMap.HasAssignedKeys)
             {
-                sb.Append(
-                    this.GetWhereClause(
-                        classMap.AssignedKeys.Select(x => new Equal(x.ColumnName, x.PropertyName)).ToList<IPredicate>()));
+                sb.Append(this.GetByPropertiesWhereClause(classMap.AssignedKeys));
             }
 
             return sb.ToString();
         }
 
-        public virtual string GetSelectWhereSql<T>(object whereConditions)
+        public virtual string GetSelectWhereSql<T>(IEnumerable<IPredicate> whereConditions) where T : class
         {
-            ClassMap classMap = ClassMapper.GetClassMap<T>();
-            classMap.ValidateWhereProperties(whereConditions);
-
             StringBuilder sb = new StringBuilder(this.GetSelectAllSql<T>());
             sb.Append(" ");
-            sb.Append(this.GetWhereClause(classMap, whereConditions));
+            sb.Append(this.GetWhereClause(whereConditions));
 
             return sb.ToString();
         }
 
-        public abstract string GetSelectWhereSql<T>(object whereConditions, object sortOrders, int firstRow, int lastRow);
+        public abstract string GetSelectWhereSql<T>(IEnumerable<IPredicate> whereConditions, object sortOrders, int firstRow, int lastRow) where T : class;
 
-        public virtual string GetUpdateSql<T>(object properties)
+        public virtual string GetUpdateSql<T>(object properties) where T : class
         {
             ClassMap classMap = ClassMapper.GetClassMap<T>();
 
@@ -200,20 +194,6 @@ namespace Testadal.SqlBuilder
             sb.Append($" {this.GetByIdWhereClause(classMap)}");
 
             return sb.ToString();
-        }
-
-        public virtual string PredicateToSql(IPredicate predicate)
-        {
-            if (predicate.Operator == Operator.Equal)
-            {
-                return $"{predicate.ColumnName} = @{predicate.PropertyName}";
-            }
-            else if (predicate.Operator == Operator.In)
-            {
-                return $"{predicate.ColumnName} IN @{predicate.PropertyName}";
-            }
-
-            return string.Empty;
         }
     }
 }

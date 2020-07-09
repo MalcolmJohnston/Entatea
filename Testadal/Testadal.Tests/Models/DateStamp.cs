@@ -1,6 +1,5 @@
 ﻿using System;
 
-using Testadal.Data;
 using Testadal.Annotations;
 
 namespace Testadal.Tests.Models
