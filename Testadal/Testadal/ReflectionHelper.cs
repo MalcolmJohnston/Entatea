@@ -62,7 +62,6 @@ namespace Testadal
                 return result;
             }
 
-
             foreach (var propertyInfo in obj.GetType().GetProperties())
             {
                 string name = propertyInfo.Name;

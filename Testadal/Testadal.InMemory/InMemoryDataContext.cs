@@ -11,6 +11,7 @@ using System.Reflection;
 using System.Threading.Tasks;
 
 using Testadal.Model;
+using Testadal.Predicate;
 
 namespace Testadal.InMemory
 {
@@ -158,6 +159,21 @@ namespace Testadal.InMemory
             return Task.CompletedTask;
         }
 
+        public Task DeleteList<T>(params IPredicate[] predicates) where T : class
+        {
+            IEnumerable<T> objects = new List<T>(this.ReadList<T>(predicates).GetAwaiter().GetResult());
+            if (objects.Count() > 0)
+            {
+                IList<T> list = this.GetData<T>();
+                foreach (T obj in objects)
+                {
+                    list.Remove(obj);
+                }
+            }
+
+            return Task.CompletedTask;
+        }
+
         /// <inheritdoc />
         public Task<T> Read<T>(object id) where T : class
         {
@@ -193,14 +209,15 @@ namespace Testadal.InMemory
             return Task.FromResult(this.ReadWhere<T>((IDictionary<string, object>)whereConditions));
         }
 
+        public Task<IEnumerable<T>> ReadList<T>(params IPredicate[] predicates) where T : class
+        {
+            return Task.FromResult(this.ReadWhere<T>(predicates));
+        }
+
         /// <inheritdoc />
         public Task<PagedList<T>> ReadList<T>(object whereConditions, object sortOrders, int pageSize, int pageNumber) where T : class
         {
             ClassMap classMap = ClassMapper.GetClassMap<T>();
-
-            // create the paging variables
-            int firstRow = ((pageNumber - 1) * pageSize) + 1;
-            int lastRow = firstRow + (pageSize - 1);
 
             // get the candidate objects
             IEnumerable<T> filteredT;
@@ -215,8 +232,36 @@ namespace Testadal.InMemory
                 filteredT = this.ReadList<T>(whereConditions).GetAwaiter().GetResult();
             }
 
-            // get the total number of candidate objects
-            int total = filteredT.Count();
+            return Task.FromResult(this.GetPage<T>(filteredT, sortOrders, pageSize, pageNumber));
+        }
+
+        public Task<PagedList<T>> ReadList<T>(object sortOrders, int pageSize, int pageNumber, params IPredicate[] predicates) where T : class
+        {
+            ClassMap classMap = ClassMapper.GetClassMap<T>();
+
+            // get the candidate objects
+            IEnumerable<T> filteredT;
+
+            if (predicates.Count() == 0)
+            {
+                filteredT = this.ReadAll<T>().GetAwaiter().GetResult();
+            }
+            else
+            {
+                filteredT = this.ReadList<T>(predicates).GetAwaiter().GetResult();
+            }
+
+            return Task.FromResult(this.GetPage<T>(filteredT, sortOrders, pageSize, pageNumber));
+        }
+
+        private PagedList<T> GetPage<T>(IEnumerable<T> results, object sortOrders, int pageSize, int pageNumber) where T : class
+        {
+            ClassMap classMap = ClassMapper.GetClassMap<T>();
+
+            // create the paging variables
+            int firstRow = ((pageNumber - 1) * pageSize) + 1;
+            int lastRow = firstRow + (pageSize - 1);
+            int total = results.Count();
 
             // validate / build the ordering string
             string ordering = string.Empty;
@@ -239,16 +284,16 @@ namespace Testadal.InMemory
             }
 
             // order the rows and take the results for this page
-            filteredT = filteredT.AsQueryable<T>().OrderBy(ordering).Skip(firstRow - 1).Take(pageSize);
+            results = results.AsQueryable<T>().OrderBy(ordering).Skip(firstRow - 1).Take(pageSize);
 
-            return Task.FromResult(new PagedList<T>()
+            return new PagedList<T>()
             {
-                Rows = filteredT,
+                Rows = results,
                 HasNext = lastRow < total,
                 HasPrevious = firstRow > 1,
                 TotalPages = (total / pageSize) + ((total % pageSize) > 0 ? 1 : 0),
                 TotalRows = total
-            });
+            };
         }
 
         /// <inheritdoc />
@@ -326,32 +371,152 @@ namespace Testadal.InMemory
                 return new T[0];
             }
 
+            // else build the predicates (can only be Equal or In)
+            List<IPredicate> predicates = new List<IPredicate>();
+            foreach (string key in properties.Keys)
+            {
+                PropertyMap pm = classMap.AllProperties[key];
+                if (pm == null)
+                {
+                    throw new ArgumentException($"Failed to find property {key} on type {typeof(T)}");
+                }
+
+                object value = properties[key];
+                Type valueType = value.GetType();
+
+                if (pm.PropertyInfo.PropertyType.IsAssignableFrom(valueType))
+                {
+                    predicates.Add(Predicate.PredicateBuilder.Equal<T>(key, value));
+                }
+                else
+                {
+                    predicates.Add(Predicate.PredicateBuilder.In<T>(key, value));
+                }
+            }
+
+            return this.ReadWhere<T>(predicates);
+        }
+
+        private IEnumerable<T> ReadWhere<T>(IEnumerable<IPredicate> predicates) where T : class
+        {
+            // get the type map
+            ClassMap classMap = ClassMapper.GetClassMap<T>();
+
+            // get the data to query
+            IQueryable<T> data = this.GetData<T>().AsQueryable<T>();
+
+            // return an empty enumerable if no objects in collection
+            if (data.Count() == 0)
+            {
+                return new T[0];
+            }
+
             // x =>
             ParameterExpression parameter = Expression.Parameter(typeof(T), "x");
-            BinaryExpression body = null;
-            foreach (string propertyName in properties.Keys)
+            Expression body = null;
+            foreach (IFieldPredicate predicate in predicates)
             {
                 // add a paramater equals expression for each property in the property bag
-                PropertyMap pm = classMap.AllProperties[propertyName];
+                PropertyMap pm = classMap.AllProperties[predicate.PropertyName];
 
                 // x.Property
                 MemberExpression member = Expression.Property(parameter, pm.PropertyName);
-                ConstantExpression constant = Expression.Constant(properties[propertyName]);
 
                 // x.Property = Value
                 if (body == null)
                 {
-                    body = Expression.Equal(member, constant);
+                    body = this.GetExpression<T>(predicate, member, pm);
                 }
                 else
                 {
-                    body = Expression.AndAlso(body, Expression.Equal(member, constant));
+                    Expression expr = this.GetExpression<T>(predicate, member, pm);
+                    if (expr != null)
+                    {
+                        body = Expression.AndAlso(body, expr);
+                    }
                 }
             }
 
             var finalExpression = Expression.Lambda<Func<T, bool>>(body, parameter);
 
             return data.Where(finalExpression).AsEnumerable<T>();
+        }
+
+        private readonly MethodInfo containsMethod =
+            typeof(Enumerable).GetMethods(BindingFlags.Static | BindingFlags.Public)
+                              .Single(m => m.Name == nameof(Enumerable.Contains) && m.GetParameters().Length == 2);
+
+        private Expression GetExpression<T>(
+            IFieldPredicate predicate,
+            MemberExpression member,
+            PropertyMap pm)
+        {
+            Expression expr = null;
+            switch (predicate.Operator)
+            {
+                case Operator.GreaterThan:
+                    expr = Expression.GreaterThan(member, Expression.Constant(predicate.Value));
+                    break;
+                case Operator.GreaterThanOrEqual:
+                    expr = Expression.GreaterThanOrEqual(member, Expression.Constant(predicate.Value));
+                    break;
+                case Operator.LessThan:
+                    expr = Expression.LessThan(member, Expression.Constant(predicate.Value));
+                    break;
+                case Operator.LessThanOrEqual:
+                    expr = Expression.LessThanOrEqual(member, Expression.Constant(predicate.Value));
+                    break;
+                case Operator.Contains:
+                case Operator.StartsWith:
+                case Operator.EndsWith:
+                    if (predicate.Value is string)
+                    {
+                        MethodInfo likeMethod = typeof(string).GetMethod(Enum.GetName(typeof(Operator), predicate.Operator));
+                        expr = Expression.Call(Expression.Constant(predicate.Value), likeMethod, member);
+                    }
+                    break;
+                case Operator.In:
+                    MethodInfo inMethod = containsMethod.MakeGenericMethod(pm.PropertyInfo.PropertyType);
+                    
+                    Type listType = typeof(List<>).MakeGenericType(pm.PropertyInfo.PropertyType);
+                    var typedList = Activator.CreateInstance(listType);
+                    
+                    // add single value or add range
+                    Type valueType = predicate.Value.GetType();
+                    if (pm.PropertyInfo.PropertyType.IsAssignableFrom(valueType))
+                    {
+                        MethodInfo addMethod = listType.GetMethod("Add");
+                        addMethod.Invoke(typedList, new[] { predicate.Value });
+                    }
+                    else
+                    {
+                        MethodInfo addRangeMethod = listType.GetMethod("AddRange");
+                        addRangeMethod.Invoke(typedList, new[] { predicate.Value });
+                    }
+
+                    try
+                    {
+                        expr = Expression.Call(inMethod, Expression.Constant(typedList), member);
+                    }
+                    catch (Exception ex)
+                    {
+                        Console.WriteLine(ex.Message);
+                        Console.WriteLine(ex.StackTrace);
+                    }
+                    break;
+                case Operator.Equal:
+                    expr = Expression.Equal(member, Expression.Constant(predicate.Value));
+                    break;
+                default:
+                    break;
+            }
+
+            if (predicate.Not && expr != null)
+            {
+                return Expression.Not(expr);
+            }
+
+            return expr;
         }
     }
 }

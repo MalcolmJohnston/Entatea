@@ -26,7 +26,7 @@ namespace Testadal.Predicate
             return sqlBuilder.Encapsulate(propertyMap.ColumnName);
         }
 
-        public static IDictionary<string, object> GetParameters(this IList<IPredicate> predicates)
+        public static IDictionary<string, object> GetParameters(this IEnumerable<IPredicate> predicates)
         {
             int parameterIndex = 0;
             Dictionary<string, object> parameters = new Dictionary<string, object>();

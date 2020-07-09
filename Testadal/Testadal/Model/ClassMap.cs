@@ -192,11 +192,21 @@ namespace Testadal.Model
             {
                 return new List<IPredicate>()
                 {
-                    PredicateFactory.Equals<T>(this.AllKeys.Single().PropertyName, propertyBag)
+                    Predicate.PredicateBuilder.Equal<T>(this.AllKeys.Single().PropertyName, propertyBag)
                 };
             }
 
-            return this.ValidateWhereProperties<T>(this.CoalesceKeyToDictionary(propertyBag));
+            // trim out unrequired key properties
+            IDictionary<string, object> keysDictionary = this.CoalesceKeyToDictionary(propertyBag);
+            foreach (string key in keysDictionary.Keys)
+            {
+                if (properties.Any(x => x.PropertyName == key) == false)
+                {
+                    keysDictionary.Remove(key);
+                }
+            }
+
+            return this.ValidateWhereProperties<T>(keysDictionary);
         }
 
         /// <summary>
@@ -373,12 +383,12 @@ namespace Testadal.Model
 
                 if (propertyMap.PropertyInfo.PropertyType.IsAssignableFrom(valueType))
                 {
-                    IPredicate op = PredicateFactory.Equals<T>(propertyName, whereDict[propertyName]);
+                    IPredicate op = Predicate.PredicateBuilder.Equal<T>(propertyName, whereDict[propertyName]);
                     whereOperations.Add(op);
                 }
                 else
                 {
-                    IPredicate op = PredicateFactory.In<T>(propertyName, whereDict[propertyName]);
+                    IPredicate op = Predicate.PredicateBuilder.In<T>(propertyName, whereDict[propertyName]);
                     whereOperations.Add(op);
                 }
             }

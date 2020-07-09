@@ -149,7 +149,7 @@ namespace Testadal.Tests
         }
 
         /// <summary>
-        /// Gets the by where conditions.
+        /// Tests that we can read with a simple equality comparison.
         /// </summary>
         /// <returns></returns>
         [TestCase(typeof(InMemoryDataContext))]
@@ -169,6 +169,89 @@ namespace Testadal.Tests
             // Assert
             // NOTE: there is only one team in Hampshire
             Assert.AreEqual(2, cities.Count());
+        }
+
+        /// <summary>
+        /// Tests that we can read with a simple (and implied) In comparison
+        /// </summary>
+        /// <param name="dataContextType"></param>
+        /// <returns></returns>
+        [TestCase(typeof(InMemoryDataContext))]
+        [TestCase(typeof(SqlServerDataContext))]
+        [TestCase(typeof(MySqlDataContext))]
+        public async Task Read_By_Where_Condition_Implied_In(Type dataContextType)
+        {
+            // Arrange
+            IDataContext dataContext = DataContextProvider.SetupDataContext(dataContextType);
+            await dataContext.Create(new City() { CityCode = "PUP", CityName = "Portsmouth", Area = "Hampshire" });
+            await dataContext.Create(new City() { CityCode = "SOU", CityName = "Southampton", Area = "Hampshire" });
+            await dataContext.Create(new City() { CityCode = "BOU", CityName = "Bournemouth", Area = "Dorset" });
+
+            // Act
+            string[] cityCodes = new string[] { "PUP", "BOU" };
+            IEnumerable<City> cities = await dataContext.ReadList<City>(new { CityCode = cityCodes });
+
+            // Assert
+            Assert.That(cityCodes, Is.EquivalentTo(cities.Select(x => x.CityCode)));
+        }
+
+        /// <summary>
+        /// Tests that we can read with more than one implied In comparison
+        /// </summary>
+        /// <param name="dataContextType"></param>
+        /// <returns></returns>
+        [TestCase(typeof(InMemoryDataContext))]
+        [TestCase(typeof(SqlServerDataContext))]
+        [TestCase(typeof(MySqlDataContext))]
+        public async Task Read_By_Where_Condition_Implied_Ins(Type dataContextType)
+        {
+            // Arrange
+            IDataContext dataContext = DataContextProvider.SetupDataContext(dataContextType);
+            await dataContext.Create(new City() { CityCode = "PUP", CityName = "Portsmouth", Area = "Hampshire" });
+            await dataContext.Create(new City() { CityCode = "SOU", CityName = "Southampton", Area = "Hampshire" });
+            await dataContext.Create(new City() { CityCode = "CHI", CityName = "Chichester", Area = "West Sussex" });
+            await dataContext.Create(new City() { CityCode = "BOU", CityName = "Bournemouth", Area = "Dorset" });
+
+            // Act
+            string[] cityCodes = new[] { "PUP", "BOU", "CHI" };
+            string[] areas = new[] { "Hampshire", "West Sussex" };
+            IEnumerable<City> cities = await dataContext.ReadList<City>(new 
+            { 
+                CityCode = cityCodes,
+                Area = areas 
+            });
+
+            // Assert
+            Assert.That(new[] { "PUP", "CHI" }, Is.EquivalentTo(cities.Select(x => x.CityCode)));
+        }
+
+        /// <summary>
+        /// Tests that we can read with an implied in and an Equal
+        /// </summary>
+        /// <param name="dataContextType"></param>
+        /// <returns></returns>
+        [TestCase(typeof(InMemoryDataContext))]
+        [TestCase(typeof(SqlServerDataContext))]
+        [TestCase(typeof(MySqlDataContext))]
+        public async Task Read_By_Where_Condition_Implied_In_And_Equal(Type dataContextType)
+        {
+            // Arrange
+            IDataContext dataContext = DataContextProvider.SetupDataContext(dataContextType);
+            await dataContext.Create(new City() { CityCode = "PUP", CityName = "Portsmouth", Area = "Hampshire" });
+            await dataContext.Create(new City() { CityCode = "SOU", CityName = "Southampton", Area = "Hampshire" });
+            await dataContext.Create(new City() { CityCode = "CHI", CityName = "Chichester", Area = "West Sussex" });
+            await dataContext.Create(new City() { CityCode = "BOU", CityName = "Bournemouth", Area = "Dorset" });
+
+            // Act
+            string[] cityCodes = new[] { "PUP", "BOU", "CHI" };
+            IEnumerable<City> cities = await dataContext.ReadList<City>(new
+            {
+                CityCode = cityCodes,
+                Area = "West Sussex"
+            });
+
+            // Assert
+            Assert.That(new[] { "CHI" }, Is.EquivalentTo(cities.Select(x => x.CityCode)));
         }
     }
 }

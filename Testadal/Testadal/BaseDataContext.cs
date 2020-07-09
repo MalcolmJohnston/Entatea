@@ -122,7 +122,11 @@ namespace Testadal
 
             // validate all properties passed
             IList<IPredicate> predicates = classMap.ValidateWhereProperties<T>(classMap.CoalesceToDictionary(whereConditions));
+            return await this.ReadList<T>(predicates);
+        }
 
+        public async Task<IEnumerable<T>> ReadList<T>(params IPredicate[] predicates) where T : class
+        {
             using (IDbConnection conn = this.connectionProvider.GetConnection())
             {
                 return await conn.QueryAsync<T>(
@@ -133,18 +137,22 @@ namespace Testadal
 
         public async Task<PagedList<T>> ReadList<T>(object whereConditions, object sortOrders, int pageSize, int pageNumber) where T : class
         {
+            IList<IPredicate> predicates = ClassMapper.GetClassMap<T>().ValidateWhereProperties<T>(whereConditions);
+            return await ReadList<T>(predicates, sortOrders, pageSize, pageNumber);
+        }
+
+        public async Task<PagedList<T>> ReadList<T>(object sortOrders, int pageSize, int pageNumber, params IPredicate[] predicates) where T : class
+        {
             // create the paging variables
             int firstRow = ((pageNumber - 1) * pageSize) + 1;
             int lastRow = firstRow + (pageSize - 1);
 
-            ClassMap map = ClassMapper.GetClassMap<T>();
+            // get the parameters
+            var parameters = predicates.GetParameters();
 
             using (IDbConnection conn = this.connectionProvider.GetConnection())
             {
                 // read the count
-                IList<IPredicate> predicates = map.ValidateWhereProperties<T>(whereConditions);
-                var parameters = predicates.GetParameters();
-
                 int total = await conn.ExecuteScalarAsync<int>(sqlProvider.GetSelectCountSql<T>(predicates), parameters);
 
                 // read the rows
@@ -206,11 +214,15 @@ namespace Testadal
 
         public async Task DeleteList<T>(object whereConditions) where T : class
         {
-            ClassMap classMap = ClassMapper.GetClassMap<T>();
+            // validate the properties
+            IList<IPredicate> predicates = ClassMapper.GetClassMap<T>().ValidateWhereProperties<T>(whereConditions);
 
-            // validate the key properties
-            IList<IPredicate> predicates = classMap.ValidateWhereProperties<T>(whereConditions);
-            if (predicates.Count == 0)
+            await this.DeleteList<T>(predicates);
+        }
+
+        public async Task DeleteList<T>(params IPredicate[] predicates) where T : class
+        {
+            if (predicates.Length == 0)
             {
                 throw new ArgumentException("Please pass where conditions.");
             }
