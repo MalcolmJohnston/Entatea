@@ -25,6 +25,18 @@ namespace Testadal.Predicate
                 return $"{columnName} IS {(Not ? "NOT " : string.Empty)}NULL)";
             }
 
+            if (this.Operator == Operator.Contains)
+            {
+                return $"{columnName} {GetOperatorString()} CONCAT('%', @p{parameterIndex}, '%')";
+            }
+            else if (this.Operator == Operator.StartsWith)
+            {
+                return $"{columnName} {GetOperatorString()} CONCAT(@p{parameterIndex}, '%')";
+            }
+            else if (this.Operator == Operator.EndsWith)
+            {
+                return $"{columnName} {GetOperatorString()} CONCAT('%', @p{parameterIndex})";
+            }
             return $"{columnName} {GetOperatorString()} @p{parameterIndex}";
         }
 

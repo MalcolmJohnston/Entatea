@@ -16,7 +16,7 @@ using Testadal.Tests.Models;
 namespace Testadal.Tests
 {
     [TestFixture]
-    public partial class DataContextTests
+    public  class PagingTests : BaseTest
     {
         /// <summary>
         /// Test that we can get the first page when not specifying where conditions or a sort order.

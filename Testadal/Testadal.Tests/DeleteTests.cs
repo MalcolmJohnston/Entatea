@@ -13,7 +13,8 @@ using NUnit.Framework;
 
 namespace Testadal.Tests
 {
-    public partial class DataContextTests
+    [TestFixture]
+    public class DeleteTests : BaseTest
     {
         /// <summary>
         /// Test that we can delete a single entity.

@@ -13,7 +13,8 @@ using NUnit.Framework;
 
 namespace Testadal.Tests
 {
-    public partial class DataContextTests
+    [TestFixture]
+    public class UpdateTests : BaseTest
     {
         /// <summary>
         /// Test that we can update a single editable property

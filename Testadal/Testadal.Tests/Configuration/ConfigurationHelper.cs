@@ -1,8 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Text;
-
-using Microsoft.Extensions.Configuration;
+﻿using Microsoft.Extensions.Configuration;
 using NUnit.Framework;
 
 namespace Testadal.Tests.Configuration
@@ -23,7 +19,7 @@ namespace Testadal.Tests.Configuration
                     new ConfigurationBuilder()
                         .SetBasePath(TestContext.CurrentContext.TestDirectory)
                         .AddJsonFile("appsettings.json", optional: true)
-                        .AddUserSecrets<DataContextTests>()
+                        .AddUserSecrets<TestConfiguration>()
                         .AddEnvironmentVariables()
                         .Build()
                         .GetSection("TestadalTests")

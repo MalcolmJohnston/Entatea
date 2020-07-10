@@ -127,12 +127,7 @@ namespace Testadal
 
         public async Task<IEnumerable<T>> ReadList<T>(params IPredicate[] predicates) where T : class
         {
-            using (IDbConnection conn = this.connectionProvider.GetConnection())
-            {
-                return await conn.QueryAsync<T>(
-                    this.sqlProvider.GetSelectWhereSql<T>(predicates),
-                    predicates.GetParameters()).ConfigureAwait(false);
-            }
+            return await ReadList<T>(predicates.AsEnumerable());
         }
 
         public async Task<PagedList<T>> ReadList<T>(object whereConditions, object sortOrders, int pageSize, int pageNumber) where T : class
@@ -143,32 +138,7 @@ namespace Testadal
 
         public async Task<PagedList<T>> ReadList<T>(object sortOrders, int pageSize, int pageNumber, params IPredicate[] predicates) where T : class
         {
-            // create the paging variables
-            int firstRow = ((pageNumber - 1) * pageSize) + 1;
-            int lastRow = firstRow + (pageSize - 1);
-
-            // get the parameters
-            var parameters = predicates.GetParameters();
-
-            using (IDbConnection conn = this.connectionProvider.GetConnection())
-            {
-                // read the count
-                int total = await conn.ExecuteScalarAsync<int>(sqlProvider.GetSelectCountSql<T>(predicates), parameters);
-
-                // read the rows
-                IEnumerable<T> results = await conn.QueryAsync<T>(
-                    sqlProvider.GetSelectWhereSql<T>(predicates, sortOrders, firstRow, lastRow),
-                    parameters);
-
-                return new PagedList<T>()
-                {
-                    Rows = results,
-                    HasNext = lastRow < total,
-                    HasPrevious = firstRow > 1,
-                    TotalPages = (total / pageSize) + ((total % pageSize) > 0 ? 1 : 0),
-                    TotalRows = total
-                };
-            }
+            return await ReadList<T>(predicates, sortOrders, pageSize, pageNumber);
         }
 
         public async Task<T> Update<T>(object properties) where T : class
@@ -214,6 +184,11 @@ namespace Testadal
 
         public async Task DeleteList<T>(object whereConditions) where T : class
         {
+            if (whereConditions == null)
+            {
+                throw new ArgumentException("Please pass where conditions");
+            }
+
             // validate the properties
             IList<IPredicate> predicates = ClassMapper.GetClassMap<T>().ValidateWhereProperties<T>(whereConditions);
 
@@ -222,7 +197,57 @@ namespace Testadal
 
         public async Task DeleteList<T>(params IPredicate[] predicates) where T : class
         {
-            if (predicates.Length == 0)
+            if (predicates == null || predicates.Length == 0)
+            {
+                throw new ArgumentException("Please pass where conditions");
+            }
+
+            await this.DeleteList<T>(predicates.AsEnumerable());
+        }
+
+        private async Task<IEnumerable<T>> ReadList<T>(IEnumerable<IPredicate> predicates) where T : class
+        {
+            using (IDbConnection conn = this.connectionProvider.GetConnection())
+            {
+                return await conn.QueryAsync<T>(
+                    this.sqlProvider.GetSelectWhereSql<T>(predicates),
+                    predicates.GetParameters()).ConfigureAwait(false);
+            }
+        }
+
+        private async Task<PagedList<T>> ReadList<T>(IEnumerable<IPredicate> predicates, object sortOrders, int pageSize, int pageNumber) where T : class
+        {
+            // create the paging variables
+            int firstRow = ((pageNumber - 1) * pageSize) + 1;
+            int lastRow = firstRow + (pageSize - 1);
+
+            // get the parameters
+            var parameters = predicates.GetParameters();
+
+            using (IDbConnection conn = this.connectionProvider.GetConnection())
+            {
+                // read the count
+                int total = await conn.ExecuteScalarAsync<int>(sqlProvider.GetSelectCountSql<T>(predicates), parameters);
+
+                // read the rows
+                IEnumerable<T> results = await conn.QueryAsync<T>(
+                    sqlProvider.GetSelectWhereSql<T>(predicates, sortOrders, firstRow, lastRow),
+                    parameters);
+
+                return new PagedList<T>()
+                {
+                    Rows = results,
+                    HasNext = lastRow < total,
+                    HasPrevious = firstRow > 1,
+                    TotalPages = (total / pageSize) + ((total % pageSize) > 0 ? 1 : 0),
+                    TotalRows = total
+                };
+            }
+        }
+
+        private async Task DeleteList<T>(IEnumerable<IPredicate> predicates) where T : class
+        {
+            if (predicates.Count() == 0)
             {
                 throw new ArgumentException("Please pass where conditions.");
             }

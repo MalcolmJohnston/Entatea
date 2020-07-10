@@ -45,8 +45,11 @@ namespace Testadal.Tests.Helpers
             // check whether we are dealing with a type that we need to dispose of
             if (typeof(SqlServerDataContext).IsAssignableFrom(dataContextType))
             {
-                // create the test database
                 LocalDbTestHelper.DeleteTestDatabase(TestContext.CurrentContext.Test.FullName);
+            } 
+            else if (typeof(MySqlDataContext).IsAssignableFrom(dataContextType))
+            {
+                MySqlTestHelper.DeleteTestDatabase(TestContext.CurrentContext.Test.FullName);
             }
         }
     }

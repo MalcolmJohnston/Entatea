@@ -388,7 +388,7 @@ namespace Testadal.Model
                 }
                 else
                 {
-                    IPredicate op = Predicate.PredicateBuilder.In<T>(propertyName, whereDict[propertyName]);
+                    IPredicate op = Predicate.PredicateBuilder.In<T>(propertyName, (System.Collections.IEnumerable)whereDict[propertyName]);
                     whereOperations.Add(op);
                 }
             }

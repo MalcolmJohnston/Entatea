@@ -13,7 +13,7 @@ using NUnit.Framework;
 namespace Testadal.Tests
 {
     [TestFixture]
-    public partial class DataContextTests
+    public class CreateTests : BaseTest
     {
         /// <summary>
         /// Test that we can insert an entity that has single key which is an identity column.

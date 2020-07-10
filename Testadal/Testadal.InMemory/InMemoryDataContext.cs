@@ -161,6 +161,11 @@ namespace Testadal.InMemory
 
         public Task DeleteList<T>(params IPredicate[] predicates) where T : class
         {
+            if (predicates == null || predicates.Length == 0)
+            {
+                throw new ArgumentException("Please pass where conditions.");
+            }
+
             IEnumerable<T> objects = new List<T>(this.ReadList<T>(predicates).GetAwaiter().GetResult());
             if (objects.Count() > 0)
             {
@@ -237,11 +242,8 @@ namespace Testadal.InMemory
 
         public Task<PagedList<T>> ReadList<T>(object sortOrders, int pageSize, int pageNumber, params IPredicate[] predicates) where T : class
         {
-            ClassMap classMap = ClassMapper.GetClassMap<T>();
-
             // get the candidate objects
             IEnumerable<T> filteredT;
-
             if (predicates.Count() == 0)
             {
                 filteredT = this.ReadAll<T>().GetAwaiter().GetResult();
@@ -386,11 +388,11 @@ namespace Testadal.InMemory
 
                 if (pm.PropertyInfo.PropertyType.IsAssignableFrom(valueType))
                 {
-                    predicates.Add(Predicate.PredicateBuilder.Equal<T>(key, value));
+                    predicates.Add(PredicateBuilder.Equal<T>(key, value));
                 }
                 else
                 {
-                    predicates.Add(Predicate.PredicateBuilder.In<T>(key, value));
+                    predicates.Add(PredicateBuilder.In<T>(key, (IEnumerable)value));
                 }
             }
 
@@ -469,11 +471,9 @@ namespace Testadal.InMemory
                 case Operator.Contains:
                 case Operator.StartsWith:
                 case Operator.EndsWith:
-                    if (predicate.Value is string)
-                    {
-                        MethodInfo likeMethod = typeof(string).GetMethod(Enum.GetName(typeof(Operator), predicate.Operator));
-                        expr = Expression.Call(Expression.Constant(predicate.Value), likeMethod, member);
-                    }
+                    string methodName = Enum.GetName(typeof(Operator), predicate.Operator);
+                    MethodInfo likeMethod = typeof(string).GetMethod(methodName, new[] { typeof(string) });
+                    expr = Expression.Call(member, likeMethod, Expression.Constant(predicate.Value));
                     break;
                 case Operator.In:
                     MethodInfo inMethod = containsMethod.MakeGenericMethod(pm.PropertyInfo.PropertyType);

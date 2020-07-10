@@ -14,7 +14,8 @@ using NUnit.Framework;
 
 namespace Testadal.Tests
 {
-    public partial class DataContextTests
+    [TestFixture]
+    public class ReadTests : BaseTest
     {
         /// <summary>
         /// Test that we can execute Get All when the Model is mapped with an Identity column.
