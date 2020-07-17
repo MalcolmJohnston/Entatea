@@ -22,7 +22,7 @@ namespace Testadal.Predicate
             string columnName = sqlBuilder.GetColumnName<T>(PropertyName);
             if (Value == null)
             {
-                return $"{columnName} IS {(Not ? "NOT " : string.Empty)}NULL)";
+                return $"{columnName} IS {(Not ? "NOT " : string.Empty)}NULL";
             }
 
             if (this.Operator == Operator.Contains)

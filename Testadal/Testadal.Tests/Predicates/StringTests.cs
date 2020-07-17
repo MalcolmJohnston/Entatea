@@ -39,6 +39,24 @@ namespace Testadal.Tests.Predicates
         [TestCase(typeof(InMemoryDataContext))]
         [TestCase(typeof(SqlServerDataContext))]
         [TestCase(typeof(MySqlDataContext))]
+        public async Task Read_With_String_Equal_Null_Predicate(Type dataContextType)
+        {
+            // Arrange
+            IDataContext dataContext = DataContextProvider.SetupDataContext(dataContextType);
+            await dataContext.Create(new Product() { Name = null });
+            await dataContext.Create(new Product() { Name = "Hammer" });
+
+            // Act
+            IEnumerable<Product> products = await dataContext.ReadList<Product>(Equal<Product>(x => x.Name, null));
+
+            // Assert
+            Assert.AreEqual(1, products.Count());
+            Assert.AreEqual(null, products.ElementAt(0).Name);
+        }
+
+        [TestCase(typeof(InMemoryDataContext))]
+        [TestCase(typeof(SqlServerDataContext))]
+        [TestCase(typeof(MySqlDataContext))]
         public async Task Read_With_String_NotEqual_Predicate(Type dataContextType)
         {
             // Arrange

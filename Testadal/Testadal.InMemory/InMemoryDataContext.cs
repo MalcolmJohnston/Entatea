@@ -8,6 +8,7 @@ using System.Linq.Dynamic.Core;
 using System.Linq.Expressions;
 
 using System.Reflection;
+using System.Runtime.Serialization;
 using System.Threading.Tasks;
 
 using Testadal.Model;
@@ -23,6 +24,8 @@ namespace Testadal.InMemory
     public class InMemoryDataContext : IDataContext
     {
         private readonly ConcurrentDictionary<string, IList> dataStore = new ConcurrentDictionary<string, IList>();
+
+        private readonly Type iEnumerableType = typeof(IEnumerable);
 
         /// <summary>
         /// Adds test data for the specific classMap.
@@ -444,10 +447,6 @@ namespace Testadal.InMemory
             return data.Where(finalExpression).AsEnumerable<T>();
         }
 
-        private readonly MethodInfo containsMethod =
-            typeof(Enumerable).GetMethods(BindingFlags.Static | BindingFlags.Public)
-                              .Single(m => m.Name == nameof(Enumerable.Contains) && m.GetParameters().Length == 2);
-
         private Expression GetExpression<T>(
             IFieldPredicate predicate,
             MemberExpression member,
@@ -457,55 +456,63 @@ namespace Testadal.InMemory
             switch (predicate.Operator)
             {
                 case Operator.GreaterThan:
-                    expr = Expression.GreaterThan(member, Expression.Constant(predicate.Value));
+                    expr = Expression.GreaterThan(member, Expression.Constant(predicate.Value, pm.PropertyInfo.PropertyType));
                     break;
                 case Operator.GreaterThanOrEqual:
-                    expr = Expression.GreaterThanOrEqual(member, Expression.Constant(predicate.Value));
+                    expr = Expression.GreaterThanOrEqual(member, Expression.Constant(predicate.Value, pm.PropertyInfo.PropertyType));
                     break;
                 case Operator.LessThan:
-                    expr = Expression.LessThan(member, Expression.Constant(predicate.Value));
+                    expr = Expression.LessThan(member, Expression.Constant(predicate.Value, pm.PropertyInfo.PropertyType));
                     break;
                 case Operator.LessThanOrEqual:
-                    expr = Expression.LessThanOrEqual(member, Expression.Constant(predicate.Value));
+                    expr = Expression.LessThanOrEqual(member, Expression.Constant(predicate.Value, pm.PropertyInfo.PropertyType));
                     break;
                 case Operator.Contains:
                 case Operator.StartsWith:
                 case Operator.EndsWith:
                     string methodName = Enum.GetName(typeof(Operator), predicate.Operator);
                     MethodInfo likeMethod = typeof(string).GetMethod(methodName, new[] { typeof(string) });
-                    expr = Expression.Call(member, likeMethod, Expression.Constant(predicate.Value));
+                    expr = Expression.Call(member, likeMethod, Expression.Constant(predicate.Value, pm.PropertyInfo.PropertyType));
                     break;
                 case Operator.In:
-                    MethodInfo inMethod = containsMethod.MakeGenericMethod(pm.PropertyInfo.PropertyType);
-                    
-                    Type listType = typeof(List<>).MakeGenericType(pm.PropertyInfo.PropertyType);
-                    var typedList = Activator.CreateInstance(listType);
-                    
-                    // add single value or add range
-                    Type valueType = predicate.Value.GetType();
-                    if (pm.PropertyInfo.PropertyType.IsAssignableFrom(valueType))
-                    {
-                        MethodInfo addMethod = listType.GetMethod("Add");
-                        addMethod.Invoke(typedList, new[] { predicate.Value });
-                    }
-                    else
-                    {
-                        MethodInfo addRangeMethod = listType.GetMethod("AddRange");
-                        addRangeMethod.Invoke(typedList, new[] { predicate.Value });
-                    }
+                    // if this is a nullable type then use the underlying type for the expression
+                    Type type = pm.PropertyInfo.PropertyType;
+                    Type underlyingType = Nullable.GetUnderlyingType(pm.PropertyInfo.PropertyType);
 
-                    try
+                    // if single value then convert to enumerable
+                    Type valueType = predicate.Value.GetType();
+                    if (type.IsAssignableFrom(valueType))
                     {
-                        expr = Expression.Call(inMethod, Expression.Constant(typedList), member);
+                        predicate.Value = new[] { predicate.Value };
                     }
-                    catch (Exception ex)
+                    
+                    IEnumerable enumerable = predicate.Value as IEnumerable;
+                    int index = 0;
+                    foreach(object value in enumerable)
                     {
-                        Console.WriteLine(ex.Message);
-                        Console.WriteLine(ex.StackTrace);
+                        Expression nextExpr;
+                        if (underlyingType != null)
+                        {
+                            nextExpr = Expression.Equal(member, Expression.Convert(Expression.Constant(value, underlyingType), type));
+                        }
+                        else
+                        {
+                            nextExpr = Expression.Equal(member, Expression.Constant(value, type));
+                        }
+
+                        if (index == 0)
+                        {
+                            expr = nextExpr;
+                        }
+                        else
+                        {
+                            expr = Expression.OrElse(expr, nextExpr);
+                        }
+                        index++;
                     }
                     break;
                 case Operator.Equal:
-                    expr = Expression.Equal(member, Expression.Constant(predicate.Value));
+                    expr = Expression.Equal(member, Expression.Constant(predicate.Value, pm.PropertyInfo.PropertyType));
                     break;
                 default:
                     break;
