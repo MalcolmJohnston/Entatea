@@ -1,0 +1,54 @@
+name: .NET Core
+
+on:
+  push:
+    branches: [ master ]
+  pull_request:
+    branches: [ master ]
+
+jobs:
+  build:
+
+    runs-on: ubuntu-latest
+
+    steps:
+    - uses: actions/checkout@v2
+    - name: Setup .NET Core
+      uses: actions/setup-dotnet@v1
+      with:
+        dotnet-version: 3.1.301
+    - name: Install dependencies
+      run: dotnet restore ./Entatea/Entatea.sln
+    - name: Build
+      run: dotnet build ./Entatea/Entatea.sln --configuration Release --no-restore
+    - name: Publish Entatea to NuGet
+      uses: brandedoutcast/publish-nuget@v2.5.5
+      with:
+        # Filepath of the project to be packaged, relative to root of repository
+        PROJECT_FILE_PATH: ./Entatea/Entatea/Entatea.csproj
+        # API key to authenticate with NuGet server
+        NUGET_KEY: ${{ secrets.NUGET_API_KEY }}
+    - name: Publish Entatea.InMemory to NuGet
+      uses: brandedoutcast/publish-nuget@v2.5.5
+      with:
+        # Filepath of the project to be packaged, relative to root of repository
+        PROJECT_FILE_PATH: ./Entatea/Entatea.InMemory/Entatea.InMemory.csproj
+        # API key to authenticate with NuGet server
+        NUGET_KEY: ${{ secrets.NUGET_API_KEY }}
+    - name: Publish Entatea.MySql to NuGet
+      uses: brandedoutcast/publish-nuget@v2.5.5
+      with:
+        # Filepath of the project to be packaged, relative to root of repository
+        PROJECT_FILE_PATH: ./Entatea/Entatea.MySql/Entatea.MySql.csproj
+        # API key to authenticate with NuGet server
+        NUGET_KEY: ${{ secrets.NUGET_API_KEY }}
+    - name: Publish Entatea.SqlServer to NuGet
+      uses: brandedoutcast/publish-nuget@v2.5.5
+      with:
+        # Filepath of the project to be packaged, relative to root of repository
+        PROJECT_FILE_PATH: ./Entatea/Entatea.SqlServer/Entatea.SqlServer.csproj
+        # API key to authenticate with NuGet server
+        NUGET_KEY: ${{ secrets.NUGET_API_KEY }}
+    
+    
+    
