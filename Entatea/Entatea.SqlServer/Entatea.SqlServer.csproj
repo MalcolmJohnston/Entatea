@@ -6,8 +6,8 @@
     <Company />
     <Copyright />
     <PackageLicenseExpression>MIT</PackageLicenseExpression>
-    <PackageProjectUrl>https://github.com/MalcolmJohnston/testadal</PackageProjectUrl>
-    <Version>1.0.2</Version>
+    <PackageProjectUrl>https://github.com/MalcolmJohnston/Entatea</PackageProjectUrl>
+    <Version>1.0.3</Version>
   </PropertyGroup>
 
   <ItemGroup>

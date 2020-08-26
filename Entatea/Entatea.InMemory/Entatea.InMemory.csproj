@@ -4,11 +4,11 @@
     <TargetFramework>netstandard2.0</TargetFramework>
     <Authors>Malcolm Johnston</Authors>
     <Company />
-    <Product>Testadal.InMemory</Product>
+    <Product>Entatea.InMemory</Product>
     <PackageLicenseExpression>MIT</PackageLicenseExpression>
-    <PackageProjectUrl>https://github.com/MalcolmJohnston/testadal</PackageProjectUrl>
-    <Version>1.0.2</Version>
-    <AssemblyVersion>1.0.2.0</AssemblyVersion>
+    <PackageProjectUrl>https://github.com/MalcolmJohnston/Entatea</PackageProjectUrl>
+    <Version>1.0.3</Version>
+    <AssemblyVersion>1.0.3.0</AssemblyVersion>
     <FileVersion>1.0.2.0</FileVersion>
   </PropertyGroup>
 
