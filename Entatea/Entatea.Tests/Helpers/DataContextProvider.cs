@@ -5,13 +5,17 @@ using System.Text;
 using NUnit.Framework;
 using Entatea.InMemory;
 using Entatea.MySql;
+using Entatea.Resolvers;
 using Entatea.SqlServer;
 
 namespace Entatea.Tests.Helpers
 {
     public class DataContextProvider
     {
-        public static IDataContext SetupDataContext(Type dataContextType)
+        public static IDataContext SetupDataContext(
+            Type dataContextType,
+            ITableNameResolver tableNameResolver = null,
+            IColumnNameResolver columnNameResolver = null)
         {
             // check whether we are dealing with a type that implement IDataContext
             if (typeof(IDataContext).IsAssignableFrom(dataContextType) == false)
@@ -27,12 +31,18 @@ namespace Entatea.Tests.Helpers
             else if (typeof(SqlServerDataContext).IsAssignableFrom(dataContextType))
             {
                 LocalDbTestHelper.CreateTestDatabase(TestContext.CurrentContext.Test.FullName);
-                return new SqlServerDataContext(LocalDbTestHelper.GetTestConnectionString(TestContext.CurrentContext.Test.FullName));
+                return new SqlServerDataContext(
+                    LocalDbTestHelper.GetTestConnectionString(TestContext.CurrentContext.Test.FullName),
+                    tableNameResolver ?? new DefaultTableNameResolver(),
+                    columnNameResolver ?? new DefaultColumnNameResolver());
             }
             else if (typeof(MySqlDataContext).IsAssignableFrom(dataContextType))
             {
                 MySqlTestHelper.CreateTestDatabase(TestContext.CurrentContext.Test.FullName);
-                return new MySqlDataContext(MySqlTestHelper.GetTestConnectionString(TestContext.CurrentContext.Test.FullName));
+                return new MySqlDataContext(
+                    MySqlTestHelper.GetTestConnectionString(TestContext.CurrentContext.Test.FullName),
+                    tableNameResolver ?? new DefaultTableNameResolver(),
+                    columnNameResolver ?? new DefaultColumnNameResolver());
             }
             else
             {

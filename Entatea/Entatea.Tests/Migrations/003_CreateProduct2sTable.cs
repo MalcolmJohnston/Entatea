@@ -1,10 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.ComponentModel.DataAnnotations.Schema;
-using System.Security.Cryptography.X509Certificates;
-using System.Text;
-
-using FluentMigrator;
+﻿using FluentMigrator;
 
 namespace Entatea.Tests.Migrations
 {

@@ -1,9 +1,8 @@
 ﻿using System;
 using System.Collections.Concurrent;
-using System.Reflection;
-using System.Linq;
-using System.Text;
+
 using Entatea.Model;
+using Entatea.Resolvers;
 
 namespace Entatea
 {

@@ -9,7 +9,7 @@ using static Entatea.Predicate.PredicateBuilder;
 using Entatea.SqlServer;
 
 using Entatea.Tests.Helpers;
-using Entatea.Tests.Models;
+using Entatea.Tests.Entities;
 
 using NUnit.Framework;
 

@@ -1,11 +1,13 @@
 ﻿using Entatea.Annotations;
 
-namespace Entatea.Tests.Models
+namespace Entatea.Tests.Entities
 {
-    [Table("CitiesManual")]
-    public class CityManual
+    [Table("CitiesSequential")]
+    public class CitySequential
     {
-        [KeyType(KeyType.Assigned)]
+        [KeyType(KeyType.Sequential)]
+        public short CityId { get; set; }
+
         [Required]
         public string CityCode { get; set; }
 

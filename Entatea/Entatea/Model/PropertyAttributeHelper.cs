@@ -24,17 +24,6 @@ namespace Entatea.Model
             return KeyType.NotAKey;
         }
 
-        internal static string GetColumnName(PropertyInfo pi)
-        {
-            dynamic attr = GetAttribute(pi, "ColumnAttribute");
-            if (attr != null)
-            {
-                return attr.Name;
-            }
-
-            return string.Empty;
-        }
-
         internal static dynamic GetSoftDelete(PropertyInfo pi)
         {
             dynamic attr = GetAttribute(pi, "SoftDeleteAttribute");
@@ -66,6 +55,11 @@ namespace Entatea.Model
             }
 
             return false;
+        }
+
+        internal static dynamic GetColumnAttribute(PropertyInfo pi)
+        {
+            return GetAttribute(pi, "ColumnAttribute");
         }
 
         private static bool HasAttribute(PropertyInfo pi, string attributeName)

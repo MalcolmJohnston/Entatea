@@ -23,7 +23,7 @@ namespace Entatea.Predicate
                 throw new NullReferenceException($"{propertyName} was not found for {typeof(T)}");
             }
 
-            return sqlBuilder.Encapsulate(propertyMap.ColumnName);
+            return sqlBuilder.GetColumnIdentifier(propertyMap);
         }
 
         public static IDictionary<string, object> GetParameters(this IEnumerable<IPredicate> predicates)

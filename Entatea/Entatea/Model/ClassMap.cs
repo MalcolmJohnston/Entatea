@@ -1,13 +1,8 @@
 ﻿using System;
-using System.Collections.Concurrent;
 using System.Collections.Generic;
-using System.ComponentModel;
-using System.Dynamic;
 using System.Linq;
 using System.Reflection;
-using System.Runtime.CompilerServices;
 
-using Humanizer;
 using Entatea.Predicate;
 
 namespace Entatea.Model
@@ -17,16 +12,10 @@ namespace Entatea.Model
         public ClassMap(Type type)
         {
             this.Name = type.Name;
-            this.Schema = string.Empty;
-            this.TableName = type.Name.Pluralize(false);
 
-            // override schema and table name if table attribute present
             dynamic tableAttribute = ClassAttributeHelper.GetTableAttribute(type);
-            if (tableAttribute != null)
-            {
-                Schema = tableAttribute.Schema;
-                TableName = tableAttribute.Name;
-            }
+            this.ExplicitSchema = tableAttribute != null ? tableAttribute.Schema : string.Empty;
+            this.ExplicitTableName = tableAttribute != null ? tableAttribute.Name : string.Empty;
 
             // load the property mappings
             // null property mappings have the NotMapped attribute and so should just be ignored
@@ -75,7 +64,7 @@ namespace Entatea.Model
 
             // set the insertable properties
             this.InsertableProperties = this.AllProperties.Values.Where(x => x.KeyType != KeyType.Identity)
-                                                                        .ToList();
+                                                                 .ToList();
 
             // set the updateable properties
             this.UpdateableProperties = this.AllProperties.Values.Where(x => x.KeyType == KeyType.NotAKey &&
@@ -88,15 +77,15 @@ namespace Entatea.Model
             this.DateStampProperties = this.AllProperties.Values.Where(x => x.IsDateStamp).ToList();
 
             // set the default sort order
-            this.DefaultSortOrder = this.AllKeys.Select(x => new { Key = x.ColumnName, Value = SortOrder.Ascending })
+            this.DefaultSortOrder = this.AllKeys.Select(x => new { Key = x.PropertyName, Value = SortOrder.Ascending })
                                                 .ToDictionary(x => x.Key, x => x.Value);
         }
 
         public string Name { get; private set; }
 
-        public string Schema { get; private set; }
+        public string ExplicitSchema { get; private set; }
 
-        public string TableName { get; private set; }
+        public string ExplicitTableName { get; private set; }
 
 
         public IDictionary<string, PropertyMap> AllProperties { get; private set; }
@@ -312,17 +301,15 @@ namespace Entatea.Model
             // only attempt to coalesce if we don't have a null reference
             if (sortOrders != null)
             {
-                // initialise our dictionary
-                IDictionary<string, SortOrder> sortOrdersDict = new Dictionary<string, SortOrder>();
-
                 // if we were passed a dictionary of the same type then return it as long as it has one or more values
                 if (sortOrders is IDictionary<string, SortOrder>)
                 {
-                    sortOrdersDict = sortOrders as IDictionary<string, SortOrder>;
+                    return sortOrders as IDictionary<string, SortOrder>;
                 }
                 else
                 {
                     // coalesce the object
+                    IDictionary<string, SortOrder> sortOrdersDict = new Dictionary<string, SortOrder>();
                     foreach (PropertyInfo propertyInfo in sortOrders.GetType().GetProperties())
                     {
                         if (propertyInfo.PropertyType != typeof(SortOrder))
@@ -332,12 +319,12 @@ namespace Entatea.Model
 
                         sortOrdersDict.Add(propertyInfo.Name, (SortOrder)propertyInfo.GetValue(sortOrders));
                     }
-                }
 
-                // validate and return
-                if (sortOrdersDict.Any())
-                {
-                    return sortOrdersDict;
+                    // validate and return
+                    if (sortOrdersDict.Any())
+                    {
+                        return sortOrdersDict;
+                    }
                 }
             }
 

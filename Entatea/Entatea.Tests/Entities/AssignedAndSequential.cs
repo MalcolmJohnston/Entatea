@@ -1,6 +1,6 @@
 ﻿using Entatea.Annotations;
 
-namespace Entatea.Tests.Models
+namespace Entatea.Tests.Entities
 {
     public class AssignedAndSequential
     {

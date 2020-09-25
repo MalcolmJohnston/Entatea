@@ -1,6 +1,5 @@
-﻿using System.Data;
-using Entatea;
-using Entatea.Cache;
+﻿using Entatea.Cache;
+using Entatea.Resolvers;
 
 namespace Entatea.MySql
 {
@@ -9,6 +8,16 @@ namespace Entatea.MySql
         public MySqlDataContext(string connectionString) : base(
             new MySqlConnectionProvider(connectionString),
             new MySqlBuilder(),
+            new SqlCache())
+        {
+        }
+
+        public MySqlDataContext(
+            string connectionString,
+            ITableNameResolver tableNameResolver,
+            IColumnNameResolver columnNameResolver) : base(
+            new MySqlConnectionProvider(connectionString),
+            new MySqlBuilder(tableNameResolver, columnNameResolver),
             new SqlCache())
         {
         }

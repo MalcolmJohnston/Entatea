@@ -1,6 +1,5 @@
-﻿using System.Data;
-using Entatea;
-using Entatea.Cache;
+﻿using Entatea.Cache;
+using Entatea.Resolvers;
 
 namespace Entatea.SqlServer
 {
@@ -9,6 +8,16 @@ namespace Entatea.SqlServer
         public SqlServerDataContext(string connectionString) : base(
             new SqlServerConnectionProvider(connectionString),
             new TSqlBuilder(),
+            new SqlCache())
+        {
+        }
+
+        public SqlServerDataContext(
+            string connectionString,
+            ITableNameResolver tableNameResolver,
+            IColumnNameResolver columnNameResolver) : base(
+            new SqlServerConnectionProvider(connectionString),
+            new TSqlBuilder(tableNameResolver, columnNameResolver),
             new SqlCache())
         {
         }

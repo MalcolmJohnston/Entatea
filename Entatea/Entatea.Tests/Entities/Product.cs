@@ -1,9 +1,6 @@
-﻿using Org.BouncyCastle.Asn1.Mozilla;
-using System;
-using System.Collections.Generic;
-using System.Text;
+﻿using System;
 
-namespace Entatea.Tests.Models
+namespace Entatea.Tests.Entities
 {
     public class Product
     {

@@ -6,11 +6,28 @@ using System.Text;
 
 using Entatea.Model;
 using Entatea.Predicate;
+using Entatea.Resolvers;
 
 namespace Entatea.SqlBuilder
 {
     public abstract class BaseSqlBuilder : ISqlBuilder
     {
+        protected readonly ITableNameResolver tableNameResolver = new DefaultTableNameResolver();
+
+        protected readonly IColumnNameResolver columnNameResolver = new DefaultColumnNameResolver();
+
+        public BaseSqlBuilder()
+        {
+        }
+
+        public BaseSqlBuilder(
+            ITableNameResolver tableNameResolver,
+            IColumnNameResolver columnNameResolver)
+        {
+            this.tableNameResolver = tableNameResolver;
+            this.columnNameResolver = columnNameResolver;
+        }
+
         private const string OrderByAsc = "ASC";
         private const string OrderByDesc = "DESC";
 
@@ -31,13 +48,12 @@ namespace Entatea.SqlBuilder
 
         public virtual string EncapsulateSelect(PropertyMap propertyMap)
         {
-            string columnName = string.Format(this.EncapsulationFormat, propertyMap.ColumnName);
-            if (propertyMap.PropertyName != propertyMap.ColumnName)
-            {
-                return $"{columnName} AS {string.Format(this.EncapsulationFormat, propertyMap.PropertyName)}";
-            }
-
-            return columnName;
+            string columnName = this.GetColumnIdentifier(propertyMap);
+            string propertyName = this.Encapsulate(propertyMap.PropertyName);
+            
+            // if the encapsulated property name and column name are not equal use the AS syntax
+            // otherwise just return the encapsulated property name
+            return (propertyName != columnName) ? $"{columnName} AS {propertyName}" : propertyName;
         }
 
         public virtual string GetTableIdentifier<T>() where T : class
@@ -48,8 +64,25 @@ namespace Entatea.SqlBuilder
 
         protected virtual string GetTableIdentifier(ClassMap classMap)
         {
-            // most dialects do not support schemas
-            return string.Format(this.EncapsulationFormat, classMap.TableName.ToLower());
+            // most dialects do not support schemas so not supported by default
+
+            // if the table name is explict just encapsulate it and return
+            if (!string.IsNullOrWhiteSpace(classMap.ExplicitTableName))
+            {
+                return this.Encapsulate(classMap.ExplicitTableName);
+            }
+
+            // otherwise encapsulate the table name returned by the resolver
+            return this.Encapsulate(this.tableNameResolver.GetTableName(classMap.Name));
+        }
+
+        public virtual string GetColumnIdentifier(PropertyMap propertyMap)
+        {
+            if (!string.IsNullOrWhiteSpace(propertyMap.ColumnName)) {
+                return this.Encapsulate(propertyMap.ColumnName);
+            }
+
+            return this.Encapsulate(this.columnNameResolver.GetColumnName(propertyMap.PropertyName));
         }
 
         public virtual string GetDeleteByIdSql<T>() where T : class
@@ -116,7 +149,7 @@ namespace Entatea.SqlBuilder
             }
 
             StringBuilder sb = new StringBuilder($"SELECT {this.IsNullFunctionName}(MAX(");
-            sb.Append(classMap.SequentialKey.ColumnName);
+            sb.Append(this.GetColumnIdentifier(classMap.SequentialKey));
             sb.Append($"), 0) + 1 FROM {this.GetTableIdentifier<T>()}");
 
             if (classMap.HasAssignedKeys)
@@ -173,7 +206,7 @@ namespace Entatea.SqlBuilder
             // add all update properties to SET clause
             for (int i = 0; i < updateMaps.Count; i++)
             {
-                sb.Append($"{updateMaps[i].ColumnName} = @{updateMaps[i].PropertyName}, ");
+                sb.Append($"{this.GetColumnIdentifier(updateMaps[i])} = @{updateMaps[i].PropertyName}, ");
             }
 
             // deal with date stamp properties
@@ -183,7 +216,7 @@ namespace Entatea.SqlBuilder
                 // add any Date Stamp properties to the SET clause
                 foreach (PropertyMap pm in classMap.DateStampProperties.Where(x => !x.IsReadOnly))
                 {
-                    sb.Append($"{pm.ColumnName} = {this.GetDateFunctionCall}, ");
+                    sb.Append($"{this.GetColumnIdentifier(pm)} = {this.GetDateFunctionCall}, ");
                 }
             }
 

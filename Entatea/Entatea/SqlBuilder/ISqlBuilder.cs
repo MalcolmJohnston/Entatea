@@ -1,6 +1,8 @@
 ﻿using System.Collections.Generic;
+
 using Entatea.Model;
 using Entatea.Predicate;
+using Entatea.Resolvers;
 
 namespace Entatea.SqlBuilder
 {
@@ -17,6 +19,8 @@ namespace Entatea.SqlBuilder
         string OrderByDescending { get; }
 
         string GetTableIdentifier<T>() where T : class;
+
+        string GetColumnIdentifier(PropertyMap propertyMap);
 
         string Encapsulate(string identifier);
 

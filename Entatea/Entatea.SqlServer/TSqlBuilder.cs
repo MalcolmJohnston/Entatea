@@ -4,22 +4,41 @@ using System.Text;
 
 using Entatea.Model;
 using Entatea.Predicate;
+using Entatea.Resolvers;
 using Entatea.SqlBuilder;
 
 namespace Entatea.SqlServer
 {
     public class TSqlBuilder : BaseSqlBuilder, ISqlBuilder
     {
+        public TSqlBuilder() : base()
+        {
+        }
+
+        public TSqlBuilder(
+            ITableNameResolver tableNameResolver,
+            IColumnNameResolver columnNameResolver) : base(
+                tableNameResolver,
+                columnNameResolver)
+        {
+        }
+
         protected override string GetTableIdentifier(ClassMap classMap)
         {
-            string tableName = string.Format(this.EncapsulationFormat, classMap.TableName.ToLower());
-            if (string.IsNullOrWhiteSpace(classMap.Schema))
+            string tableName = classMap.ExplicitTableName;
+            if (string.IsNullOrEmpty(tableName))
+            {
+                tableName = this.tableNameResolver.GetTableName(classMap.Name);
+            }
+
+            tableName = this.Encapsulate(tableName);
+            if (string.IsNullOrWhiteSpace(classMap.ExplicitSchema))
             {
                 return tableName;
             }
             else
             {
-                string schemaName = string.Format(this.EncapsulationFormat, classMap.Schema.ToLower());
+                string schemaName = this.Encapsulate(classMap.ExplicitSchema);
                 return $"{schemaName}.{tableName}";
             }
         }
@@ -32,13 +51,13 @@ namespace Entatea.SqlServer
             StringBuilder sb = new StringBuilder($"INSERT INTO {this.GetTableIdentifier(classMap)} (");
 
             // add the columns we are inserting
-            sb.Append(string.Join(", ", classMap.InsertableProperties.Select(x => this.Encapsulate(x.ColumnName))));
+            sb.Append(string.Join(", ", classMap.InsertableProperties.Select(x => this.GetColumnIdentifier(x))));
             sb.Append(")");
 
             // add identity column outputs
             if (classMap.HasIdentityKey)
             {
-                sb.Append($" OUTPUT inserted.{this.Encapsulate(classMap.IdentityKey.ColumnName)}");
+                sb.Append($" OUTPUT inserted.{this.GetColumnIdentifier(classMap.IdentityKey)}");
             }
 
             // add parameterised values

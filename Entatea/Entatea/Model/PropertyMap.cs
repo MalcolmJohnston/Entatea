@@ -17,14 +17,6 @@ namespace Entatea.Model
 
         public string ColumnName { get; private set; }
 
-        /*public string ColumnSelect
-        {
-            get
-            {
-                return this.Property == this.Column ? this.Column : $"{this.Column} AS {this.Property}";
-            }
-        }*/
-
         public bool IsKey
         {
             get { return this.KeyType != KeyType.NotAKey; }
@@ -89,7 +81,6 @@ namespace Entatea.Model
             bool isKey = pm.KeyType != KeyType.NotAKey || PropertyAttributeHelper.IsKey(propertyInfo);
             
             bool isRequired = PropertyAttributeHelper.IsRequired(propertyInfo);
-            string columnName = PropertyAttributeHelper.GetColumnName(propertyInfo);
             bool isReadOnly = PropertyAttributeHelper.IsReadOnly(propertyInfo);
             bool isEditable = PropertyAttributeHelper.IsEditable(propertyInfo);
             bool isDateStamp = PropertyAttributeHelper.IsDateStamp(propertyInfo);
@@ -124,7 +115,8 @@ namespace Entatea.Model
             }
 
             // set remaining properties
-            pm.ColumnName = string.IsNullOrWhiteSpace(columnName) ? propertyInfo.Name : columnName;
+            dynamic columnAttribute = PropertyAttributeHelper.GetColumnAttribute(propertyInfo);
+            pm.ColumnName = columnAttribute != null ? columnAttribute.Name : string.Empty;
             pm.IsRequired = isRequired;
             pm.IsDateStamp = isDateStamp;
             pm.IsSoftDelete = softDeleteAttribute != null;

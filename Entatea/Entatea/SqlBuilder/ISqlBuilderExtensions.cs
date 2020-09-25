@@ -71,7 +71,7 @@ namespace Entatea.SqlBuilder
             int count = properties.Count();
             for (int i = 0; i < count; i++)
             {
-                sb.Append($"{sqlBuilder.Encapsulate(properties.ElementAt(i).ColumnName)} = @p{i}");
+                sb.Append($"{sqlBuilder.GetColumnIdentifier(properties.ElementAt(i))} = @p{i}");
 
                 // exclude AND on last property
                 if ((i + 1) < count)
@@ -101,7 +101,7 @@ namespace Entatea.SqlBuilder
                     throw new ArgumentException($"Failed to find property {propertyName} on {classMap.Name}");
                 }
 
-                orderBySb.Append($"{pm.ColumnName} {sqlBuilder.GetSortOrder(order)}");
+                orderBySb.Append($"{sqlBuilder.GetColumnIdentifier(pm)} {sqlBuilder.GetSortOrder(order)}");
 
                 if (i != sortOrderDict.Count - 1)
                 {
