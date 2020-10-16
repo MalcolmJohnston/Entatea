@@ -63,7 +63,8 @@ namespace Entatea.Model
             this.RequiredProperties = this.AllProperties.Values.Where(x => x.IsRequired).ToList();
 
             // set the insertable properties
-            this.InsertableProperties = this.AllProperties.Values.Where(x => x.KeyType != KeyType.Identity)
+            this.InsertableProperties = this.AllProperties.Values.Where(x => x.KeyType != KeyType.Identity &&
+                                                                             x.IsReadOnly == false)
                                                                  .ToList();
 
             // set the updateable properties
