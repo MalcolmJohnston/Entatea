@@ -56,6 +56,11 @@ namespace Entatea.SqlBuilder
             return (propertyName != columnName) ? $"{columnName} AS {propertyName}" : propertyName;
         }
 
+        public virtual string CallConcatenate(params object[] parameters)
+        {
+            return $"CONCAT({string.Join(",", parameters)})";
+        }
+
         public virtual string GetTableIdentifier<T>() where T : class
         {
             ClassMap classMap = ClassMapper.GetClassMap<T>();

@@ -9,6 +9,7 @@ using NUnit.Framework;
 using Entatea.InMemory;
 using Entatea.MySql;
 using Entatea.SqlServer;
+using Entatea.Sqlite;
 
 using Entatea.Tests.Helpers;
 using Entatea.Tests.Entities;
@@ -24,6 +25,7 @@ namespace Entatea.Tests
         [TestCase(typeof(InMemoryDataContext))]
         [TestCase(typeof(SqlServerDataContext))]
         [TestCase(typeof(MySqlDataContext))]
+        [TestCase(typeof(SqliteDataContext))]
         public async Task Read_Paged_First_Page(Type dataContextType)
         {
             // Arrange
@@ -51,6 +53,7 @@ namespace Entatea.Tests
         [TestCase(typeof(InMemoryDataContext))]
         [TestCase(typeof(SqlServerDataContext))]
         [TestCase(typeof(MySqlDataContext))]
+        [TestCase(typeof(SqliteDataContext))]
         public async Task Read_Paged_Neither_First_Or_Last_Page(Type dataContextType)
         {
             // Arrange
@@ -81,6 +84,7 @@ namespace Entatea.Tests
         [TestCase(typeof(InMemoryDataContext))]
         [TestCase(typeof(SqlServerDataContext))]
         [TestCase(typeof(MySqlDataContext))]
+        [TestCase(typeof(SqliteDataContext))]
         public async Task Read_Paged_Last_Page(Type dataContextType)
         {
             // Arrange
@@ -113,6 +117,7 @@ namespace Entatea.Tests
         [TestCase(typeof(InMemoryDataContext))]
         [TestCase(typeof(SqlServerDataContext))]
         [TestCase(typeof(MySqlDataContext))]
+        [TestCase(typeof(SqliteDataContext))]
         public async Task Read_Paged_With_Where(Type dataContextType)
         {
             // Arrange
@@ -143,6 +148,7 @@ namespace Entatea.Tests
         [TestCase(typeof(InMemoryDataContext))]
         [TestCase(typeof(SqlServerDataContext))]
         [TestCase(typeof(MySqlDataContext))]
+        [TestCase(typeof(SqliteDataContext))]
         public async Task Read_Paged_With_Where_Dictionary(Type dataContextType)
         {
             // Arrange
@@ -177,6 +183,7 @@ namespace Entatea.Tests
         [TestCase(typeof(InMemoryDataContext))]
         [TestCase(typeof(SqlServerDataContext))]
         [TestCase(typeof(MySqlDataContext))]
+        [TestCase(typeof(SqliteDataContext))]
         public async Task Read_Paged_With_OrderBy(Type dataContextType)
         {
             // Arrange
@@ -219,6 +226,7 @@ namespace Entatea.Tests
         [TestCase(typeof(InMemoryDataContext))]
         [TestCase(typeof(SqlServerDataContext))]
         [TestCase(typeof(MySqlDataContext))]
+        [TestCase(typeof(SqliteDataContext))]
         public async Task Read_Paged_With_OrderBy_Dictionary(Type dataContextType)
         {
             // Arrange
@@ -261,6 +269,7 @@ namespace Entatea.Tests
         [TestCase(typeof(InMemoryDataContext))]
         [TestCase(typeof(SqlServerDataContext))]
         [TestCase(typeof(MySqlDataContext))]
+        [TestCase(typeof(SqliteDataContext))]
         public async Task Read_Paged_With_Where_And_OrderBy(Type dataContextType)
         {
             // Arrange
@@ -292,6 +301,7 @@ namespace Entatea.Tests
         [TestCase(typeof(InMemoryDataContext))]
         [TestCase(typeof(SqlServerDataContext))]
         [TestCase(typeof(MySqlDataContext))]
+        [TestCase(typeof(SqliteDataContext))]
         public async Task Read_Paged_With_Where_Dictionary_And_OrderBy_Dictionary(Type dataContextType)
         {
             // Arrange
@@ -323,6 +333,7 @@ namespace Entatea.Tests
         [TestCase(typeof(InMemoryDataContext))]
         [TestCase(typeof(SqlServerDataContext))]
         [TestCase(typeof(MySqlDataContext))]
+        [TestCase(typeof(SqliteDataContext))]
         public async Task Read_Paged_With_Invalid_Where(Type dataContextType)
         {
             // Arrange
@@ -346,6 +357,7 @@ namespace Entatea.Tests
         [TestCase(typeof(InMemoryDataContext))]
         [TestCase(typeof(SqlServerDataContext))]
         [TestCase(typeof(MySqlDataContext))]
+        [TestCase(typeof(SqliteDataContext))]
         public async Task Read_Paged_With_Invalid_Where_Dictionary(Type dataContextType)
         {
             // Arrange
@@ -372,6 +384,7 @@ namespace Entatea.Tests
         [TestCase(typeof(InMemoryDataContext))]
         [TestCase(typeof(SqlServerDataContext))]
         [TestCase(typeof(MySqlDataContext))]
+        [TestCase(typeof(SqliteDataContext))]
         public async Task Read_Paged_With_Invalid_OrderBy(Type dataContextType)
         {
             // Arrange
@@ -398,6 +411,7 @@ namespace Entatea.Tests
         [TestCase(typeof(InMemoryDataContext))]
         [TestCase(typeof(SqlServerDataContext))]
         [TestCase(typeof(MySqlDataContext))]
+        [TestCase(typeof(SqliteDataContext))]
         public async Task Read_Paged_With_Invalid_OrderBy_Dictionary(Type dataContextType)
         {
             // Arrange

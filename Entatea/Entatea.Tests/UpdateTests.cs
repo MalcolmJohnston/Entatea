@@ -4,6 +4,7 @@ using System.Threading.Tasks;
 
 using Entatea.InMemory;
 using Entatea.MySql;
+using Entatea.Sqlite;
 using Entatea.SqlServer;
 
 using Entatea.Tests.Helpers;
@@ -22,6 +23,7 @@ namespace Entatea.Tests
         [TestCase(typeof(InMemoryDataContext))]
         [TestCase(typeof(SqlServerDataContext))]
         [TestCase(typeof(MySqlDataContext))]
+        [TestCase(typeof(SqliteDataContext))]
         public async Task Update_Editable_Property(Type dataContextType)
         {
             // Arrange
@@ -44,6 +46,7 @@ namespace Entatea.Tests
         [TestCase(typeof(InMemoryDataContext))]
         [TestCase(typeof(SqlServerDataContext))]
         [TestCase(typeof(MySqlDataContext))]
+        [TestCase(typeof(SqliteDataContext))]
         public async Task Update_Editable_Properties(Type dataContextType)
         {
             // Arrange
@@ -74,6 +77,7 @@ namespace Entatea.Tests
         [TestCase(typeof(InMemoryDataContext))]
         [TestCase(typeof(SqlServerDataContext))]
         [TestCase(typeof(MySqlDataContext))]
+        [TestCase(typeof(SqliteDataContext))]
         public async Task Update_With_Datestamp(Type dataContextType)
         {
             // Arrange
@@ -104,6 +108,7 @@ namespace Entatea.Tests
         [TestCase(typeof(InMemoryDataContext))]
         [TestCase(typeof(SqlServerDataContext))]
         [TestCase(typeof(MySqlDataContext))]
+        [TestCase(typeof(SqliteDataContext))]
         public async Task Update_Soft_Delete_Column(Type dataContextType)
         {
             // Arrange
@@ -124,6 +129,7 @@ namespace Entatea.Tests
         [TestCase(typeof(InMemoryDataContext))]
         [TestCase(typeof(SqlServerDataContext))]
         [TestCase(typeof(MySqlDataContext))]
+        [TestCase(typeof(SqliteDataContext))]
         public async Task Update_Read_Only_Column(Type dataContextType)
         {
             // Arrange

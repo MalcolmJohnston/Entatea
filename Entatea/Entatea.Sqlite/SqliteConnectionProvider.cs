@@ -1,19 +1,19 @@
 ﻿using System.Data;
-using System.Data.SqlClient;
+using Microsoft.Data.Sqlite;
 
-namespace Entatea.SqlServer
+namespace Entatea.Sqlite
 {
-    public class SqlServerConnectionProvider : IConnectionProvider
+    public class SqliteConnectionProvider : IConnectionProvider
     {
         private readonly string connectionString;
-        public SqlServerConnectionProvider(string connectionString)
+        public SqliteConnectionProvider(string connectionString)
         {
             this.connectionString = connectionString;
         }
 
         public IDbConnection GetConnection()
         {
-            IDbConnection conn = new SqlConnection(this.connectionString);
+            IDbConnection conn = new SqliteConnection(this.connectionString);
             conn.Open();
 
             return conn;

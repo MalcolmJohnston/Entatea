@@ -1,25 +1,27 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Data;
+using System.Data.SqlClient;
 using System.IO;
 using System.Reflection;
 
 using Microsoft.Extensions.DependencyInjection;
 
-using MySql.Data.MySqlClient;
 using NUnit.Framework;
 using Entatea.Tests.Configuration;
+using Microsoft.Data.Sqlite;
+using FluentMigrator.Runner.Processors.SQLite;
 
 namespace Entatea.Tests.Helpers
 {
     /// <summary>
     /// Class that contains helper method for creating/deleting LocalDb databases whilst testing
     /// </summary>
-    public class MySqlTestHelper
+    public class SqliteTestHelper
     {
         private static readonly Dictionary<string, string> testName2DbName = new Dictionary<string, string>();
 
-        private static readonly string tempFolder = Path.Combine(Path.GetTempPath(), Assembly.GetExecutingAssembly().GetName().Name, "MySQL");
+        private static readonly string tempFolder = Path.Combine(Path.GetTempPath(), Assembly.GetExecutingAssembly().GetName().Name, "SqlLite");
 
         public static void CreateTestDatabase(string testName)
         {
@@ -28,7 +30,7 @@ namespace Entatea.Tests.Helpers
             File.Delete(tempFile);
 
             // get the database name and add to cache
-            string dbName = Path.GetFileNameWithoutExtension(tempFile);
+            string dbName = Path.Combine(tempFolder, Path.GetFileNameWithoutExtension(tempFile) + ".db");
             testName2DbName[testName] = dbName;
 
             // check whether our temp folder exists
@@ -37,19 +39,7 @@ namespace Entatea.Tests.Helpers
                 Directory.CreateDirectory(tempFolder);
             }
 
-            // create the database
-            using (MySqlConnection conn = new MySqlConnection(GetMySqlConnectionString()))
-            {
-                conn.Open();
-
-                string sql = $"CREATE DATABASE {dbName}";
-
-                MySqlCommand command = new MySqlCommand(sql, conn);
-                command.ExecuteNonQuery();
-                conn.Close();
-            }
-
-            FluentMigrationsRunner.UpMySql(GetMySqlConnectionString(dbName));
+            FluentMigrationsRunner.UpSqlite(GetSqliteConnectionString(dbName));
         }
 
         public static IDbConnection OpenTestConnection(string testName)
@@ -79,25 +69,19 @@ namespace Entatea.Tests.Helpers
         public static string GetTestConnectionString(string testName)
         {
             string dbName = testName2DbName[testName];
-            return GetMySqlConnectionString(dbName);
+            return GetSqliteConnectionString(dbName);
         }
 
-        private static string GetMySqlConnectionString()
+        private static string GetSqliteConnectionString(string dbName)
         {
-            TestConfiguration config = ConfigurationHelper.GetTestConfiguration();
-            return $"Server={config.MySqlServer};Database=sys;UId={config.MySqlUsername};Pwd={config.MySqlPassword};";
-        }
-
-        private static string GetMySqlConnectionString(string dbName)
-        {
-            TestConfiguration config = ConfigurationHelper.GetTestConfiguration();
-            return $"Server={config.MySqlServer};Database={dbName};UId={config.MySqlUsername};Password={config.MySqlPassword};";
+            return new SqliteConnectionStringBuilder() { DataSource = dbName }
+                .ConnectionString;
         }
 
         private static IDbConnection OpenConnection(string connectionString)
         {
             // open the connection
-            IDbConnection conn = new MySqlConnection(connectionString);
+            IDbConnection conn = new SqliteConnection(connectionString);
             conn.Open();
 
             return conn;
@@ -107,16 +91,8 @@ namespace Entatea.Tests.Helpers
         {
             try
             {
-                string sql = $"DROP DATABASE {dbName}";
-                
-                using (IDbConnection conn = OpenConnection(GetMySqlConnectionString()))
-                {
-                    IDbCommand cmd = conn.CreateCommand();
-                    cmd.CommandText = sql;
-                    cmd.ExecuteNonQuery();
-                    conn.Close();
-                    return true;
-                }
+                File.Delete(dbName);
+                return true;
             }
             catch
             {

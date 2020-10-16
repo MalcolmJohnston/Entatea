@@ -8,6 +8,7 @@ using Entatea.Resolvers;
 using Entatea.Tests.Entities;
 using Entatea.Tests.Helpers;
 using NUnit.Framework;
+using Entatea.Sqlite;
 
 namespace Entatea.Tests.Resolvers
 {
@@ -72,6 +73,7 @@ namespace Entatea.Tests.Resolvers
 
         [TestCase(typeof(SqlServerDataContext))]
         [TestCase(typeof(MySqlDataContext))]
+        [TestCase(typeof(SqliteDataContext))]
         public async Task Read_Test_Resolver_With_Default_Resolver(Type dataContextType)
         {
             // Arrange
@@ -87,6 +89,7 @@ namespace Entatea.Tests.Resolvers
 
         [TestCase(typeof(SqlServerDataContext))]
         [TestCase(typeof(MySqlDataContext))]
+        [TestCase(typeof(SqliteDataContext))]
         public async Task Read_Test_Resolver_With_Underscore_Resolver(Type dataContextType)
         {
             // Arrange

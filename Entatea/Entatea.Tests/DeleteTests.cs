@@ -4,6 +4,7 @@ using System.Threading.Tasks;
 
 using Entatea.InMemory;
 using Entatea.MySql;
+using Entatea.Sqlite;
 using Entatea.SqlServer;
 
 using Entatea.Tests.Helpers;
@@ -22,6 +23,7 @@ namespace Entatea.Tests
         [TestCase(typeof(InMemoryDataContext))]
         [TestCase(typeof(SqlServerDataContext))]
         [TestCase(typeof(MySqlDataContext))]
+        [TestCase(typeof(SqliteDataContext))]
         public async Task Delete_Entity(Type dataContextType)
         {
             // Arrange
@@ -42,6 +44,7 @@ namespace Entatea.Tests
         [TestCase(typeof(InMemoryDataContext))]
         [TestCase(typeof(SqlServerDataContext))]
         [TestCase(typeof(MySqlDataContext))]
+        [TestCase(typeof(SqliteDataContext))]
         public async Task Delete_Entity_Single_Typed_Argument(Type dataContextType)
         {
             // Arrange
@@ -61,6 +64,7 @@ namespace Entatea.Tests
         [TestCase(typeof(InMemoryDataContext))]
         [TestCase(typeof(SqlServerDataContext))]
         [TestCase(typeof(MySqlDataContext))]
+        [TestCase(typeof(SqliteDataContext))]
         public async Task Delete_List_Of_Entities(Type dataContextType)
         {
             // Arrange
@@ -85,6 +89,7 @@ namespace Entatea.Tests
         [TestCase(typeof(InMemoryDataContext))]
         [TestCase(typeof(SqlServerDataContext))]
         [TestCase(typeof(MySqlDataContext))]
+        [TestCase(typeof(SqliteDataContext))]
         public async Task Delete_List_No_Conditions(Type dataContextType)
         {
             // Arrange
@@ -106,6 +111,7 @@ namespace Entatea.Tests
         [TestCase(typeof(InMemoryDataContext))]
         [TestCase(typeof(SqlServerDataContext))]
         [TestCase(typeof(MySqlDataContext))]
+        [TestCase(typeof(SqliteDataContext))]
         public async Task Delete_List_Non_Existing_Conditions(Type dataContextType)
         {
             // Arrange

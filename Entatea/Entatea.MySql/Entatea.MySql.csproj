@@ -6,7 +6,8 @@
     <Authors>Malcolm Johnston</Authors>
     <PackageLicenseExpression>MIT</PackageLicenseExpression>
     <PackageProjectUrl>https://github.com/MalcolmJohnston/Entatea</PackageProjectUrl>
-    <Version>1.0.3</Version>
+    <Version>1.0.5</Version>
+    <AssemblyVersion>1.0.4.0</AssemblyVersion>
   </PropertyGroup>
 
   <ItemGroup>

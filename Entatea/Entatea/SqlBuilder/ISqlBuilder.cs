@@ -26,6 +26,8 @@ namespace Entatea.SqlBuilder
 
         string EncapsulateSelect(PropertyMap propertyMap);
 
+        string CallConcatenate(params object[] parameters);
+
         string GetSelectCountSql<T>(IEnumerable<IPredicate> whereConditions) where T : class;
 
         string GetSelectAllSql<T>() where T : class;

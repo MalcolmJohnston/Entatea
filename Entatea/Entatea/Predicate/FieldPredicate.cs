@@ -27,15 +27,15 @@ namespace Entatea.Predicate
 
             if (this.Operator == Operator.Contains)
             {
-                return $"{columnName} {GetOperatorString()} CONCAT('%', @p{parameterIndex}, '%')";
+                return $"{columnName} {GetOperatorString()} {sqlBuilder.CallConcatenate("'%'", $"@p{parameterIndex}", "'%'")}";
             }
             else if (this.Operator == Operator.StartsWith)
             {
-                return $"{columnName} {GetOperatorString()} CONCAT(@p{parameterIndex}, '%')";
+                return $"{columnName} {GetOperatorString()} {sqlBuilder.CallConcatenate($"@p{parameterIndex}", "'%'")}";
             }
             else if (this.Operator == Operator.EndsWith)
             {
-                return $"{columnName} {GetOperatorString()} CONCAT('%', @p{parameterIndex})";
+                return $"{columnName} {GetOperatorString()} {sqlBuilder.CallConcatenate("'%'", $"@p{parameterIndex}")}";
             }
             return $"{columnName} {GetOperatorString()} @p{parameterIndex}";
         }

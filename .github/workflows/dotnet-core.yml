@@ -42,6 +42,13 @@ jobs:
         PROJECT_FILE_PATH: ./Entatea/Entatea.MySql/Entatea.MySql.csproj
         # API key to authenticate with NuGet server
         NUGET_KEY: ${{ secrets.NUGET_API_KEY }}
+    - name: Publish Entatea.Sqlite to NuGet
+      uses: brandedoutcast/publish-nuget@v2.5.5
+      with:
+        # Filepath of the project to be packaged, relative to root of repository
+        PROJECT_FILE_PATH: ./Entatea/Entatea.Sqlite/Entatea.Sqlite.csproj
+        # API key to authenticate with NuGet server
+        NUGET_KEY: ${{ secrets.NUGET_API_KEY }}
     - name: Publish Entatea.SqlServer to NuGet
       uses: brandedoutcast/publish-nuget@v2.5.5
       with:
@@ -49,6 +56,3 @@ jobs:
         PROJECT_FILE_PATH: ./Entatea/Entatea.SqlServer/Entatea.SqlServer.csproj
         # API key to authenticate with NuGet server
         NUGET_KEY: ${{ secrets.NUGET_API_KEY }}
-    
-    
-    

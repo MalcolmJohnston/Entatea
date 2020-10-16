@@ -6,6 +6,7 @@ using System.Threading.Tasks;
 using Entatea.InMemory;
 using Entatea.MySql;
 using Entatea.SqlServer;
+using Entatea.Sqlite;
 
 using Entatea.Tests.Helpers;
 using Entatea.Tests.Entities;
@@ -23,6 +24,7 @@ namespace Entatea.Tests
         [TestCase(typeof(InMemoryDataContext))]
         [TestCase(typeof(SqlServerDataContext))]
         [TestCase(typeof(MySqlDataContext))]
+        [TestCase(typeof(SqliteDataContext))]
         public async Task Read_All_With_Identity(Type dataContextType)
         {
             // Arrange
@@ -46,6 +48,7 @@ namespace Entatea.Tests
         [TestCase(typeof(InMemoryDataContext))]
         [TestCase(typeof(SqlServerDataContext))]
         [TestCase(typeof(MySqlDataContext))]
+        [TestCase(typeof(SqliteDataContext))]
         public async Task Read_All_With_Assigned(Type dataContextType)
         {
             // Arrange
@@ -66,6 +69,7 @@ namespace Entatea.Tests
         [TestCase(typeof(InMemoryDataContext))]
         [TestCase(typeof(SqlServerDataContext))]
         [TestCase(typeof(MySqlDataContext))]
+        [TestCase(typeof(SqliteDataContext))]
         public async Task Read_By_Id_With_Identity_Property_Bag(Type dataContextType)
         {
             // Arrange
@@ -89,6 +93,7 @@ namespace Entatea.Tests
         [TestCase(typeof(InMemoryDataContext))]
         [TestCase(typeof(SqlServerDataContext))]
         [TestCase(typeof(MySqlDataContext))]
+        [TestCase(typeof(SqliteDataContext))]
         public async Task Read_By_Id_With_Identity_Single_Typed_Argument(Type dataContextType)
         {
             // Arrange
@@ -112,6 +117,7 @@ namespace Entatea.Tests
         [TestCase(typeof(InMemoryDataContext))]
         [TestCase(typeof(SqlServerDataContext))]
         [TestCase(typeof(MySqlDataContext))]
+        [TestCase(typeof(SqliteDataContext))]
         public async Task Read_By_Id_With_Assigned_Property_Bag(Type dataContextType)
         {
             // Arrange
@@ -134,6 +140,7 @@ namespace Entatea.Tests
         [TestCase(typeof(InMemoryDataContext))]
         [TestCase(typeof(SqlServerDataContext))]
         [TestCase(typeof(MySqlDataContext))]
+        [TestCase(typeof(SqliteDataContext))]
         public async Task Read_By_Id_With_Assigned_Single_Typed_Argument(Type dataContextType)
         {
             // Arrange
@@ -156,6 +163,7 @@ namespace Entatea.Tests
         [TestCase(typeof(InMemoryDataContext))]
         [TestCase(typeof(SqlServerDataContext))]
         [TestCase(typeof(MySqlDataContext))]
+        [TestCase(typeof(SqliteDataContext))]
         public async Task Read_By_Where_Condition(Type dataContextType)
         {
             // Arrange
@@ -180,6 +188,7 @@ namespace Entatea.Tests
         [TestCase(typeof(InMemoryDataContext))]
         [TestCase(typeof(SqlServerDataContext))]
         [TestCase(typeof(MySqlDataContext))]
+        [TestCase(typeof(SqliteDataContext))]
         public async Task Read_By_Where_Condition_Implied_In(Type dataContextType)
         {
             // Arrange
@@ -204,6 +213,7 @@ namespace Entatea.Tests
         [TestCase(typeof(InMemoryDataContext))]
         [TestCase(typeof(SqlServerDataContext))]
         [TestCase(typeof(MySqlDataContext))]
+        [TestCase(typeof(SqliteDataContext))]
         public async Task Read_By_Where_Condition_Implied_Ins(Type dataContextType)
         {
             // Arrange
@@ -234,6 +244,7 @@ namespace Entatea.Tests
         [TestCase(typeof(InMemoryDataContext))]
         [TestCase(typeof(SqlServerDataContext))]
         [TestCase(typeof(MySqlDataContext))]
+        [TestCase(typeof(SqliteDataContext))]
         public async Task Read_By_Where_Condition_Implied_In_And_Equal(Type dataContextType)
         {
             // Arrange

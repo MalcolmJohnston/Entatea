@@ -22,7 +22,7 @@ namespace Entatea.Tests.Configuration
                         .AddUserSecrets<TestConfiguration>()
                         .AddEnvironmentVariables()
                         .Build()
-                        .GetSection("TestadalTests")
+                        .GetSection("EntateaTests")
                         .Bind(config);
                 }
             }

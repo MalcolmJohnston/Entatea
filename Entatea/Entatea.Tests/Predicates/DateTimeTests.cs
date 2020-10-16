@@ -7,6 +7,7 @@ using NUnit.Framework;
 using Entatea.InMemory;
 using Entatea.MySql;
 using static Entatea.Predicate.PredicateBuilder;
+using Entatea.Sqlite;
 using Entatea.SqlServer;
 
 using Entatea.Tests.Helpers;
@@ -20,6 +21,7 @@ namespace Entatea.Tests.Predicates
         [TestCase(typeof(InMemoryDataContext))]
         [TestCase(typeof(SqlServerDataContext))]
         [TestCase(typeof(MySqlDataContext))]
+        [TestCase(typeof(SqliteDataContext))]
         public async Task Read_With_DateTime_Equal_Predicate(Type dataContextType)
         {
             // Arrange
@@ -39,6 +41,7 @@ namespace Entatea.Tests.Predicates
         [TestCase(typeof(InMemoryDataContext))]
         [TestCase(typeof(SqlServerDataContext))]
         [TestCase(typeof(MySqlDataContext))]
+        [TestCase(typeof(SqliteDataContext))]
         public async Task Read_With_DateTime_NotEqual_Predicate(Type dataContextType)
         {
             // Arrange
@@ -58,6 +61,7 @@ namespace Entatea.Tests.Predicates
         [TestCase(typeof(InMemoryDataContext))]
         [TestCase(typeof(SqlServerDataContext))]
         [TestCase(typeof(MySqlDataContext))]
+        [TestCase(typeof(SqliteDataContext))]
         public async Task Read_With_DateTime_In_Predicate(Type dataContextType)
         {
             // Arrange
@@ -84,6 +88,7 @@ namespace Entatea.Tests.Predicates
         [TestCase(typeof(InMemoryDataContext))]
         [TestCase(typeof(SqlServerDataContext))]
         [TestCase(typeof(MySqlDataContext))]
+        [TestCase(typeof(SqliteDataContext))]
         public async Task Read_With_DateTime_NotIn_Predicate(Type dataContextType)
         {
             // Arrange
@@ -110,6 +115,7 @@ namespace Entatea.Tests.Predicates
         [TestCase(typeof(InMemoryDataContext))]
         [TestCase(typeof(SqlServerDataContext))]
         [TestCase(typeof(MySqlDataContext))]
+        [TestCase(typeof(SqliteDataContext))]
         public async Task Read_With_DateTime_GreaterThan_Predicate(Type dataContextType)
         {
             // Arrange
@@ -135,6 +141,7 @@ namespace Entatea.Tests.Predicates
         [TestCase(typeof(InMemoryDataContext))]
         [TestCase(typeof(SqlServerDataContext))]
         [TestCase(typeof(MySqlDataContext))]
+        [TestCase(typeof(SqliteDataContext))]
         public async Task Read_With_DateTime_GreaterThanOrEqual_Predicate(Type dataContextType)
         {
             // Arrange
@@ -160,6 +167,7 @@ namespace Entatea.Tests.Predicates
         [TestCase(typeof(InMemoryDataContext))]
         [TestCase(typeof(SqlServerDataContext))]
         [TestCase(typeof(MySqlDataContext))]
+        [TestCase(typeof(SqliteDataContext))]
         public async Task Read_With_DateTime_LessThanPredicate(Type dataContextType)
         {
             // Arrange
@@ -185,6 +193,7 @@ namespace Entatea.Tests.Predicates
         [TestCase(typeof(InMemoryDataContext))]
         [TestCase(typeof(SqlServerDataContext))]
         [TestCase(typeof(MySqlDataContext))]
+        [TestCase(typeof(SqliteDataContext))]
         public async Task Read_With_DateTime_LessThanOrEqual_Predicate(Type dataContextType)
         {
             // Arrange

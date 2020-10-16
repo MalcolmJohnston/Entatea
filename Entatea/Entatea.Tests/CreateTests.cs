@@ -4,6 +4,7 @@ using System.Threading.Tasks;
 using Entatea.InMemory;
 using Entatea.MySql;
 using Entatea.SqlServer;
+using Entatea.Sqlite;
 
 using Entatea.Tests.Helpers;
 using Entatea.Tests.Entities;
@@ -21,7 +22,7 @@ namespace Entatea.Tests
         [TestCase(typeof(InMemoryDataContext))]
         [TestCase(typeof(SqlServerDataContext))]
         [TestCase(typeof(MySqlDataContext))]
-
+        [TestCase(typeof(SqliteDataContext))]
         public async Task Insert_With_Identity(Type dataContextType)
         {
             // Arrange
@@ -43,6 +44,7 @@ namespace Entatea.Tests
         [TestCase(typeof(InMemoryDataContext))]
         [TestCase(typeof(SqlServerDataContext))]
         [TestCase(typeof(MySqlDataContext))]
+        [TestCase(typeof(SqliteDataContext))]
         public async Task Insert_With_Assigned_Key(Type dataContextType)
         {
             // Arrange
@@ -62,6 +64,7 @@ namespace Entatea.Tests
         [TestCase(typeof(InMemoryDataContext))]
         [TestCase(typeof(SqlServerDataContext))]
         [TestCase(typeof(MySqlDataContext))]
+        [TestCase(typeof(SqliteDataContext))]
         public async Task Insert_With_Sequential_Key(Type dataContextType)
         {
             // Arrange
@@ -83,6 +86,7 @@ namespace Entatea.Tests
         [TestCase(typeof(InMemoryDataContext))]
         [TestCase(typeof(SqlServerDataContext))]
         [TestCase(typeof(MySqlDataContext))]
+        [TestCase(typeof(SqliteDataContext))]
         public async Task Insert_With_Composite_Key_One_Assigned_And_One_Sequential(Type dataContextType)
         {
             // Arrange
@@ -104,6 +108,7 @@ namespace Entatea.Tests
         [TestCase(typeof(InMemoryDataContext))]
         [TestCase(typeof(SqlServerDataContext))]
         [TestCase(typeof(MySqlDataContext))]
+        [TestCase(typeof(SqliteDataContext))]
         public async Task Insert_With_Composite_Key_Two_Assigned_And_One_Sequential(Type dataContextType)
         {
             // Arrange
@@ -128,6 +133,7 @@ namespace Entatea.Tests
         [TestCase(typeof(InMemoryDataContext))]
         [TestCase(typeof(SqlServerDataContext))]
         [TestCase(typeof(MySqlDataContext))]
+        [TestCase(typeof(SqliteDataContext))]
         public async Task Insert_With_Datestamp(Type dataContextType)
         {
             // Arrange
@@ -147,6 +153,7 @@ namespace Entatea.Tests
         [TestCase(typeof(InMemoryDataContext))]
         [TestCase(typeof(SqlServerDataContext))]
         [TestCase(typeof(MySqlDataContext))]
+        [TestCase(typeof(SqliteDataContext))]
         public async Task Insert_With_Soft_Delete(Type dataContextType)
         {
             // Arrange

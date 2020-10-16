@@ -7,6 +7,7 @@ using Entatea.InMemory;
 using Entatea.MySql;
 using Entatea.Resolvers;
 using Entatea.SqlServer;
+using Entatea.Sqlite;
 
 namespace Entatea.Tests.Helpers
 {
@@ -44,6 +45,14 @@ namespace Entatea.Tests.Helpers
                     tableNameResolver ?? new DefaultTableNameResolver(),
                     columnNameResolver ?? new DefaultColumnNameResolver());
             }
+            else if (typeof(SqliteDataContext).IsAssignableFrom(dataContextType))
+            {
+                SqliteTestHelper.CreateTestDatabase(TestContext.CurrentContext.Test.FullName);
+                return new SqliteDataContext(
+                    SqliteTestHelper.GetTestConnectionString(TestContext.CurrentContext.Test.FullName),
+                    tableNameResolver ?? new DefaultTableNameResolver(),
+                    columnNameResolver ?? new DefaultColumnNameResolver());
+            }
             else
             {
                 throw new ArgumentException($"Type {dataContextType} is not supported, add support in {nameof(Helpers.DataContextProvider)}.cs");
@@ -60,6 +69,10 @@ namespace Entatea.Tests.Helpers
             else if (typeof(MySqlDataContext).IsAssignableFrom(dataContextType))
             {
                 MySqlTestHelper.DeleteTestDatabase(TestContext.CurrentContext.Test.FullName);
+            }
+            else if(typeof(SqliteDataContext).IsAssignableFrom(dataContextType))
+            {
+                SqliteTestHelper.DeleteTestDatabase(TestContext.CurrentContext.Test.FullName);
             }
         }
     }
