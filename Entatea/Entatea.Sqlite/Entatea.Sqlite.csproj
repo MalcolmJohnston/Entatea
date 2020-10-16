@@ -2,6 +2,11 @@
 
   <PropertyGroup>
     <TargetFramework>netstandard2.0</TargetFramework>
+    <Authors>Malcolm Johnston</Authors>
+    <Company></Company>
+    <Product>Entatea.Sqlite</Product>
+    <PackageLicenseExpression>MIT</PackageLicenseExpression>
+    <PackageProjectUrl>https://github.com/MalcolmJohnston/Entatea</PackageProjectUrl>
   </PropertyGroup>
 
   <ItemGroup>
