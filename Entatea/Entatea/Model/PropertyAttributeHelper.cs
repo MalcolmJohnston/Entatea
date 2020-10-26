@@ -35,6 +35,17 @@ namespace Entatea.Model
             return null;
         }
 
+        internal static dynamic GetDiscriminator(PropertyInfo pi)
+        {
+            dynamic attr = GetAttribute(pi, "DiscriminatorAttribute");
+            if (attr != null)
+            {
+                return attr;
+            }
+
+            return null;
+        }
+
         internal static bool IsEditable(PropertyInfo pi)
         {
             dynamic attr = GetAttribute(pi, "EditableAttribute");

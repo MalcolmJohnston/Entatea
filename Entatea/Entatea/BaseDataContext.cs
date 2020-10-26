@@ -64,6 +64,17 @@ namespace Entatea
                         classMap.SoftDeleteProperty.ValueOnInsert);
                 }
 
+                // set discriminator properties
+                if(classMap.DiscriminatorProperties.Any())
+                {
+                    foreach (PropertyMap discriminatorProperty in classMap.DiscriminatorProperties)
+                    {
+                        discriminatorProperty.PropertyInfo.SetValue(
+                            entity,
+                            discriminatorProperty.ValueOnInsert);
+                    }
+                }
+
                 // execute the insert
                 var row = (await conn.QueryAsync(sqlProvider.GetInsertSql<T>(), entity).ConfigureAwait(false)).SingleOrDefault();
 
@@ -109,6 +120,19 @@ namespace Entatea
 
         public async Task<IEnumerable<T>> ReadAll<T>() where T : class
         {
+            // check for discriminator predicates
+            ClassMap classMap = ClassMapper.GetClassMap<T>();
+            if (classMap.DiscriminatorProperties.Any())
+            {
+                IList<IPredicate> predicates = classMap.GetDiscriminatorPredicates<T>();
+                using (IDbConnection conn = this.connectionProvider.GetConnection())
+                {
+                    return await conn.QueryAsync<T>(
+                        this.sqlProvider.GetSelectWhereSql<T>(predicates),
+                        predicates.GetParameters()).ConfigureAwait(false);
+                }
+            }
+
             using (IDbConnection conn = this.connectionProvider.GetConnection())
             {
                 return await conn.QueryAsync<T>(sqlProvider.GetSelectAllSql<T>())
@@ -147,13 +171,13 @@ namespace Entatea
 
             // coalesce all properties into update dictionary
             IDictionary<string, object> updDictionary = classMap.CoalesceToDictionary(properties);
-            
+
             // coalesce key properties
             IDictionary<string, object> keyDictionary = classMap.CoalesceKeyToDictionary(properties);
 
             // remove key properties from update dictionary
             keyDictionary.Keys.ToList().ForEach(x => updDictionary.Remove(x));
-            
+
             // get the parameters for the WHERE clause
             IDictionary<string, object> keyParameters = classMap.ValidateKeyProperties<T>(properties).GetParameters();
 
@@ -207,6 +231,10 @@ namespace Entatea
 
         private async Task<IEnumerable<T>> ReadList<T>(IEnumerable<IPredicate> predicates) where T : class
         {
+            // add discriminator predicates
+            ClassMap classMap = ClassMapper.GetClassMap<T>();
+            predicates = classMap.AddDiscriminatorPredicates<T>(predicates);
+
             using (IDbConnection conn = this.connectionProvider.GetConnection())
             {
                 return await conn.QueryAsync<T>(
@@ -220,6 +248,10 @@ namespace Entatea
             // create the paging variables
             int firstRow = ((pageNumber - 1) * pageSize) + 1;
             int lastRow = firstRow + (pageSize - 1);
+
+            // add discriminator predicates
+            ClassMap classMap = ClassMapper.GetClassMap<T>();
+            predicates = classMap.AddDiscriminatorPredicates<T>(predicates);
 
             // get the parameters
             var parameters = predicates.GetParameters();
@@ -251,6 +283,10 @@ namespace Entatea
             {
                 throw new ArgumentException("Please pass where conditions.");
             }
+
+            // add discriminator predicates
+            ClassMap classMap = ClassMapper.GetClassMap<T>();
+            predicates = classMap.AddDiscriminatorPredicates<T>(predicates);
 
             using (IDbConnection conn = this.connectionProvider.GetConnection())
             {

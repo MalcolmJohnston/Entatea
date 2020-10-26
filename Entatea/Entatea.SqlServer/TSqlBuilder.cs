@@ -57,7 +57,7 @@ namespace Entatea.SqlServer
             // add identity column outputs
             if (classMap.HasIdentityKey)
             {
-                sb.Append($" OUTPUT inserted.{this.GetColumnIdentifier(classMap.IdentityKey)}");
+                sb.Append($" OUTPUT inserted.{this.EncapsulateSelect(classMap.IdentityKey)}");
             }
 
             // add parameterised values

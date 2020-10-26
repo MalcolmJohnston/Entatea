@@ -115,6 +115,17 @@ namespace Entatea.InMemory
                     classMap.SoftDeleteProperty.ValueOnInsert);
             }
 
+            // set discriminator properties
+            if (classMap.DiscriminatorProperties.Any())
+            {
+                foreach (PropertyMap discriminatorProperty in classMap.DiscriminatorProperties)
+                {
+                    discriminatorProperty.PropertyInfo.SetValue(
+                        entity,
+                        discriminatorProperty.ValueOnInsert);
+                }
+            }
+
             // finally add the item to the list
             list.Add(entity);
 

@@ -160,11 +160,39 @@ namespace Entatea.Tests
             IDataContext dataContext = DataContextProvider.SetupDataContext(dataContextType);
 
             // Act
-            SoftDelete softDelete = await dataContext.Create<SoftDelete>(new SoftDelete()).ConfigureAwait(false);
+            SoftDelete softDelete = await dataContext.Create(new SoftDelete()).ConfigureAwait(false);
 
             // Assert
             Assert.Greater(softDelete.SoftDeleteId, 0);
             Assert.AreEqual(1, softDelete.RecordStatus);
+        }
+
+        /// <summary>
+        /// Test that we can create records with a discriminator attribute and their discriminator property is set accordingly
+        /// </summary>
+        /// <param name="dataContextType"></param>
+        /// <returns></returns>
+        [TestCase(typeof(InMemoryDataContext))]
+        [TestCase(typeof(SqlServerDataContext))]
+        [TestCase(typeof(MySqlDataContext))]
+        [TestCase(typeof(SqliteDataContext))]
+        public async Task Insert_With_Discriminator(Type dataContextType)
+        {
+            // Arrange
+            IDataContext dataContext = DataContextProvider.SetupDataContext(dataContextType);
+
+            // Act
+            DiscriminatorContact contact = await dataContext.Create(new DiscriminatorContact() { Name = "Paul" });
+            DiscriminatorCompany company = await dataContext.Create(new DiscriminatorCompany() { Name = "The Beatles" });
+
+            // Assert
+            Assert.Greater(contact.ContactId, 0);
+            Assert.AreEqual(DiscriminatorType.Contact, contact.DiscriminatorType);
+            Assert.AreEqual("Paul", contact.Name);
+
+            Assert.Greater(company.CompanyId, 0);
+            Assert.AreEqual(DiscriminatorType.Company, company.DiscriminatorType);
+            Assert.AreEqual("The Beatles", company.Name);
         }
     }
 }

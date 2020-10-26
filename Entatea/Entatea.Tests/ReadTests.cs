@@ -265,5 +265,33 @@ namespace Entatea.Tests
             // Assert
             Assert.That(new[] { "CHI" }, Is.EquivalentTo(cities.Select(x => x.CityCode)));
         }
+
+        /// <summary>
+        /// Tests that we read data from the same table, we only get the data for the given discriminator
+        /// </summary>
+        /// <param name="dataContextType"></param>
+        /// <returns></returns>
+        [TestCase(typeof(InMemoryDataContext))]
+        [TestCase(typeof(SqlServerDataContext))]
+        [TestCase(typeof(MySqlDataContext))]
+        [TestCase(typeof(SqliteDataContext))]
+        public async Task Read_Discriminator_Entities(Type dataContextType)
+        {
+            // Arrange
+            IDataContext dataContext = DataContextProvider.SetupDataContext(dataContextType);
+            await dataContext.Create(new DiscriminatorContact() { Name = "Paul" });
+            await dataContext.Create(new DiscriminatorContact() { Name = "John" });
+            
+            await dataContext.Create(new DiscriminatorCompany() { Name = "Apple Music Ltd" });
+            await dataContext.Create(new DiscriminatorCompany() { Name = "Linda McCartneys Ltd" });
+            await dataContext.Create(new DiscriminatorCompany() { Name = "Stella McCartney Fashion Ltd" });
+
+            // Act
+            IEnumerable<DiscriminatorCompany> companies = await dataContext.ReadAll<DiscriminatorCompany>();
+
+            // Assert
+            Assert.AreEqual(3, companies.Count());
+            Assert.That(companies.Select(x => x.DiscriminatorType), Is.All.EqualTo(DiscriminatorType.Company));
+        }
     }
 }

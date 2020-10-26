@@ -4,6 +4,7 @@ using System.Threading.Tasks;
 
 using Entatea.InMemory;
 using Entatea.MySql;
+using static Entatea.Predicate.PredicateBuilder;
 using Entatea.Sqlite;
 using Entatea.SqlServer;
 
@@ -131,6 +132,72 @@ namespace Entatea.Tests
                     Area = "Hampshire"
                 });
             });
+        }
+
+        /// <summary>
+        /// Test that we can soft delete a single entity.
+        /// </summary>
+        [TestCase(typeof(InMemoryDataContext))]
+        [TestCase(typeof(SqlServerDataContext))]
+        [TestCase(typeof(MySqlDataContext))]
+        [TestCase(typeof(SqliteDataContext))]
+        public async Task Soft_Delete_Entity(Type dataContextType)
+        {
+            // Arrange
+            IDataContext dataContext = DataContextProvider.SetupDataContext(dataContextType);
+            SoftDelete softDelete = await dataContext.Create(new SoftDelete());
+
+            // Act
+            await dataContext.Delete<SoftDelete>(new { softDelete.SoftDeleteId, });
+
+            // Assert
+            Assert.IsNull(await dataContext.Read<SoftDelete>(new { softDelete.SoftDeleteId }));
+        }
+
+        /// <summary>
+        /// Test that we can soft delete a multiple entities using a where condition.
+        /// </summary>
+        [TestCase(typeof(InMemoryDataContext))]
+        [TestCase(typeof(SqlServerDataContext))]
+        [TestCase(typeof(MySqlDataContext))]
+        [TestCase(typeof(SqliteDataContext))]
+        public async Task Soft_Delete_List_Of_Entities(Type dataContextType)
+        {
+            // Arrange
+            IDataContext dataContext = DataContextProvider.SetupDataContext(dataContextType);
+            SoftDelete sd1 = await dataContext.Create(new SoftDelete());
+            SoftDelete sd2 = await dataContext.Create(new SoftDelete());
+            SoftDelete sd3 = await dataContext.Create(new SoftDelete());
+
+            // Act
+            await dataContext.DeleteList<SoftDelete>(
+                In<SoftDelete>(x => x.SoftDeleteId, new int[] { sd2.SoftDeleteId, sd3.SoftDeleteId }));
+
+            // Assert
+            Assert.AreEqual(0, (await dataContext.ReadList<SoftDelete>(
+                In<SoftDelete>(x => x.SoftDeleteId, new int[] { sd2.SoftDeleteId, sd3.SoftDeleteId }))).Count());
+            Assert.AreEqual(1, (await dataContext.ReadAll<SoftDelete>()).Count());
+        }
+
+        /// <summary>
+        /// Test that when we have two items with the same name and different discriminator
+        /// When we delete by name the discriminator is taken into account and only the correct record is deleted
+        /// </summary>
+        /// <param name="dataContextType"></param>
+        /// <returns></returns>
+        public async Task Delete_Discriminator_Entity(Type dataContextType)
+        {
+            // Arrange
+            IDataContext dataContext = DataContextProvider.SetupDataContext(dataContextType);
+            DiscriminatorContact contact = await dataContext.Create(new DiscriminatorContact() { Name = "Paul" });
+            DiscriminatorCompany company = await dataContext.Create(new DiscriminatorCompany() { Name = "Paul" });
+
+            // Act
+            await dataContext.DeleteList<DiscriminatorContact>(Equal<DiscriminatorContact>(x => x.Name, "Paul"));
+
+            // Assert
+            Assert.AreEqual(0, (await dataContext.ReadList<DiscriminatorContact>(In<DiscriminatorContact>(x => x.Name, "Paul"))).Count());
+            Assert.AreEqual(1, (await dataContext.ReadList<DiscriminatorCompany>(In<DiscriminatorCompany>(x => x.Name, "Paul"))).Count());
         }
     }
 }

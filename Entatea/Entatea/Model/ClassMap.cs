@@ -63,19 +63,22 @@ namespace Entatea.Model
             this.RequiredProperties = this.AllProperties.Values.Where(x => x.IsRequired).ToList();
 
             // set the insertable properties
-            this.InsertableProperties = this.AllProperties.Values.Where(x => x.KeyType != KeyType.Identity &&
-                                                                             x.IsReadOnly == false)
+            this.InsertableProperties = this.AllProperties.Values.Where(x => x.KeyType != KeyType.Identity)
                                                                  .ToList();
 
             // set the updateable properties
             this.UpdateableProperties = this.AllProperties.Values.Where(x => x.KeyType == KeyType.NotAKey &&
-                                                                                    x.IsEditable &&
-                                                                                    !x.IsSoftDelete &&
-                                                                                    !x.IsDateStamp)
+                                                                                x.IsEditable &&
+                                                                                !x.IsSoftDelete &&
+                                                                                !x.IsDateStamp &&
+                                                                                !x.IsDiscriminator)
                                                                         .ToList();
 
             // set the date stamp properties
             this.DateStampProperties = this.AllProperties.Values.Where(x => x.IsDateStamp).ToList();
+
+            // set the discriminator properties
+            this.DiscriminatorProperties = this.AllProperties.Values.Where(x => x.IsDiscriminator).ToList();
 
             // set the default sort order
             this.DefaultSortOrder = this.AllKeys.Select(x => new { Key = x.PropertyName, Value = SortOrder.Ascending })
@@ -131,6 +134,8 @@ namespace Entatea.Model
         public IList<PropertyMap> DateStampProperties { get; private set; }
 
         public PropertyMap SoftDeleteProperty { get; private set; }
+
+        public IList<PropertyMap> DiscriminatorProperties { get; private set; }
 
         public bool IsSoftDelete
         {
@@ -371,17 +376,42 @@ namespace Entatea.Model
 
                 if (propertyMap.PropertyInfo.PropertyType.IsAssignableFrom(valueType))
                 {
-                    IPredicate op = Predicate.PredicateBuilder.Equal<T>(propertyName, whereDict[propertyName]);
+                    IPredicate op = PredicateBuilder.Equal<T>(propertyName, whereDict[propertyName]);
                     whereOperations.Add(op);
                 }
                 else
                 {
-                    IPredicate op = Predicate.PredicateBuilder.In<T>(propertyName, (System.Collections.IEnumerable)whereDict[propertyName]);
+                    IPredicate op = PredicateBuilder.In<T>(propertyName, (System.Collections.IEnumerable)whereDict[propertyName]);
                     whereOperations.Add(op);
                 }
             }
 
             return whereOperations;
+        }
+
+        public IList<IPredicate> AddDiscriminatorPredicates<T>(IEnumerable<IPredicate> predicates) where T : class
+        {
+            List<IPredicate> newPredicates = new List<IPredicate>(predicates);
+            newPredicates.AddRange(this.GetDiscriminatorPredicates<T>());
+            return newPredicates;
+        }
+
+        private IList<IPredicate> discriminatorPredicates = null;
+        public IList<IPredicate> GetDiscriminatorPredicates<T>() where T : class
+        {
+            if (discriminatorPredicates == null)
+            {
+                IList<IPredicate> predicates = new List<IPredicate>();
+                if (this.DiscriminatorProperties.Any())
+                {
+                    foreach (PropertyMap discriminatorProperty in this.DiscriminatorProperties)
+                    {
+                        predicates.Add(PredicateBuilder.Equal<T>(discriminatorProperty.PropertyName, discriminatorProperty.ValueOnInsert));
+                    }
+                }
+                discriminatorPredicates = predicates;
+            }
+            return discriminatorPredicates;
         }
     }
 }

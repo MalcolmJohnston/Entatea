@@ -50,7 +50,12 @@ namespace Entatea.Model
         public bool IsSoftDelete { get; private set; }
 
         /// <summary>
-        /// The value the property should be set to on insert (only applies if IsSoftDelete)
+        /// Gets a value indicating whether this instance is a discriminator.
+        /// </summary>
+        public bool IsDiscriminator { get; private set; }
+
+        /// <summary>
+        /// The value the property should be set to on insert (only applies if IsSoftDelete, or IsDiscriminator)
         /// </summary>
         public object ValueOnInsert { get; private set; }
 
@@ -85,6 +90,12 @@ namespace Entatea.Model
             bool isEditable = PropertyAttributeHelper.IsEditable(propertyInfo);
             bool isDateStamp = PropertyAttributeHelper.IsDateStamp(propertyInfo);
             dynamic softDeleteAttribute = PropertyAttributeHelper.GetSoftDelete(propertyInfo);
+            dynamic discriminatorAttribute = PropertyAttributeHelper.GetDiscriminator(propertyInfo);
+
+            if (softDeleteAttribute != null && discriminatorAttribute != null)
+            {
+                throw new ArgumentException("Property cannot be soft delete and discriminator");
+            }
 
             // use the metadata to populate the property map
 
@@ -120,10 +131,15 @@ namespace Entatea.Model
             pm.IsRequired = isRequired;
             pm.IsDateStamp = isDateStamp;
             pm.IsSoftDelete = softDeleteAttribute != null;
+            pm.IsDiscriminator = discriminatorAttribute != null;
             if (pm.IsSoftDelete)
             {
                 pm.ValueOnInsert = softDeleteAttribute.ValueOnInsert;
                 pm.ValueOnDelete = softDeleteAttribute.ValueOnDelete;
+            }
+            if (pm.IsDiscriminator)
+            {
+                pm.ValueOnInsert = discriminatorAttribute.ValueOnInsert;
             }
 
             // set read-only / editable
@@ -139,7 +155,7 @@ namespace Entatea.Model
                 // only take into account editable attribute if isReadOnly = false
                 // i.e. cannot be editable and readonly
                 pm.IsReadOnly = isReadOnly;
-                pm.IsEditable = isReadOnly ? false : isEditable;
+                pm.IsEditable = !isReadOnly && isEditable;
             }
 
             return pm;
