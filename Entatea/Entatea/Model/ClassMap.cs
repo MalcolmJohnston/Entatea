@@ -276,6 +276,23 @@ namespace Entatea.Model
 
             // otherwise, check we have all key properties
             IDictionary<string, object> key = new Dictionary<string, object>();
+
+            
+            // if we have an expando object or dictionary already then find the keys
+            if (propertyBag is IDictionary<string, object>)
+            {
+                IDictionary<string, object> propertyDict = propertyBag as IDictionary<string, object>;
+                foreach (PropertyMap propertyMap in this.AllKeys)
+                {
+                    if (!propertyDict.ContainsKey(propertyMap.PropertyName))
+                    {
+                        throw new ArgumentException($"Failed to find key property {propertyMap.PropertyName}.");
+                    }
+
+                    key[propertyMap.PropertyName] = propertyDict[propertyMap.PropertyName];
+                }
+            }
+
             PropertyInfo[] propertyInfos = propertyBag.GetType().GetProperties();
             foreach (PropertyMap propertyMap in this.AllKeys)
             {
