@@ -187,17 +187,30 @@ namespace Entatea.SqlBuilder
 
             // build list of columns to update
             List<PropertyMap> updateMaps = new List<PropertyMap>();
-            PropertyInfo[] propertyInfos = properties.GetType().GetProperties();
-
-            // loop through our updateable properties and add them as required
-            foreach (PropertyInfo pi in propertyInfos)
+            if (properties is IDictionary<string, object>)
             {
-                PropertyMap propertyMap = classMap.UpdateableProperties.Where(x => x.PropertyName == pi.Name).SingleOrDefault();
-                if (propertyMap != null)
+                var propertyDict = properties as IDictionary<string, object>;
+                foreach (string key in propertyDict.Keys)
                 {
-                    updateMaps.Add(propertyMap);
+                    PropertyMap propertyMap = classMap.UpdateableProperties.SingleOrDefault(x => x.PropertyName == key);
+                    if (propertyMap != null)
+                    {
+                        updateMaps.Add(propertyMap);
+                    }
                 }
             }
+            else
+            {
+                PropertyInfo[] propertyInfos = properties.GetType().GetProperties();
+                foreach (PropertyInfo pi in propertyInfos)
+                {
+                    PropertyMap propertyMap = classMap.UpdateableProperties.SingleOrDefault(x => x.PropertyName == pi.Name);
+                    if (propertyMap != null)
+                    {
+                        updateMaps.Add(propertyMap);
+                    }
+                }
+            }            
 
             // check we have properties to update
             if (updateMaps.Count == 0)

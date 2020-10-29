@@ -233,7 +233,8 @@ namespace Entatea.Model
                     }
                 }
 
-                return dict;
+                // return a copy in case propertyBag object is required in subsequent processing
+                return new Dictionary<string, object>(dict);
             }
 
             IDictionary<string, object> obj = new Dictionary<string, object>();
@@ -289,20 +290,22 @@ namespace Entatea.Model
                         throw new ArgumentException($"Failed to find key property {propertyMap.PropertyName}.");
                     }
 
-                    key[propertyMap.PropertyName] = propertyDict[propertyMap.PropertyName];
+                    key.Add(propertyMap.PropertyName, propertyDict[propertyMap.PropertyName]);
                 }
             }
-
-            PropertyInfo[] propertyInfos = propertyBag.GetType().GetProperties();
-            foreach (PropertyMap propertyMap in this.AllKeys)
+            else
             {
-                PropertyInfo pi = propertyInfos.Where(x => x.Name == propertyMap.PropertyName).SingleOrDefault();
-                if (pi == null)
+                PropertyInfo[] propertyInfos = propertyBag.GetType().GetProperties();
+                foreach (PropertyMap propertyMap in this.AllKeys)
                 {
-                    throw new ArgumentException($"Failed to find key property {propertyMap.PropertyName}.");
-                }
+                    PropertyInfo pi = propertyInfos.Where(x => x.Name == propertyMap.PropertyName).SingleOrDefault();
+                    if (pi == null)
+                    {
+                        throw new ArgumentException($"Failed to find key property {propertyMap.PropertyName}.");
+                    }
 
-                key.Add(propertyMap.PropertyName, pi.GetValue(propertyBag));
+                    key.Add(propertyMap.PropertyName, pi.GetValue(propertyBag));
+                }
             }
 
             return key;

@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.Threading;
 using System.Threading.Tasks;
 
@@ -11,6 +12,8 @@ using Entatea.Tests.Helpers;
 using Entatea.Tests.Entities;
 
 using NUnit.Framework;
+using System.Collections;
+using System.Dynamic;
 
 namespace Entatea.Tests
 {
@@ -32,6 +35,32 @@ namespace Entatea.Tests
 
             // Act
             City basVegas = await dataContext.Update<City>(new { city.CityId, CityName = "Bas Vegas!" });
+
+            // Assert
+            Assert.AreEqual(city.CityId, basVegas.CityId);
+            Assert.AreEqual(city.CityCode, basVegas.CityCode);
+            Assert.AreEqual(city.Area, basVegas.Area);
+            Assert.AreEqual("Bas Vegas!", basVegas.CityName);
+        }
+
+        /// <summary>
+        /// Test that we can update a single editable property with an Expando Object
+        /// </summary>
+        [TestCase(typeof(InMemoryDataContext))]
+        [TestCase(typeof(SqlServerDataContext))]
+        [TestCase(typeof(MySqlDataContext))]
+        [TestCase(typeof(SqliteDataContext))]
+        public async Task Update_Editable_Property_Expando_Object(Type dataContextType)
+        {
+            // Arrange
+            IDataContext dataContext = DataContextProvider.SetupDataContext(dataContextType);
+            City city = await dataContext.Create<City>(new City() { CityCode = "BAS", CityName = "Basingstoke", Area = "Hampshire" });
+
+            // Act
+            IDictionary<string, object> eo = new ExpandoObject();
+            eo.Add(nameof(City.CityId), city.CityId);
+            eo.Add(nameof(City.CityName), "Bas Vegas!");
+            City basVegas = await dataContext.Update<City>(eo);
 
             // Assert
             Assert.AreEqual(city.CityId, basVegas.CityId);
