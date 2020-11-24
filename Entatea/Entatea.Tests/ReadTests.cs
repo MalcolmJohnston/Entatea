@@ -293,5 +293,26 @@ namespace Entatea.Tests
             Assert.AreEqual(3, companies.Count());
             Assert.That(companies.Select(x => x.DiscriminatorType), Is.All.EqualTo(DiscriminatorType.Company));
         }
+
+        /// <summary>
+        /// Test that we can read a row that has a GUID key
+        /// </summary>
+        /// <param name="dataContextType"></param>
+        /// <returns></returns>
+        [TestCase(typeof(InMemoryDataContext))]
+        [TestCase(typeof(SqlServerDataContext))]
+        public async Task Read_With_Guid_Key(Type dataContextType)
+        {
+            // Arrange
+            IDataContext dataContext = DataContextProvider.SetupDataContext(dataContextType);
+            Uid unique1 = await dataContext.Create(new Uid() { Value = "It's Unique" });
+
+            // Act
+            Uid read = await dataContext.Read<Uid>(unique1.Id);
+
+            // Assert
+            Assert.AreEqual(unique1.Id, read.Id);
+            Assert.AreEqual(unique1.Value, read.Value);
+        }
     }
 }

@@ -62,9 +62,14 @@ namespace Entatea.Model
             // set the required properties
             this.RequiredProperties = this.AllProperties.Values.Where(x => x.IsRequired).ToList();
 
-            // set the insertable properties
-            this.InsertableProperties = this.AllProperties.Values.Where(x => x.KeyType != KeyType.Identity)
-                                                                 .ToList();
+            // set the insertable properties which are
+            // all key properties except identity
+            // any datestamp or discriminator properties
+            // any non-key properties that are not readonly
+            this.InsertableProperties = this.AllProperties.Values.Where(x => x.KeyType == KeyType.Guid || x.KeyType == KeyType.Sequential || x.KeyType == KeyType.Assigned)
+                .Union(this.AllProperties.Values.Where(x => x.KeyType == KeyType.NotAKey && (x.IsDateStamp || x.IsDiscriminator)))
+                .Union(this.AllProperties.Values.Where(x => x.KeyType == KeyType.NotAKey && !x.IsReadOnly))
+                .ToList();
 
             // set the updateable properties
             this.UpdateableProperties = this.AllProperties.Values.Where(x => x.KeyType == KeyType.NotAKey &&

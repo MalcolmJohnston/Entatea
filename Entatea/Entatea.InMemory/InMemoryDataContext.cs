@@ -85,16 +85,24 @@ namespace Entatea.InMemory
                 // alias the property info
                 PropertyInfo pi = classMap.IdentityKey.PropertyInfo;
 
-                // initialise the key value to zero for the key type
-                dynamic keyValue = Activator.CreateInstance(pi.PropertyType);
+                // deal with guids
+                if (pi.PropertyType == typeof(Guid))
+                {
+                    pi.SetValue(entity, Guid.NewGuid());
+                }
+                else // assume some form of integer
+                {
+                    // initialise the key value to zero for the key type
+                    dynamic keyValue = Activator.CreateInstance(pi.PropertyType);
 
-                // now get the last item that was added to the list in order of the key
-                T lastIn = linqList.OrderBy($"{pi.Name} DESC").FirstOrDefault();
-                keyValue = lastIn != null ? pi.GetValue(lastIn) : keyValue;
+                    // now get the last item that was added to the list in order of the key
+                    T lastIn = linqList.OrderBy($"{pi.Name} DESC").FirstOrDefault();
+                    keyValue = lastIn != null ? pi.GetValue(lastIn) : keyValue;
 
-                // increment and set the key value on the object
-                Expression incrementExpr = Expression.Increment(Expression.Constant(keyValue));
-                pi.SetValue(entity, Expression.Lambda(incrementExpr).Compile().DynamicInvoke());
+                    // increment and set the key value on the object
+                    Expression incrementExpr = Expression.Increment(Expression.Constant(keyValue));
+                    pi.SetValue(entity, Expression.Lambda(incrementExpr).Compile().DynamicInvoke());
+                }
             }
 
             // now set any date stamp properties

@@ -163,10 +163,14 @@ namespace Entatea.Tests
         {
             // Arrange
             IDataContext dataContext = DataContextProvider.SetupDataContext(dataContextType);
+
+            // a value must be provided for the read-only property when used with an in memory 
+            // data context, SQL based implementations will take the value from the columns 
+            // default value
             ReadOnly readOnly = await dataContext.Create<ReadOnly>(new ReadOnly()
             {
                 Editable = "Hello",
-                ReadOnlyProperty = "World"
+                ReadOnlyProperty = "Default"
             });
 
             // Act
@@ -179,7 +183,7 @@ namespace Entatea.Tests
 
             // Assert
             Assert.AreEqual("Goodbye", readOnly.Editable);
-            Assert.AreEqual("World", readOnly.ReadOnlyProperty);
+            Assert.AreEqual("Default", readOnly.ReadOnlyProperty);
         }
     }
 }

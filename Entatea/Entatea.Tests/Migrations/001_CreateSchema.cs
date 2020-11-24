@@ -48,7 +48,7 @@ namespace Entatea.Tests.Migrations
             Create.Table("ReadOnlies")
                 .WithColumn("SequentialId").AsInt16().PrimaryKey()
                 .WithColumn("Editable").AsString()
-                .WithColumn("ReadOnly").AsString();
+                .WithColumn("ReadOnly").AsString().WithDefaultValue("Default");
 
             Create.Schema("TdDb");
             Create.Table("SoftDeleteTest")

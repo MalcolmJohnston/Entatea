@@ -194,5 +194,30 @@ namespace Entatea.Tests
             Assert.AreEqual(DiscriminatorType.Company, company.DiscriminatorType);
             Assert.AreEqual("The Beatles", company.Name);
         }
+
+        /// <summary>
+        /// Test that we can insert a row that has a GUID key
+        /// </summary>
+        /// <param name="dataContextType"></param>
+        /// <returns></returns>
+        [TestCase(typeof(InMemoryDataContext))]
+        [TestCase(typeof(SqlServerDataContext))]
+        public async Task Insert_With_Guid_Key(Type dataContextType)
+        {
+            // Arrange
+            IDataContext dataContext = DataContextProvider.SetupDataContext(dataContextType);
+
+            // Act
+            Uid unique1 = await dataContext.Create(new Uid() { Value = "It's Unique" });
+            Uid unique2 = await dataContext.Create(new Uid() { Value = "So is this." });
+
+            // Assert
+            Assert.NotNull(unique1.Id);
+            Assert.AreEqual("It's Unique", unique1.Value);
+
+            Assert.NotNull(unique2.Id);
+            Assert.AreEqual("So is this.", unique2.Value);
+            Assert.AreNotEqual(unique1.Id, unique2.Id);
+        }
     }
 }
