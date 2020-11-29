@@ -50,9 +50,9 @@ namespace Entatea.Tests.Migrations
                 .WithColumn("Editable").AsString()
                 .WithColumn("ReadOnly").AsString().WithDefaultValue("Default");
 
-            Create.Schema("TdDb");
+            Create.Schema("Entatea");
             Create.Table("SoftDeleteTest")
-                .InSchema("TdDb")
+                .InSchema("Entatea")
                 .WithColumn("SoftDeleteId").AsInt32().PrimaryKey().Identity()
                 .WithColumn("RecordStatus").AsInt32().NotNullable();
         }

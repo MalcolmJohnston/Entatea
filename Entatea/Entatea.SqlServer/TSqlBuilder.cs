@@ -11,6 +11,8 @@ namespace Entatea.SqlServer
 {
     public class TSqlBuilder : BaseSqlBuilder, ISqlBuilder
     {
+        private readonly string defaultSchema = "dbo";
+
         public TSqlBuilder() : base()
         {
         }
@@ -23,6 +25,16 @@ namespace Entatea.SqlServer
         {
         }
 
+        public TSqlBuilder(
+            ITableNameResolver tableNameResolver,
+            IColumnNameResolver columnNameResolver,
+            string defaultSchema) : base(
+                tableNameResolver,
+                columnNameResolver)
+        {
+            this.defaultSchema = defaultSchema;
+        }
+
         protected override string GetTableIdentifier(ClassMap classMap)
         {
             string tableName = classMap.ExplicitTableName;
@@ -32,15 +44,17 @@ namespace Entatea.SqlServer
             }
 
             tableName = this.Encapsulate(tableName);
-            if (string.IsNullOrWhiteSpace(classMap.ExplicitSchema))
+            string schemaName = string.Empty;
+            if (!string.IsNullOrWhiteSpace(classMap.ExplicitSchema))
             {
-                return tableName;
+                schemaName = this.Encapsulate(classMap.ExplicitSchema);
             }
             else
             {
-                string schemaName = this.Encapsulate(classMap.ExplicitSchema);
-                return $"{schemaName}.{tableName}";
+                schemaName = this.Encapsulate(this.defaultSchema);
             }
+            
+            return $"{schemaName}.{tableName}";
         }
 
         public override string GetInsertSql<T>()

@@ -2,7 +2,7 @@
 
 namespace Entatea.Tests.Entities
 {
-    [Table("SoftDeleteTest", Schema = "TdDb")]
+    [Table("SoftDeleteTest", Schema = "Entatea")]
     public class SoftDelete
     {
         [KeyType(KeyType.Identity)]
