@@ -7,7 +7,5 @@
         public string MySqlServer { get; set; }
 
         public string MySqlUsername { get; set; }
-
-        public string MySqlPassword { get; set; }
     }
 }

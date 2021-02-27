@@ -10,6 +10,8 @@ namespace Entatea
 
         Task<T> Read<T>(object id) where T : class;
 
+        Task<T> Read<T>(params IPredicate[] predicates) where T : class;
+
         Task<IEnumerable<T>> ReadAll<T>() where T : class;
 
         Task<IEnumerable<T>> ReadList<T>(object whereConditions) where T : class;

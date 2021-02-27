@@ -213,6 +213,30 @@ namespace Entatea.InMemory
         }
 
         /// <inheritdoc />
+        public Task<T> Read<T>(params IPredicate[] predicates) where T : class
+        {
+            ClassMap classMap = ClassMapper.GetClassMap<T>();
+
+            // validate that all key properties are passed
+            List<IPredicate> predicateList = new List<IPredicate>(predicates);
+
+            // add discriminator predicates if necessary
+            if (classMap.DiscriminatorProperties.Any())
+            {
+                predicateList.AddRange(classMap.GetDiscriminatorPredicates<T>());
+            }
+
+            IEnumerable<T> results = this.ReadWhere<T>(predicateList);
+
+            if (results.Count() > 1)
+            {
+                throw new ArgumentException("Expected predicates to evaluate to a single row.");
+            }
+
+            return Task.FromResult(results.SingleOrDefault());
+        }
+
+        /// <inheritdoc />
         public Task<IEnumerable<T>> ReadAll<T>() where T : class
         {
             if (this.dataStore.ContainsKey(typeof(T).FullName))

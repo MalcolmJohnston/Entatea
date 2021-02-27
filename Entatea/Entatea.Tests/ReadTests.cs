@@ -8,6 +8,8 @@ using Entatea.MySql;
 using Entatea.SqlServer;
 using Entatea.Sqlite;
 
+using static Entatea.Predicate.PredicateBuilder;
+
 using Entatea.Tests.Helpers;
 using Entatea.Tests.Entities;
 
@@ -164,7 +166,7 @@ namespace Entatea.Tests
         [TestCase(typeof(SqlServerDataContext))]
         [TestCase(typeof(MySqlDataContext))]
         [TestCase(typeof(SqliteDataContext))]
-        public async Task Read_By_Where_Condition(Type dataContextType)
+        public async Task Read_List_By_Where_Condition(Type dataContextType)
         {
             // Arrange
             IDataContext dataContext = DataContextProvider.SetupDataContext(dataContextType);
@@ -189,7 +191,7 @@ namespace Entatea.Tests
         [TestCase(typeof(SqlServerDataContext))]
         [TestCase(typeof(MySqlDataContext))]
         [TestCase(typeof(SqliteDataContext))]
-        public async Task Read_By_Where_Condition_Implied_In(Type dataContextType)
+        public async Task Read_List_By_Where_Condition_Implied_In(Type dataContextType)
         {
             // Arrange
             IDataContext dataContext = DataContextProvider.SetupDataContext(dataContextType);
@@ -214,7 +216,7 @@ namespace Entatea.Tests
         [TestCase(typeof(SqlServerDataContext))]
         [TestCase(typeof(MySqlDataContext))]
         [TestCase(typeof(SqliteDataContext))]
-        public async Task Read_By_Where_Condition_Implied_Ins(Type dataContextType)
+        public async Task Read_List_By_Where_Condition_Implied_Ins(Type dataContextType)
         {
             // Arrange
             IDataContext dataContext = DataContextProvider.SetupDataContext(dataContextType);
@@ -245,7 +247,7 @@ namespace Entatea.Tests
         [TestCase(typeof(SqlServerDataContext))]
         [TestCase(typeof(MySqlDataContext))]
         [TestCase(typeof(SqliteDataContext))]
-        public async Task Read_By_Where_Condition_Implied_In_And_Equal(Type dataContextType)
+        public async Task Read_List_By_Where_Condition_Implied_In_And_Equal(Type dataContextType)
         {
             // Arrange
             IDataContext dataContext = DataContextProvider.SetupDataContext(dataContextType);
@@ -275,7 +277,7 @@ namespace Entatea.Tests
         [TestCase(typeof(SqlServerDataContext))]
         [TestCase(typeof(MySqlDataContext))]
         [TestCase(typeof(SqliteDataContext))]
-        public async Task Read_Discriminator_Entities(Type dataContextType)
+        public async Task Read_List_Discriminator_Entities(Type dataContextType)
         {
             // Arrange
             IDataContext dataContext = DataContextProvider.SetupDataContext(dataContextType);
@@ -313,6 +315,79 @@ namespace Entatea.Tests
             // Assert
             Assert.AreEqual(unique1.Id, read.Id);
             Assert.AreEqual(unique1.Value, read.Value);
+        }
+
+        /// <summary>
+        /// Test that we can read a single row using a predicate.
+        /// </summary>
+        /// <param name="dataContextType"></param>
+        /// <returns></returns>
+        [TestCase(typeof(InMemoryDataContext))]
+        [TestCase(typeof(SqlServerDataContext))]
+        [TestCase(typeof(MySqlDataContext))]
+        [TestCase(typeof(SqliteDataContext))]
+        public async Task Read_With_Predicates(Type dataContextType)
+        {
+            // Arrange
+            IDataContext dataContext = DataContextProvider.SetupDataContext(dataContextType);
+            await dataContext.Create(new City() { CityCode = "PUP", CityName = "Portsmouth", Area = "Hampshire" });
+            await dataContext.Create(new City() { CityCode = "SOU", CityName = "Southampton", Area = "Hampshire" });
+            await dataContext.Create(new City() { CityCode = "CHI", CityName = "Chichester", Area = "West Sussex" });
+            await dataContext.Create(new City() { CityCode = "BOU", CityName = "Bournemouth", Area = "Dorset" });
+
+            // Act
+            City city = await dataContext.Read<City>(Equal<City>(x => x.Area, "West Sussex"));
+
+            // Assert
+            Assert.AreEqual(city.CityCode, "CHI");
+        }
+
+        /// <summary>
+        /// Test that when we try to read a single row with predicates that if the row does not exist null is returned.
+        /// </summary>
+        /// <param name="dataContextType"></param>
+        /// <returns></returns>
+        [TestCase(typeof(InMemoryDataContext))]
+        [TestCase(typeof(SqlServerDataContext))]
+        [TestCase(typeof(MySqlDataContext))]
+        [TestCase(typeof(SqliteDataContext))]
+        public async Task Read_With_Predicates_Return_Null(Type dataContextType)
+        {
+            // Arrange
+            IDataContext dataContext = DataContextProvider.SetupDataContext(dataContextType);
+            await dataContext.Create(new City() { CityCode = "PUP", CityName = "Portsmouth", Area = "Hampshire" });
+            await dataContext.Create(new City() { CityCode = "SOU", CityName = "Southampton", Area = "Hampshire" });
+            await dataContext.Create(new City() { CityCode = "CHI", CityName = "Chichester", Area = "West Sussex" });
+            await dataContext.Create(new City() { CityCode = "BOU", CityName = "Bournemouth", Area = "Dorset" });
+
+            // Act
+            City city = await dataContext.Read<City>(Equal<City>(x => x.Area, "East Sussex"));
+
+            // Assert
+            Assert.IsNull(city);
+        }
+
+        /// <summary>
+        /// Test that when we try to read a single row with predicates that if multiple rows are returned then an
+        /// <see cref="ArgumentException"/> is thrown
+        /// </summary>
+        /// <param name="dataContextType"></param>
+        /// <returns></returns>
+        [TestCase(typeof(InMemoryDataContext))]
+        [TestCase(typeof(SqlServerDataContext))]
+        [TestCase(typeof(MySqlDataContext))]
+        [TestCase(typeof(SqliteDataContext))]
+        public async Task Read_With_Predicates_Multiple_Results_Throws_Argument_Exception(Type dataContextType)
+        {
+            // Arrange
+            IDataContext dataContext = DataContextProvider.SetupDataContext(dataContextType);
+            await dataContext.Create(new City() { CityCode = "PUP", CityName = "Portsmouth", Area = "Hampshire" });
+            await dataContext.Create(new City() { CityCode = "SOU", CityName = "Southampton", Area = "Hampshire" });
+            await dataContext.Create(new City() { CityCode = "CHI", CityName = "Chichester", Area = "West Sussex" });
+            await dataContext.Create(new City() { CityCode = "BOU", CityName = "Bournemouth", Area = "Dorset" });
+
+            // Act / Assert
+            Assert.ThrowsAsync<ArgumentException>(async() => await dataContext.Read<City>(Equal<City>(x => x.Area, "Hampshire")));
         }
     }
 }

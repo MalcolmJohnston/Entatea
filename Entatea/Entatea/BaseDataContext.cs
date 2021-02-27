@@ -118,6 +118,34 @@ namespace Entatea
             }
         }
 
+        public async Task<T> Read<T>(params IPredicate[] predicates) where T : class
+        {
+            ClassMap classMap = ClassMapper.GetClassMap<T>();
+
+            // validate that all key properties are passed
+            List<IPredicate> predicateList = new List<IPredicate>(predicates);
+            
+            // add discriminator predicates if necessary
+            if (classMap.DiscriminatorProperties.Any())
+            {
+                predicateList.AddRange(classMap.GetDiscriminatorPredicates<T>());
+            }
+
+            using (IDbConnection conn = this.connectionProvider.GetConnection())
+            {
+                IEnumerable<T> results = await conn.QueryAsync<T>(
+                    this.sqlProvider.GetSelectWhereSql<T>(predicates),
+                    predicates.GetParameters()).ConfigureAwait(false);
+
+                if (results.Count() > 1)
+                {
+                    throw new ArgumentException("Expected predicates to evaluate to a single row.");
+                }
+
+                return results.SingleOrDefault();
+            }
+        }
+
         public async Task<IEnumerable<T>> ReadAll<T>() where T : class
         {
             // check for discriminator predicates
