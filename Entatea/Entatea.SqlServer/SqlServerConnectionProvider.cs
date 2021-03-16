@@ -1,5 +1,5 @@
 ﻿using System.Data;
-using System.Data.SqlClient;
+using Microsoft.Data.SqlClient;
 
 namespace Entatea.SqlServer
 {
@@ -13,7 +13,7 @@ namespace Entatea.SqlServer
 
         public IDbConnection GetConnection()
         {
-            IDbConnection conn = new SqlConnection(this.connectionString);
+            SqlConnection conn = new SqlConnection(this.connectionString);
             conn.Open();
 
             return conn;
