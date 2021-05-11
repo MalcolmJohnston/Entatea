@@ -206,7 +206,10 @@ namespace Entatea
             keyDictionary.Keys.ToList().ForEach(x => updDictionary.Remove(x));
 
             // get the parameters for the WHERE clause
-            IDictionary<string, object> keyParameters = classMap.ValidateKeyProperties<T>(properties).GetParameters();
+            IList<IPredicate> predicates = classMap.ValidateKeyProperties<T>(properties);
+            predicates = classMap.AddDefaultPredicates<IPredicate>(predicates);
+
+            IDictionary<string, object> keyParameters = predicates.GetParameters();
 
             // add the WHERE clause parameters to our update dictionary
             updDictionary = updDictionary.Union(keyParameters).ToDictionary(x => x.Key, x => x.Value);

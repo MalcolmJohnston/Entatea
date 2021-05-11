@@ -54,6 +54,7 @@ namespace Entatea.Tests.Migrations
             Create.Table("SoftDeleteTest")
                 .InSchema("Entatea")
                 .WithColumn("SoftDeleteId").AsInt32().PrimaryKey().Identity()
+                .WithColumn("Value").AsString().NotNullable()
                 .WithColumn("RecordStatus").AsInt32().NotNullable();
         }
     }

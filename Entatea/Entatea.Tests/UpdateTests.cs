@@ -151,6 +151,28 @@ namespace Entatea.Tests
         }
 
         /// <summary>
+        /// Test that when we try to update a soft delete entity that it executes succesfully.
+        /// </summary>
+        /// <returns></returns>
+        [TestCase(typeof(InMemoryDataContext))]
+        [TestCase(typeof(SqlServerDataContext))]
+        [TestCase(typeof(MySqlDataContext))]
+        [TestCase(typeof(SqliteDataContext))]
+        public async Task Update_Soft_Delete_Entity(Type dataContextType)
+        {
+            // Arrange
+            IDataContext dataContext = DataContextProvider.SetupDataContext(dataContextType);
+            SoftDelete original = await dataContext.Create<SoftDelete>(new SoftDelete() { Value = "Value" });
+
+            // Act / Assert
+            SoftDelete updated = await dataContext.Update<SoftDelete>(new { original.SoftDeleteId, Value = "Another Value" });
+
+            // Assert
+            Assert.AreEqual(original.SoftDeleteId, updated.SoftDeleteId);
+            Assert.AreEqual("Another Value", updated.Value);
+        }
+
+        /// <summary>
         /// Test that when we try to update a read only column that our update is not persisted.
         /// </summary>
         /// <returns></returns>
