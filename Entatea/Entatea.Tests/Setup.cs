@@ -23,7 +23,7 @@ namespace Entatea.Tests
             // start up a my-sql container
             ProcessStartInfo startInfo = new ProcessStartInfo(
                 DOCKER_PROCESS,
-                $"run --name {MY_SQL_CONTAINER_NAME} -p3306:3306 -e MYSQL_ALLOW_EMPTY_PASSWORD=yes -d mysql:latest --max-connections=1000");
+                $"run --name {MY_SQL_CONTAINER_NAME} -p3306:3306 -e MYSQL_ALLOW_EMPTY_PASSWORD=yes -e TZ=Europe/London -d mysql:latest --max-connections=1000");
             Process startProcess = Process.Start(startInfo);
             startProcess.WaitForExit();
 

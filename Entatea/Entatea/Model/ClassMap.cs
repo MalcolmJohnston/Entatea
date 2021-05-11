@@ -1,9 +1,8 @@
-﻿using System;
+﻿using Entatea.Predicate;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Reflection;
-
-using Entatea.Predicate;
 
 namespace Entatea.Model
 {
@@ -414,17 +413,17 @@ namespace Entatea.Model
             return whereOperations;
         }
 
-        public IList<IPredicate> AddDiscriminatorPredicates<T>(IEnumerable<IPredicate> predicates) where T : class
+        public IList<IPredicate> AddDefaultPredicates<T>(IEnumerable<IPredicate> predicates) where T : class
         {
             List<IPredicate> newPredicates = new List<IPredicate>(predicates);
-            newPredicates.AddRange(this.GetDiscriminatorPredicates<T>());
+            newPredicates.AddRange(this.GetDefaultPredicates<T>());
             return newPredicates;
         }
 
-        private IList<IPredicate> discriminatorPredicates = null;
-        public IList<IPredicate> GetDiscriminatorPredicates<T>() where T : class
+        private IList<IPredicate> defaultPredicates = null;
+        public IList<IPredicate> GetDefaultPredicates<T>() where T : class
         {
-            if (discriminatorPredicates == null)
+            if (defaultPredicates == null)
             {
                 IList<IPredicate> predicates = new List<IPredicate>();
                 if (this.DiscriminatorProperties.Any())
@@ -434,9 +433,13 @@ namespace Entatea.Model
                         predicates.Add(PredicateBuilder.Equal<T>(discriminatorProperty.PropertyName, discriminatorProperty.ValueOnInsert));
                     }
                 }
-                discriminatorPredicates = predicates;
+                if (this.SoftDeleteProperty != null)
+                {
+                    predicates.Add(PredicateBuilder.Equal<T>(this.SoftDeleteProperty.PropertyName, this.SoftDeleteProperty.ValueOnInsert));
+                }
+                defaultPredicates = predicates;
             }
-            return discriminatorPredicates;
+            return defaultPredicates;
         }
     }
 }

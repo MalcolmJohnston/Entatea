@@ -223,7 +223,7 @@ namespace Entatea.InMemory
             // add discriminator predicates if necessary
             if (classMap.DiscriminatorProperties.Any())
             {
-                predicateList.AddRange(classMap.GetDiscriminatorPredicates<T>());
+                predicateList.AddRange(classMap.GetDefaultPredicates<T>());
             }
 
             IEnumerable<T> results = this.ReadWhere<T>(predicateList);

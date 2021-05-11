@@ -93,6 +93,15 @@ namespace Entatea.SqlBuilder
         public virtual string GetDeleteByIdSql<T>() where T : class
         {
             ClassMap classMap = ClassMapper.GetClassMap<T>();
+
+            string sql = string.Empty;
+            if (classMap.SoftDeleteProperty != null)
+            {
+                return $"UPDATE {this.GetTableIdentifier(classMap)} SET " +
+                    $"{this.GetColumnIdentifier(classMap.SoftDeleteProperty)} = {classMap.SoftDeleteProperty.ValueOnDelete} " + 
+                    $"{this.GetByIdWhereClause(classMap)}";
+            }
+            
             return $"DELETE FROM {this.GetTableIdentifier(classMap)} {this.GetByIdWhereClause(classMap)}";
         }
 

@@ -125,9 +125,8 @@ namespace Entatea.Tests
             // Assert
             Assert.AreEqual(row.Name, updatedRow.Name);
             Assert.AreEqual("New Value", updatedRow.Value);
-            Assert.AreEqual(0, (row.InsertDate - updatedRow.InsertDate).Seconds);
             Assert.AreNotEqual(row.InsertDate, updatedRow.UpdateDate);
-            Assert.That(updatedRow.UpdateDate, Is.EqualTo(updateDate).Within(TimeSpan.FromSeconds(1)));
+            Assert.That(updatedRow.UpdateDate, Is.EqualTo(updateDate).Within(TimeSpan.FromSeconds(2)));
         }
 
         /// <summary>

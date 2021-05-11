@@ -48,20 +48,21 @@ namespace Entatea.SqlBuilder
             return sb.ToString();
         }
 
-        public static string GetWhereClause<T>(this ISqlBuilder sqlBuilder, object whereConditions) where T : class
-        {
-            // build a list of properties for the WHERE clause
-            // this will error if no properties are found that match our Type
-            ClassMap classMap = ClassMapper.GetClassMap<T>();
-            IList<IPredicate> properties = classMap.ValidateWhereProperties<T>(whereConditions);
-
-            // return the WHERE clause
-            return sqlBuilder.GetWhereClause(properties);
-        }
-
         public static string GetByIdWhereClause(this ISqlBuilder sqlBuilder, ClassMap classMap)
         {
-            return GetByPropertiesWhereClause(sqlBuilder, classMap.AllKeys);
+            // as this is a utility method then we need to add the default properties here
+            // for all other where clause building assume these have been passed in
+            List<PropertyMap> props = new List<PropertyMap>(classMap.AllKeys);
+            if (classMap.DiscriminatorProperties.Any())
+            {
+                props.AddRange(classMap.DiscriminatorProperties);
+            }
+            if (classMap.SoftDeleteProperty != null)
+            {
+                props.Add(classMap.SoftDeleteProperty);
+            }
+
+            return GetByPropertiesWhereClause(sqlBuilder, props);
         }
 
         public static string GetByPropertiesWhereClause(this ISqlBuilder sqlBuilder, IEnumerable<PropertyMap> properties)

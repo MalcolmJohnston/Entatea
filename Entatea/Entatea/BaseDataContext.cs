@@ -109,6 +109,7 @@ namespace Entatea
 
             // validate that all key properties are passed
             IList<IPredicate> predicates = classMap.ValidateKeyProperties<T>(id);
+            predicates = classMap.AddDefaultPredicates<IPredicate>(predicates);
 
             using (IDbConnection conn = this.connectionProvider.GetConnection())
             {
@@ -123,14 +124,8 @@ namespace Entatea
             ClassMap classMap = ClassMapper.GetClassMap<T>();
 
             // validate that all key properties are passed
-            List<IPredicate> predicateList = new List<IPredicate>(predicates);
+            predicates = classMap.AddDefaultPredicates<IPredicate>(predicates).ToArray();
             
-            // add discriminator predicates if necessary
-            if (classMap.DiscriminatorProperties.Any())
-            {
-                predicateList.AddRange(classMap.GetDiscriminatorPredicates<T>());
-            }
-
             using (IDbConnection conn = this.connectionProvider.GetConnection())
             {
                 IEnumerable<T> results = await conn.QueryAsync<T>(
@@ -150,9 +145,10 @@ namespace Entatea
         {
             // check for discriminator predicates
             ClassMap classMap = ClassMapper.GetClassMap<T>();
-            if (classMap.DiscriminatorProperties.Any())
+            IEnumerable<IPredicate> predicates = classMap.GetDefaultPredicates<T>();
+
+            if (predicates.Any())
             {
-                IList<IPredicate> predicates = classMap.GetDiscriminatorPredicates<T>();
                 using (IDbConnection conn = this.connectionProvider.GetConnection())
                 {
                     return await conn.QueryAsync<T>(
@@ -174,6 +170,7 @@ namespace Entatea
 
             // validate all properties passed
             IList<IPredicate> predicates = classMap.ValidateWhereProperties<T>(classMap.CoalesceToDictionary(whereConditions));
+
             return await this.ReadList<T>(predicates);
         }
 
@@ -184,7 +181,9 @@ namespace Entatea
 
         public async Task<PagedList<T>> ReadList<T>(object whereConditions, object sortOrders, int pageSize, int pageNumber) where T : class
         {
-            IList<IPredicate> predicates = ClassMapper.GetClassMap<T>().ValidateWhereProperties<T>(whereConditions);
+            ClassMap classMap = ClassMapper.GetClassMap<T>();
+            IList<IPredicate> predicates = classMap.ValidateWhereProperties<T>(whereConditions);
+
             return await ReadList<T>(predicates, sortOrders, pageSize, pageNumber);
         }
 
@@ -227,6 +226,7 @@ namespace Entatea
 
             // validate the key properties
             IList<IPredicate> predicates = classMap.ValidateKeyProperties<T>(id);
+            predicates = classMap.AddDefaultPredicates<IPredicate>(predicates);
 
             using (IDbConnection conn = this.connectionProvider.GetConnection())
             {
@@ -242,7 +242,8 @@ namespace Entatea
             }
 
             // validate the properties
-            IList<IPredicate> predicates = ClassMapper.GetClassMap<T>().ValidateWhereProperties<T>(whereConditions);
+            ClassMap classMap = ClassMapper.GetClassMap<T>();
+            IList<IPredicate> predicates = classMap.ValidateWhereProperties<T>(whereConditions);
 
             await this.DeleteList<T>(predicates);
         }
@@ -259,9 +260,8 @@ namespace Entatea
 
         private async Task<IEnumerable<T>> ReadList<T>(IEnumerable<IPredicate> predicates) where T : class
         {
-            // add discriminator predicates
             ClassMap classMap = ClassMapper.GetClassMap<T>();
-            predicates = classMap.AddDiscriminatorPredicates<T>(predicates);
+            predicates = classMap.AddDefaultPredicates<T>(predicates);
 
             using (IDbConnection conn = this.connectionProvider.GetConnection())
             {
@@ -277,9 +277,8 @@ namespace Entatea
             int firstRow = ((pageNumber - 1) * pageSize) + 1;
             int lastRow = firstRow + (pageSize - 1);
 
-            // add discriminator predicates
             ClassMap classMap = ClassMapper.GetClassMap<T>();
-            predicates = classMap.AddDiscriminatorPredicates<T>(predicates);
+            predicates = classMap.AddDefaultPredicates<T>(predicates);
 
             // get the parameters
             var parameters = predicates.GetParameters();
@@ -312,9 +311,8 @@ namespace Entatea
                 throw new ArgumentException("Please pass where conditions.");
             }
 
-            // add discriminator predicates
             ClassMap classMap = ClassMapper.GetClassMap<T>();
-            predicates = classMap.AddDiscriminatorPredicates<T>(predicates);
+            predicates = classMap.AddDefaultPredicates<T>(predicates);
 
             using (IDbConnection conn = this.connectionProvider.GetConnection())
             {
