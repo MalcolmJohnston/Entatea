@@ -23,6 +23,12 @@ namespace Entatea.Tests.Helpers
 
         public static void CreateTestDatabase(string testName)
         {
+            // check whether database has already been created
+            if (testName2DbName.ContainsKey(testName))
+            {
+                return;
+            }
+
             // get the temporary file name and delete the temporary file
             string tempFile = Path.GetTempFileName();
             File.Delete(tempFile);

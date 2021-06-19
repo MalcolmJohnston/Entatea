@@ -12,6 +12,13 @@ namespace Entatea.Sqlite
         {
         }
 
+        public SqliteDataContext(SqliteConnectionProvider connectionProvider) : base(
+            connectionProvider,
+            new SqliteBuilder(),
+            new SqlCache())
+        {
+        }
+
         public SqliteDataContext(
             string connectionString,
             ITableNameResolver tableNameResolver,
@@ -19,6 +26,16 @@ namespace Entatea.Sqlite
             new SqliteConnectionProvider(connectionString),
             new SqliteBuilder(tableNameResolver, columnNameResolver),
             new SqlCache())
+        {
+        }
+
+        public SqliteDataContext(
+            SqliteConnectionProvider connectionProvider,
+            ITableNameResolver tableNameResolver,
+            IColumnNameResolver columnNameResolver) : base(
+                connectionProvider,
+                new SqliteBuilder(tableNameResolver, columnNameResolver),
+                new SqlCache())
         {
         }
     }

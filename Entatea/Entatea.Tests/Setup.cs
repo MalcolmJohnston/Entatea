@@ -59,7 +59,7 @@ namespace Entatea.Tests
             ProcessStartInfo removeStartInfo = new ProcessStartInfo(
                 DOCKER_PROCESS,
                 $"container rm {MY_SQL_CONTAINER_NAME}");
-            Process removeProcess = Process.Start(stopStartInfo);
+            Process removeProcess = Process.Start(removeStartInfo);
             removeProcess.WaitForExit();
         }
     }

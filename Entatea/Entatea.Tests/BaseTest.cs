@@ -10,7 +10,10 @@ namespace Entatea.Tests
         [TearDown]
         public void TearDown()
         {
-            DataContextProvider.DeleteDataContext((Type)TestContext.CurrentContext.Test.Arguments[0]);
+            if (TestContext.CurrentContext.Test.Arguments.Length > 0)
+            {
+                DataContextProvider.DeleteDataContext((Type)TestContext.CurrentContext.Test.Arguments[0]);
+            }
         }
     }
 }

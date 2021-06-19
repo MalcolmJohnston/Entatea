@@ -4,15 +4,13 @@ using MySql.Data.MySqlClient;
 
 namespace Entatea.MySql
 {
-    public class MySqlConnectionProvider : IConnectionProvider
+    public class MySqlConnectionProvider : BaseConnectionProvider, IConnectionProvider
     {
-        private readonly string connectionString;
-        public MySqlConnectionProvider(string connectionString)
+        public MySqlConnectionProvider(string connectionString) : base(connectionString)
         {
-            this.connectionString = connectionString;
         }
 
-        public IDbConnection GetConnection()
+        protected override IDbConnection GetOpenConnection()
         {
             IDbConnection conn = new MySqlConnection(this.connectionString);
             conn.Open();

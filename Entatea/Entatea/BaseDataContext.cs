@@ -31,76 +31,79 @@ namespace Entatea
         {
             ClassMap classMap = ClassMapper.GetClassMap<T>();
 
-            using (IDbConnection conn = connectionProvider.GetConnection())
+            IDbConnection conn = this.connectionProvider.GetConnection();
+            IDbTransaction tran = this.connectionProvider.GetTransaction();
+            
+            // set the value of the sequential key
+            if (classMap.HasSequentialKey)
             {
-                // set the value of the sequential key
-                if (classMap.HasSequentialKey)
-                {
-                    // read the next id from the database
-                    var parameters = classMap.ValidateAssignedKeyProperties<T>(entity).GetParameters();
-                    object id = await conn.ExecuteScalarAsync(sqlProvider.GetSelectNextIdSql<T>(), parameters).ConfigureAwait(false);
+                // read the next id from the database
+                var parameters = classMap.ValidateAssignedKeyProperties<T>(entity).GetParameters();
+                object id = await conn.ExecuteScalarAsync(
+                    sqlProvider.GetSelectNextIdSql<T>(), 
+                    parameters,
+                    tran).ConfigureAwait(false);
 
-                    // set the sequential key on our entity
-                    classMap.SequentialKey.PropertyInfo.SetValue(
-                        entity,
-                        Convert.ChangeType(id, classMap.SequentialKey.PropertyInfo.PropertyType));
-                }
-
-                // set current date time on any date stamp properties
-                if (classMap.DateStampProperties.Any())
-                {
-                    DateTime dateStamp = DateTime.Now;
-                    foreach (PropertyMap dateStampProperty in classMap.DateStampProperties)
-                    {
-                        dateStampProperty.PropertyInfo.SetValue(entity, dateStamp);
-                    }
-                }
-
-                // set value on insert on any soft delete properties
-                if (classMap.IsSoftDelete)
-                {
-                    classMap.SoftDeleteProperty.PropertyInfo.SetValue(
-                        entity,
-                        classMap.SoftDeleteProperty.ValueOnInsert);
-                }
-
-                // set discriminator properties
-                if(classMap.DiscriminatorProperties.Any())
-                {
-                    foreach (PropertyMap discriminatorProperty in classMap.DiscriminatorProperties)
-                    {
-                        discriminatorProperty.PropertyInfo.SetValue(
-                            entity,
-                            discriminatorProperty.ValueOnInsert);
-                    }
-                }
-
-                // execute the insert
-                var row = (await conn.QueryAsync(sqlProvider.GetInsertSql<T>(), entity).ConfigureAwait(false)).SingleOrDefault();
-
-                // apply OUTPUT values to identity column
-                if (classMap.HasIdentityKey)
-                {
-                    if (row == null)
-                    {
-                        throw new DataException("Expected row with Identity values, but no row returned.");
-                    }
-
-                    // convert to dictionary to iterate through results
-                    IDictionary<string, object> rowDictionary = (IDictionary<string, object>)row;
-
-                    // in MySQL identity values from LAST_INSERT_ID() come back as ulong
-                    // but this may not be the type of our identity property so cast
-                    object identityValue = Convert.ChangeType(
-                        rowDictionary[classMap.IdentityKey.PropertyName],
-                        classMap.IdentityKey.PropertyInfo.PropertyType);
-
-                    // set the key value on the entity
-                    classMap.IdentityKey.PropertyInfo.SetValue(entity, identityValue);
-                }
-
-                return entity;
+                // set the sequential key on our entity
+                classMap.SequentialKey.PropertyInfo.SetValue(
+                    entity,
+                    Convert.ChangeType(id, classMap.SequentialKey.PropertyInfo.PropertyType));
             }
+
+            // set current date time on any date stamp properties
+            if (classMap.DateStampProperties.Any())
+            {
+                DateTime dateStamp = DateTime.Now;
+                foreach (PropertyMap dateStampProperty in classMap.DateStampProperties)
+                {
+                    dateStampProperty.PropertyInfo.SetValue(entity, dateStamp);
+                }
+            }
+
+            // set value on insert on any soft delete properties
+            if (classMap.IsSoftDelete)
+            {
+                classMap.SoftDeleteProperty.PropertyInfo.SetValue(
+                    entity,
+                    classMap.SoftDeleteProperty.ValueOnInsert);
+            }
+
+            // set discriminator properties
+            if(classMap.DiscriminatorProperties.Any())
+            {
+                foreach (PropertyMap discriminatorProperty in classMap.DiscriminatorProperties)
+                {
+                    discriminatorProperty.PropertyInfo.SetValue(
+                        entity,
+                        discriminatorProperty.ValueOnInsert);
+                }
+            }
+
+            // execute the insert
+            var row = (await conn.QueryAsync(sqlProvider.GetInsertSql<T>(), entity, tran).ConfigureAwait(false)).SingleOrDefault();
+
+            // apply OUTPUT values to identity column
+            if (classMap.HasIdentityKey)
+            {
+                if (row == null)
+                {
+                    throw new DataException("Expected row with Identity values, but no row returned.");
+                }
+
+                // convert to dictionary to iterate through results
+                IDictionary<string, object> rowDictionary = (IDictionary<string, object>)row;
+
+                // in MySQL identity values from LAST_INSERT_ID() come back as ulong
+                // but this may not be the type of our identity property so cast
+                object identityValue = Convert.ChangeType(
+                    rowDictionary[classMap.IdentityKey.PropertyName],
+                    classMap.IdentityKey.PropertyInfo.PropertyType);
+
+                // set the key value on the entity
+                classMap.IdentityKey.PropertyInfo.SetValue(entity, identityValue);
+            }
+
+            return entity;
         }
 
         public async Task<T> Read<T>(object id) where T : class
@@ -111,12 +114,11 @@ namespace Entatea
             IList<IPredicate> predicates = classMap.ValidateKeyProperties<T>(id);
             predicates = classMap.AddDefaultPredicates<IPredicate>(predicates);
 
-            using (IDbConnection conn = this.connectionProvider.GetConnection())
-            {
-                return (await conn.QueryAsync<T>(sqlProvider.GetSelectByIdSql<T>(), predicates.GetParameters())
-                    .ConfigureAwait(false))
-                    .SingleOrDefault();
-            }
+            IDbConnection conn = this.connectionProvider.GetConnection();
+            IDbTransaction tran = this.connectionProvider.GetTransaction();
+            return (await conn.QueryAsync<T>(sqlProvider.GetSelectByIdSql<T>(), predicates.GetParameters(), tran)
+                .ConfigureAwait(false))
+                .SingleOrDefault();
         }
 
         public async Task<T> Read<T>(params IPredicate[] predicates) where T : class
@@ -125,20 +127,20 @@ namespace Entatea
 
             // validate that all key properties are passed
             predicates = classMap.AddDefaultPredicates<IPredicate>(predicates).ToArray();
-            
-            using (IDbConnection conn = this.connectionProvider.GetConnection())
+
+            IDbConnection conn = this.connectionProvider.GetConnection();
+            IDbTransaction tran = this.connectionProvider.GetTransaction();
+            IEnumerable<T> results = await conn.QueryAsync<T>(
+                this.sqlProvider.GetSelectWhereSql<T>(predicates),
+                predicates.GetParameters(),
+                tran).ConfigureAwait(false);
+
+            if (results.Count() > 1)
             {
-                IEnumerable<T> results = await conn.QueryAsync<T>(
-                    this.sqlProvider.GetSelectWhereSql<T>(predicates),
-                    predicates.GetParameters()).ConfigureAwait(false);
-
-                if (results.Count() > 1)
-                {
-                    throw new ArgumentException("Expected predicates to evaluate to a single row.");
-                }
-
-                return results.SingleOrDefault();
+                throw new ArgumentException("Expected predicates to evaluate to a single row.");
             }
+
+            return results.SingleOrDefault();
         }
 
         public async Task<IEnumerable<T>> ReadAll<T>() where T : class
@@ -147,21 +149,17 @@ namespace Entatea
             ClassMap classMap = ClassMapper.GetClassMap<T>();
             IEnumerable<IPredicate> predicates = classMap.GetDefaultPredicates<T>();
 
+            IDbConnection conn = this.connectionProvider.GetConnection();
+            IDbTransaction tran = this.connectionProvider.GetTransaction();
             if (predicates.Any())
             {
-                using (IDbConnection conn = this.connectionProvider.GetConnection())
-                {
-                    return await conn.QueryAsync<T>(
-                        this.sqlProvider.GetSelectWhereSql<T>(predicates),
-                        predicates.GetParameters()).ConfigureAwait(false);
-                }
+                return await conn.QueryAsync<T>(
+                    this.sqlProvider.GetSelectWhereSql<T>(predicates),
+                    predicates.GetParameters(),
+                    tran).ConfigureAwait(false);
             }
 
-            using (IDbConnection conn = this.connectionProvider.GetConnection())
-            {
-                return await conn.QueryAsync<T>(sqlProvider.GetSelectAllSql<T>())
-                    .ConfigureAwait(false);
-            }
+            return await conn.QueryAsync<T>(sqlProvider.GetSelectAllSql<T>()).ConfigureAwait(false);
         }
 
         public async Task<IEnumerable<T>> ReadList<T>(object whereConditions) where T : class
@@ -214,13 +212,12 @@ namespace Entatea
             // add the WHERE clause parameters to our update dictionary
             updDictionary = updDictionary.Union(keyParameters).ToDictionary(x => x.Key, x => x.Value);
 
-            using (IDbConnection conn = this.connectionProvider.GetConnection())
-            {
-                // execute the update
-                await conn.ExecuteAsync(sqlProvider.GetUpdateSql<T>(properties), updDictionary).ConfigureAwait(false);
-
-                return (await conn.QueryAsync<T>(sqlProvider.GetSelectByIdSql<T>(), keyParameters).ConfigureAwait(false)).SingleOrDefault();
-            }
+            IDbConnection conn = this.connectionProvider.GetConnection();
+            IDbTransaction tran = this.connectionProvider.GetTransaction();
+            await conn.ExecuteAsync(sqlProvider.GetUpdateSql<T>(properties), updDictionary, tran).ConfigureAwait(false);
+            
+            return (await conn.QueryAsync<T>(sqlProvider.GetSelectByIdSql<T>(), keyParameters, tran).ConfigureAwait(false))
+                .SingleOrDefault();
         }
 
         public async Task Delete<T>(object id) where T : class
@@ -231,10 +228,9 @@ namespace Entatea
             IList<IPredicate> predicates = classMap.ValidateKeyProperties<T>(id);
             predicates = classMap.AddDefaultPredicates<IPredicate>(predicates);
 
-            using (IDbConnection conn = this.connectionProvider.GetConnection())
-            {
-                await conn.QueryAsync<T>(sqlProvider.GetDeleteByIdSql<T>(), predicates.GetParameters()).ConfigureAwait(false);
-            }
+            IDbConnection conn = this.connectionProvider.GetConnection();
+            IDbTransaction tran = this.connectionProvider.GetTransaction();
+            await conn.QueryAsync<T>(sqlProvider.GetDeleteByIdSql<T>(), predicates.GetParameters(), tran).ConfigureAwait(false);
         }
 
         public async Task DeleteList<T>(object whereConditions) where T : class
@@ -266,12 +262,12 @@ namespace Entatea
             ClassMap classMap = ClassMapper.GetClassMap<T>();
             predicates = classMap.AddDefaultPredicates<T>(predicates);
 
-            using (IDbConnection conn = this.connectionProvider.GetConnection())
-            {
-                return await conn.QueryAsync<T>(
-                    this.sqlProvider.GetSelectWhereSql<T>(predicates),
-                    predicates.GetParameters()).ConfigureAwait(false);
-            }
+            IDbConnection conn = this.connectionProvider.GetConnection();
+            IDbTransaction tran = this.connectionProvider.GetTransaction();
+            return await conn.QueryAsync<T>(
+                this.sqlProvider.GetSelectWhereSql<T>(predicates),
+                predicates.GetParameters(),
+                tran).ConfigureAwait(false);
         }
 
         private async Task<PagedList<T>> ReadList<T>(IEnumerable<IPredicate> predicates, object sortOrders, int pageSize, int pageNumber) where T : class
@@ -286,25 +282,26 @@ namespace Entatea
             // get the parameters
             var parameters = predicates.GetParameters();
 
-            using (IDbConnection conn = this.connectionProvider.GetConnection())
+            IDbConnection conn = this.connectionProvider.GetConnection();
+            IDbTransaction tran = this.connectionProvider.GetTransaction();
+
+            // read the count
+            int total = await conn.ExecuteScalarAsync<int>(sqlProvider.GetSelectCountSql<T>(predicates), parameters, tran);
+
+            // read the rows
+            IEnumerable<T> results = await conn.QueryAsync<T>(
+                sqlProvider.GetSelectWhereSql<T>(predicates, sortOrders, firstRow, lastRow),
+                parameters,
+                tran);
+
+            return new PagedList<T>()
             {
-                // read the count
-                int total = await conn.ExecuteScalarAsync<int>(sqlProvider.GetSelectCountSql<T>(predicates), parameters);
-
-                // read the rows
-                IEnumerable<T> results = await conn.QueryAsync<T>(
-                    sqlProvider.GetSelectWhereSql<T>(predicates, sortOrders, firstRow, lastRow),
-                    parameters);
-
-                return new PagedList<T>()
-                {
-                    Rows = results,
-                    HasNext = lastRow < total,
-                    HasPrevious = firstRow > 1,
-                    TotalPages = (total / pageSize) + ((total % pageSize) > 0 ? 1 : 0),
-                    TotalRows = total
-                };
-            }
+                Rows = results,
+                HasNext = lastRow < total,
+                HasPrevious = firstRow > 1,
+                TotalPages = (total / pageSize) + ((total % pageSize) > 0 ? 1 : 0),
+                TotalRows = total
+            };
         }
 
         private async Task DeleteList<T>(IEnumerable<IPredicate> predicates) where T : class
@@ -317,11 +314,31 @@ namespace Entatea
             ClassMap classMap = ClassMapper.GetClassMap<T>();
             predicates = classMap.AddDefaultPredicates<T>(predicates);
 
-            using (IDbConnection conn = this.connectionProvider.GetConnection())
-            {
-                // delete
-                await conn.QueryAsync<T>(sqlProvider.GetDeleteWhereSql<T>(predicates), predicates.GetParameters()).ConfigureAwait(false);
-            }
+            IDbConnection conn = this.connectionProvider.GetConnection();
+            IDbTransaction tran = this.connectionProvider.GetTransaction();
+            await conn.QueryAsync<T>(sqlProvider.GetDeleteWhereSql<T>(predicates), predicates.GetParameters(), tran)
+                      .ConfigureAwait(false);
+        }
+
+        public void BeginTransaction()
+        {
+            this.connectionProvider.BeginTransaction(this);
+        }
+
+        public void Commit()
+        {
+            this.connectionProvider.Commit(this);
+        }
+
+        public void Rollback()
+        {
+            this.connectionProvider.Rollback(this);
+        }
+
+        public void Dispose()
+        {
+            this.connectionProvider.NotifyDisposed(this);
+            this.connectionProvider.CloseConnection();
         }
     }
 }

@@ -12,6 +12,13 @@ namespace Entatea.SqlServer
         {
         }
 
+        public SqlServerDataContext(SqlServerConnectionProvider connectionProvider) : base(
+            connectionProvider,
+            new TSqlBuilder(),
+            new SqlCache())
+        {
+        }
+
         public SqlServerDataContext(
             string connectionString,
             ITableNameResolver tableNameResolver,
@@ -30,6 +37,17 @@ namespace Entatea.SqlServer
             new SqlServerConnectionProvider(connectionString),
             new TSqlBuilder(tableNameResolver, columnNameResolver, defaultSchema),
             new SqlCache())
+        {
+        }
+
+        public SqlServerDataContext(
+            SqlServerConnectionProvider connectionProvider,
+            ITableNameResolver tableNameResolver,
+            IColumnNameResolver columnNameResolver,
+            string defaultSchema) : base(
+                connectionProvider,
+                new TSqlBuilder(tableNameResolver, columnNameResolver, defaultSchema),
+                new SqlCache())
         {
         }
     }

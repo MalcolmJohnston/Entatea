@@ -3,15 +3,13 @@ using Microsoft.Data.SqlClient;
 
 namespace Entatea.SqlServer
 {
-    public class SqlServerConnectionProvider : IConnectionProvider
+    public class SqlServerConnectionProvider : BaseConnectionProvider, IConnectionProvider
     {
-        private readonly string connectionString;
-        public SqlServerConnectionProvider(string connectionString)
+        public SqlServerConnectionProvider(string connectionString) : base(connectionString)
         {
-            this.connectionString = connectionString;
         }
 
-        public IDbConnection GetConnection()
+        protected override IDbConnection GetOpenConnection()
         {
             SqlConnection conn = new SqlConnection(this.connectionString);
             conn.Open();

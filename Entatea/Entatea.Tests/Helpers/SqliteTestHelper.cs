@@ -25,6 +25,11 @@ namespace Entatea.Tests.Helpers
 
         public static void CreateTestDatabase(string testName)
         {
+            if (testName2DbName.ContainsKey(testName))
+            {
+                return;
+            }
+
             // get the temporary file name and delete the temporary file
             string tempFile = Path.GetTempFileName();
             File.Delete(tempFile);

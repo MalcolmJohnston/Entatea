@@ -12,13 +12,30 @@ namespace Entatea.MySql
         {
         }
 
+        public MySqlDataContext(MySqlConnectionProvider connectionProvider) : base(
+            connectionProvider,
+            new MySqlBuilder(),
+            new SqlCache())
+        {
+        }
+
         public MySqlDataContext(
             string connectionString,
             ITableNameResolver tableNameResolver,
             IColumnNameResolver columnNameResolver) : base(
-            new MySqlConnectionProvider(connectionString),
-            new MySqlBuilder(tableNameResolver, columnNameResolver),
-            new SqlCache())
+                new MySqlConnectionProvider(connectionString),
+                new MySqlBuilder(tableNameResolver, columnNameResolver),
+                new SqlCache())
+        {
+        }
+
+        public MySqlDataContext(
+            MySqlConnectionProvider connectionProvider,
+            ITableNameResolver tableNameResolver,
+            IColumnNameResolver columnNameResolver) : base(
+                connectionProvider,
+                new MySqlBuilder(tableNameResolver, columnNameResolver),
+                new SqlCache())
         {
         }
     }

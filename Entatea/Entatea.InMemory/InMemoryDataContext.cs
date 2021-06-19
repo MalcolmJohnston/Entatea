@@ -24,6 +24,8 @@ namespace Entatea.InMemory
     {
         private readonly ConcurrentDictionary<string, IList> dataStore = new ConcurrentDictionary<string, IList>();
 
+        private readonly ConcurrentDictionary<string, IList> transactionCreatedItems = new ConcurrentDictionary<string, IList>();
+
         private readonly Type iEnumerableType = typeof(IEnumerable);
 
         /// <summary>
@@ -592,6 +594,26 @@ namespace Entatea.InMemory
             }
 
             return null;
+        }
+
+        public void BeginTransaction()
+        {
+            return;
+        }
+
+        public void Commit()
+        {
+            return;
+        }
+
+        public void Rollback()
+        {
+            return;
+        }
+
+        public void Dispose()
+        {
+            return;
         }
     }
 }

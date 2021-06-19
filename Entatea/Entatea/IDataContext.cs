@@ -1,11 +1,18 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 using System.Threading.Tasks;
 using Entatea.Predicate;
 
 namespace Entatea
 {
-    public interface IDataContext
+    public interface IDataContext : IDisposable
     {
+        void BeginTransaction();
+
+        void Commit();
+
+        void Rollback();
+
         Task<T> Create<T>(T entity) where T : class;
 
         Task<T> Read<T>(object id) where T : class;

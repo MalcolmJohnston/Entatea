@@ -3,15 +3,13 @@ using Microsoft.Data.Sqlite;
 
 namespace Entatea.Sqlite
 {
-    public class SqliteConnectionProvider : IConnectionProvider
+    public class SqliteConnectionProvider : BaseConnectionProvider, IConnectionProvider
     {
-        private readonly string connectionString;
-        public SqliteConnectionProvider(string connectionString)
+        public SqliteConnectionProvider(string connectionString) : base(connectionString)
         {
-            this.connectionString = connectionString;
         }
 
-        public IDbConnection GetConnection()
+        protected override IDbConnection GetOpenConnection()
         {
             IDbConnection conn = new SqliteConnection(this.connectionString);
             conn.Open();
