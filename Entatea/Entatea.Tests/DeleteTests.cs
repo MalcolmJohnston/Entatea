@@ -28,7 +28,7 @@ namespace Entatea.Tests
         public async Task Delete_Entity(Type dataContextType)
         {
             // Arrange
-            IDataContext dataContext = DataContextProvider.SetupDataContext(dataContextType);
+            using IDataContext dataContext = DataContextTestHelper.SetupDataContext(dataContextType);
             City city = await dataContext.Create<City>(new City() { CityCode = "BAS", CityName = "Basingstoke", Area = "Hampshire" });
 
             // Act
@@ -49,7 +49,7 @@ namespace Entatea.Tests
         public async Task Delete_Entity_Single_Typed_Argument(Type dataContextType)
         {
             // Arrange
-            IDataContext dataContext = DataContextProvider.SetupDataContext(dataContextType);
+            using IDataContext dataContext = DataContextTestHelper.SetupDataContext(dataContextType);
             City city = await dataContext.Create<City>(new City() { CityCode = "BAS", CityName = "Basingstoke", Area = "Hampshire" });
 
             // Act
@@ -69,7 +69,7 @@ namespace Entatea.Tests
         public async Task Delete_List_Of_Entities(Type dataContextType)
         {
             // Arrange
-            IDataContext dataContext = DataContextProvider.SetupDataContext(dataContextType);
+            using IDataContext dataContext = DataContextTestHelper.SetupDataContext(dataContextType);
             await dataContext.Create<City>(new City() { CityCode = "BAS", CityName = "Basingstoke", Area = "Hampshire" });
             await dataContext.Create<City>(new City() { CityCode = "PUP", CityName = "Portsmouth", Area = "Hampshire" });
             await dataContext.Create<City>(new City() { CityCode = "BOU", CityName = "Bournemouth", Area = "Dorset" });
@@ -94,7 +94,7 @@ namespace Entatea.Tests
         public async Task Delete_List_No_Conditions(Type dataContextType)
         {
             // Arrange
-            IDataContext dataContext = DataContextProvider.SetupDataContext(dataContextType);
+            using IDataContext dataContext = DataContextTestHelper.SetupDataContext(dataContextType);
             await dataContext.Create<City>(new City() { CityCode = "BAS", CityName = "Basingstoke", Area = "Hampshire" });
             await dataContext.Create<City>(new City() { CityCode = "PUP", CityName = "Portsmouth", Area = "Hampshire" });
             await dataContext.Create<City>(new City() { CityCode = "BOU", CityName = "Bournemouth", Area = "Dorset" });
@@ -116,7 +116,7 @@ namespace Entatea.Tests
         public async Task Delete_List_Non_Existing_Conditions(Type dataContextType)
         {
             // Arrange
-            IDataContext dataContext = DataContextProvider.SetupDataContext(dataContextType);
+            using IDataContext dataContext = DataContextTestHelper.SetupDataContext(dataContextType);
             await dataContext.Create<City>(new City() { CityCode = "BAS", CityName = "Basingstoke", Area = "Hampshire" });
             await dataContext.Create<City>(new City() { CityCode = "PUP", CityName = "Portsmouth", Area = "Hampshire" });
             await dataContext.Create<City>(new City() { CityCode = "BOU", CityName = "Bournemouth", Area = "Dorset" });
@@ -144,7 +144,7 @@ namespace Entatea.Tests
         public async Task Soft_Delete_Entity(Type dataContextType)
         {
             // Arrange
-            IDataContext dataContext = DataContextProvider.SetupDataContext(dataContextType);
+            using IDataContext dataContext = DataContextTestHelper.SetupDataContext(dataContextType);
             SoftDelete softDelete = await dataContext.Create(new SoftDelete());
 
             // Act
@@ -164,7 +164,7 @@ namespace Entatea.Tests
         public async Task Soft_Delete_List_Of_Entities(Type dataContextType)
         {
             // Arrange
-            IDataContext dataContext = DataContextProvider.SetupDataContext(dataContextType);
+            using IDataContext dataContext = DataContextTestHelper.SetupDataContext(dataContextType);
             SoftDelete sd1 = await dataContext.Create(new SoftDelete());
             SoftDelete sd2 = await dataContext.Create(new SoftDelete());
             SoftDelete sd3 = await dataContext.Create(new SoftDelete());
@@ -188,7 +188,7 @@ namespace Entatea.Tests
         public async Task Delete_Discriminator_Entity(Type dataContextType)
         {
             // Arrange
-            IDataContext dataContext = DataContextProvider.SetupDataContext(dataContextType);
+            using IDataContext dataContext = DataContextTestHelper.SetupDataContext(dataContextType);
             DiscriminatorContact contact = await dataContext.Create(new DiscriminatorContact() { Name = "Paul" });
             DiscriminatorCompany company = await dataContext.Create(new DiscriminatorCompany() { Name = "Paul" });
 

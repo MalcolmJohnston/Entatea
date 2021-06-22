@@ -15,11 +15,11 @@ namespace Entatea
             return GetClassMap(type);
         }
 
-        public static ClassMap GetClassMap(Type type)
+        private static ClassMap GetClassMap(Type type)
         {
             if (!cache.ContainsKey(type.FullName))
             {
-                cache[type.FullName] = new ClassMap(type);
+                cache.TryAdd(type.FullName, new ClassMap(type));
             }
 
             return cache[type.FullName];

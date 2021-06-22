@@ -12,7 +12,7 @@ namespace Entatea.Tests
         {
             if (TestContext.CurrentContext.Test.Arguments.Length > 0)
             {
-                DataContextProvider.DeleteDataContext((Type)TestContext.CurrentContext.Test.Arguments[0]);
+                DataContextTestHelper.DeleteDataContext((Type)TestContext.CurrentContext.Test.Arguments[0]);
             }
         }
     }

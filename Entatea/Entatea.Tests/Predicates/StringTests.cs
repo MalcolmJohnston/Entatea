@@ -26,7 +26,7 @@ namespace Entatea.Tests.Predicates
         public async Task Read_With_String_Equal_Predicate(Type dataContextType)
         {
             // Arrange
-            IDataContext dataContext = DataContextProvider.SetupDataContext(dataContextType);
+            using IDataContext dataContext = DataContextTestHelper.SetupDataContext(dataContextType);
             await dataContext.Create(new Product() { Name = "Spanner" });
             await dataContext.Create(new Product() { Name = "Hammer" });
 
@@ -45,7 +45,7 @@ namespace Entatea.Tests.Predicates
         public async Task Read_With_String_Equal_Null_Predicate(Type dataContextType)
         {
             // Arrange
-            IDataContext dataContext = DataContextProvider.SetupDataContext(dataContextType);
+            using IDataContext dataContext = DataContextTestHelper.SetupDataContext(dataContextType);
             await dataContext.Create(new Product() { Name = null });
             await dataContext.Create(new Product() { Name = "Hammer" });
 
@@ -64,7 +64,7 @@ namespace Entatea.Tests.Predicates
         public async Task Read_With_String_NotEqual_Predicate(Type dataContextType)
         {
             // Arrange
-            IDataContext dataContext = DataContextProvider.SetupDataContext(dataContextType);
+            using IDataContext dataContext = DataContextTestHelper.SetupDataContext(dataContextType);
             await dataContext.Create(new Product() { Name = "Spanner" });
             await dataContext.Create(new Product() { Name = "Hammer" });
 
@@ -83,7 +83,7 @@ namespace Entatea.Tests.Predicates
         public async Task Read_With_String_In_Predicate(Type dataContextType)
         {
             // Arrange
-            IDataContext dataContext = DataContextProvider.SetupDataContext(dataContextType);
+            using IDataContext dataContext = DataContextTestHelper.SetupDataContext(dataContextType);
             await dataContext.Create(new Product() { Name = "Spanner" });
             await dataContext.Create(new Product() { Name = "Hammer" });
             await dataContext.Create(new Product() { Name = "Nail" });
@@ -103,7 +103,7 @@ namespace Entatea.Tests.Predicates
         public async Task Read_With_String_NotIn_Predicate(Type dataContextType)
         {
             // Arrange
-            IDataContext dataContext = DataContextProvider.SetupDataContext(dataContextType);
+            using IDataContext dataContext = DataContextTestHelper.SetupDataContext(dataContextType);
             await dataContext.Create(new Product() { Name = "Spanner" });
             await dataContext.Create(new Product() { Name = "Hammer" });
             await dataContext.Create(new Product() { Name = "Nail" });
@@ -124,7 +124,7 @@ namespace Entatea.Tests.Predicates
         public async Task Read_With_String_Contains_Predicate(Type dataContextType)
         {
             // Arrange
-            IDataContext dataContext = DataContextProvider.SetupDataContext(dataContextType);
+            using IDataContext dataContext = DataContextTestHelper.SetupDataContext(dataContextType);
             await dataContext.Create(new Product() { Name = "Bosch Hammer I" });
             await dataContext.Create(new Product() { Name = "Black and Decker Hammer" });
             await dataContext.Create(new Product() { Name = "Hammer B&Q" });
@@ -144,7 +144,7 @@ namespace Entatea.Tests.Predicates
         public async Task Read_With_String_StartsWith_Predicate(Type dataContextType)
         {
             // Arrange
-            IDataContext dataContext = DataContextProvider.SetupDataContext(dataContextType);
+            using IDataContext dataContext = DataContextTestHelper.SetupDataContext(dataContextType);
             await dataContext.Create(new Product() { Name = "Bosch Hammer I" });
             await dataContext.Create(new Product() { Name = "Black and Decker Hammer" });
             await dataContext.Create(new Product() { Name = "Hammer B&Q" });
@@ -165,7 +165,7 @@ namespace Entatea.Tests.Predicates
         public async Task Read_With_String_EndsWith_Predicate(Type dataContextType)
         {
             // Arrange
-            IDataContext dataContext = DataContextProvider.SetupDataContext(dataContextType);
+            using IDataContext dataContext = DataContextTestHelper.SetupDataContext(dataContextType);
             await dataContext.Create(new Product() { Name = "Bosch Hammer I" });
             await dataContext.Create(new Product() { Name = "Black and Decker Hammer" });
             await dataContext.Create(new Product() { Name = "Hammer B&Q" });

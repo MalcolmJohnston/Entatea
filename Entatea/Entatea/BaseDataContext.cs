@@ -18,6 +18,12 @@ namespace Entatea
         private readonly IConnectionProvider connectionProvider;
         private readonly ISqlProvider sqlProvider;
 
+        public DataContextState State { get; private set; } = DataContextState.NoTransaction;
+
+        protected IDbConnection Connection { get { return this.connectionProvider.GetConnection(this); } }
+
+        protected IDbTransaction Transaction { get { return this.connectionProvider.GetTransaction(); } }
+
         public BaseDataContext(
             IConnectionProvider connectionProvider, 
             ISqlBuilder sqlBuilder, 
@@ -31,18 +37,15 @@ namespace Entatea
         {
             ClassMap classMap = ClassMapper.GetClassMap<T>();
 
-            IDbConnection conn = this.connectionProvider.GetConnection();
-            IDbTransaction tran = this.connectionProvider.GetTransaction();
-            
             // set the value of the sequential key
             if (classMap.HasSequentialKey)
             {
                 // read the next id from the database
                 var parameters = classMap.ValidateAssignedKeyProperties<T>(entity).GetParameters();
-                object id = await conn.ExecuteScalarAsync(
+                object id = await this.Connection.ExecuteScalarAsync(
                     sqlProvider.GetSelectNextIdSql<T>(), 
                     parameters,
-                    tran).ConfigureAwait(false);
+                    this.Transaction).ConfigureAwait(false);
 
                 // set the sequential key on our entity
                 classMap.SequentialKey.PropertyInfo.SetValue(
@@ -80,7 +83,9 @@ namespace Entatea
             }
 
             // execute the insert
-            var row = (await conn.QueryAsync(sqlProvider.GetInsertSql<T>(), entity, tran).ConfigureAwait(false)).SingleOrDefault();
+            var row = (await this.Connection.QueryAsync(sqlProvider.GetInsertSql<T>(), entity, this.Transaction)
+                                            .ConfigureAwait(false))
+                                            .SingleOrDefault();
 
             // apply OUTPUT values to identity column
             if (classMap.HasIdentityKey)
@@ -114,11 +119,9 @@ namespace Entatea
             IList<IPredicate> predicates = classMap.ValidateKeyProperties<T>(id);
             predicates = classMap.AddDefaultPredicates<IPredicate>(predicates);
 
-            IDbConnection conn = this.connectionProvider.GetConnection();
-            IDbTransaction tran = this.connectionProvider.GetTransaction();
-            return (await conn.QueryAsync<T>(sqlProvider.GetSelectByIdSql<T>(), predicates.GetParameters(), tran)
-                .ConfigureAwait(false))
-                .SingleOrDefault();
+            return (await this.Connection.QueryAsync<T>(sqlProvider.GetSelectByIdSql<T>(), predicates.GetParameters(), this.Transaction)
+                                         .ConfigureAwait(false))
+                                         .SingleOrDefault();
         }
 
         public async Task<T> Read<T>(params IPredicate[] predicates) where T : class
@@ -128,12 +131,10 @@ namespace Entatea
             // validate that all key properties are passed
             predicates = classMap.AddDefaultPredicates<IPredicate>(predicates).ToArray();
 
-            IDbConnection conn = this.connectionProvider.GetConnection();
-            IDbTransaction tran = this.connectionProvider.GetTransaction();
-            IEnumerable<T> results = await conn.QueryAsync<T>(
+            IEnumerable<T> results = await this.Connection.QueryAsync<T>(
                 this.sqlProvider.GetSelectWhereSql<T>(predicates),
                 predicates.GetParameters(),
-                tran).ConfigureAwait(false);
+                this.Transaction).ConfigureAwait(false);
 
             if (results.Count() > 1)
             {
@@ -149,17 +150,15 @@ namespace Entatea
             ClassMap classMap = ClassMapper.GetClassMap<T>();
             IEnumerable<IPredicate> predicates = classMap.GetDefaultPredicates<T>();
 
-            IDbConnection conn = this.connectionProvider.GetConnection();
-            IDbTransaction tran = this.connectionProvider.GetTransaction();
             if (predicates.Any())
             {
-                return await conn.QueryAsync<T>(
+                return await this.Connection.QueryAsync<T>(
                     this.sqlProvider.GetSelectWhereSql<T>(predicates),
                     predicates.GetParameters(),
-                    tran).ConfigureAwait(false);
+                    this.Transaction).ConfigureAwait(false);
             }
 
-            return await conn.QueryAsync<T>(sqlProvider.GetSelectAllSql<T>()).ConfigureAwait(false);
+            return await this.Connection.QueryAsync<T>(sqlProvider.GetSelectAllSql<T>(), null, this.Transaction).ConfigureAwait(false);
         }
 
         public async Task<IEnumerable<T>> ReadList<T>(object whereConditions) where T : class
@@ -212,12 +211,10 @@ namespace Entatea
             // add the WHERE clause parameters to our update dictionary
             updDictionary = updDictionary.Union(keyParameters).ToDictionary(x => x.Key, x => x.Value);
 
-            IDbConnection conn = this.connectionProvider.GetConnection();
-            IDbTransaction tran = this.connectionProvider.GetTransaction();
-            await conn.ExecuteAsync(sqlProvider.GetUpdateSql<T>(properties), updDictionary, tran).ConfigureAwait(false);
-            
-            return (await conn.QueryAsync<T>(sqlProvider.GetSelectByIdSql<T>(), keyParameters, tran).ConfigureAwait(false))
-                .SingleOrDefault();
+            await this.Connection.ExecuteAsync(sqlProvider.GetUpdateSql<T>(properties), updDictionary, this.Transaction)
+                                 .ConfigureAwait(false);
+
+            return await this.Read<T>(keyDictionary);
         }
 
         public async Task Delete<T>(object id) where T : class
@@ -226,11 +223,10 @@ namespace Entatea
 
             // validate the key properties
             IList<IPredicate> predicates = classMap.ValidateKeyProperties<T>(id);
-            predicates = classMap.AddDefaultPredicates<IPredicate>(predicates);
+            predicates = classMap.AddDefaultPredicates<T>(predicates);
 
-            IDbConnection conn = this.connectionProvider.GetConnection();
-            IDbTransaction tran = this.connectionProvider.GetTransaction();
-            await conn.QueryAsync<T>(sqlProvider.GetDeleteByIdSql<T>(), predicates.GetParameters(), tran).ConfigureAwait(false);
+            await this.Connection.QueryAsync<T>(sqlProvider.GetDeleteByIdSql<T>(), predicates.GetParameters(), this.Transaction)
+                                 .ConfigureAwait(false);
         }
 
         public async Task DeleteList<T>(object whereConditions) where T : class
@@ -262,12 +258,10 @@ namespace Entatea
             ClassMap classMap = ClassMapper.GetClassMap<T>();
             predicates = classMap.AddDefaultPredicates<T>(predicates);
 
-            IDbConnection conn = this.connectionProvider.GetConnection();
-            IDbTransaction tran = this.connectionProvider.GetTransaction();
-            return await conn.QueryAsync<T>(
+            return await this.Connection.QueryAsync<T>(
                 this.sqlProvider.GetSelectWhereSql<T>(predicates),
                 predicates.GetParameters(),
-                tran).ConfigureAwait(false);
+                this.Transaction).ConfigureAwait(false);
         }
 
         private async Task<PagedList<T>> ReadList<T>(IEnumerable<IPredicate> predicates, object sortOrders, int pageSize, int pageNumber) where T : class
@@ -282,17 +276,14 @@ namespace Entatea
             // get the parameters
             var parameters = predicates.GetParameters();
 
-            IDbConnection conn = this.connectionProvider.GetConnection();
-            IDbTransaction tran = this.connectionProvider.GetTransaction();
-
             // read the count
-            int total = await conn.ExecuteScalarAsync<int>(sqlProvider.GetSelectCountSql<T>(predicates), parameters, tran);
+            int total = await this.Connection.ExecuteScalarAsync<int>(sqlProvider.GetSelectCountSql<T>(predicates), parameters, this.Transaction);
 
             // read the rows
-            IEnumerable<T> results = await conn.QueryAsync<T>(
+            IEnumerable<T> results = await this.Connection.QueryAsync<T>(
                 sqlProvider.GetSelectWhereSql<T>(predicates, sortOrders, firstRow, lastRow),
                 parameters,
-                tran);
+                this.Transaction);
 
             return new PagedList<T>()
             {
@@ -314,31 +305,37 @@ namespace Entatea
             ClassMap classMap = ClassMapper.GetClassMap<T>();
             predicates = classMap.AddDefaultPredicates<T>(predicates);
 
-            IDbConnection conn = this.connectionProvider.GetConnection();
-            IDbTransaction tran = this.connectionProvider.GetTransaction();
-            await conn.QueryAsync<T>(sqlProvider.GetDeleteWhereSql<T>(predicates), predicates.GetParameters(), tran)
-                      .ConfigureAwait(false);
+            await this.Connection.QueryAsync<T>(sqlProvider.GetDeleteWhereSql<T>(predicates), predicates.GetParameters(), this.Transaction)
+                                 .ConfigureAwait(false);
         }
 
         public void BeginTransaction()
         {
             this.connectionProvider.BeginTransaction(this);
+            this.State = DataContextState.InTransaction;
         }
 
         public void Commit()
         {
             this.connectionProvider.Commit(this);
+            this.State = DataContextState.Committed;
         }
 
         public void Rollback()
         {
-            this.connectionProvider.Rollback(this);
+            try
+            {
+                this.connectionProvider.Rollback(this);
+            }
+            finally
+            {
+                this.State = DataContextState.Rolledback;
+            }
         }
 
         public void Dispose()
         {
-            this.connectionProvider.NotifyDisposed(this);
-            this.connectionProvider.CloseConnection();
+           this.connectionProvider.NotifyDisposed(this);
         }
     }
 }

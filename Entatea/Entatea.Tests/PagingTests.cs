@@ -29,7 +29,7 @@ namespace Entatea.Tests
         public async Task Read_Paged_First_Page(Type dataContextType)
         {
             // Arrange
-            IDataContext dataContext = DataContextProvider.SetupDataContext(dataContextType);
+            using IDataContext dataContext = DataContextTestHelper.SetupDataContext(dataContextType);
             await dataContext.Create(new City() { CityCode = "PUP", CityName = "Portsmouth", Area = "Hampshire" });
             await dataContext.Create(new City() { CityCode = "SOU", CityName = "Southampton", Area = "Hampshire" });
             await dataContext.Create(new City() { CityCode = "BAS", CityName = "Basingstoke", Area = "Hampshire" });
@@ -57,7 +57,7 @@ namespace Entatea.Tests
         public async Task Read_Paged_Neither_First_Or_Last_Page(Type dataContextType)
         {
             // Arrange
-            IDataContext dataContext = DataContextProvider.SetupDataContext(dataContextType);
+            using IDataContext dataContext = DataContextTestHelper.SetupDataContext(dataContextType);
             await dataContext.Create(new City() { CityCode = "PUP", CityName = "Portsmouth", Area = "Hampshire" });
             await dataContext.Create(new City() { CityCode = "SOU", CityName = "Southampton", Area = "Hampshire" });
             await dataContext.Create(new City() { CityCode = "BAS", CityName = "Basingstoke", Area = "Hampshire" });
@@ -88,7 +88,7 @@ namespace Entatea.Tests
         public async Task Read_Paged_Last_Page(Type dataContextType)
         {
             // Arrange
-            IDataContext dataContext = DataContextProvider.SetupDataContext(dataContextType);
+            using IDataContext dataContext = DataContextTestHelper.SetupDataContext(dataContextType);
             await dataContext.Create(new City() { CityCode = "PUP", CityName = "Portsmouth", Area = "Hampshire" });
             await dataContext.Create(new City() { CityCode = "SOU", CityName = "Southampton", Area = "Hampshire" });
             await dataContext.Create(new City() { CityCode = "BAS", CityName = "Basingstoke", Area = "Hampshire" });
@@ -121,7 +121,7 @@ namespace Entatea.Tests
         public async Task Read_Paged_With_Where(Type dataContextType)
         {
             // Arrange
-            IDataContext dataContext = DataContextProvider.SetupDataContext(dataContextType);
+            using IDataContext dataContext = DataContextTestHelper.SetupDataContext(dataContextType);
             await dataContext.Create(new City() { CityCode = "PUP", CityName = "Portsmouth", Area = "Hampshire" });
             await dataContext.Create(new City() { CityCode = "SOU", CityName = "Southampton", Area = "Hampshire" });
             await dataContext.Create(new City() { CityCode = "BAS", CityName = "Basingstoke", Area = "Hampshire" });
@@ -152,7 +152,7 @@ namespace Entatea.Tests
         public async Task Read_Paged_With_Where_Dictionary(Type dataContextType)
         {
             // Arrange
-            IDataContext dataContext = DataContextProvider.SetupDataContext(dataContextType);
+            using IDataContext dataContext = DataContextTestHelper.SetupDataContext(dataContextType);
             await dataContext.Create(new City() { CityCode = "PUP", CityName = "Portsmouth", Area = "Hampshire" });
             await dataContext.Create(new City() { CityCode = "SOU", CityName = "Southampton", Area = "Hampshire" });
             await dataContext.Create(new City() { CityCode = "BAS", CityName = "Basingstoke", Area = "Hampshire" });
@@ -187,7 +187,7 @@ namespace Entatea.Tests
         public async Task Read_Paged_With_OrderBy(Type dataContextType)
         {
             // Arrange
-            IDataContext dataContext = DataContextProvider.SetupDataContext(dataContextType);
+            using IDataContext dataContext = DataContextTestHelper.SetupDataContext(dataContextType);
             await dataContext.Create(new City() { CityCode = "PUP", CityName = "Portsmouth", Area = "Hampshire" });
             await dataContext.Create(new City() { CityCode = "SOU", CityName = "Southampton", Area = "Hampshire" });
             await dataContext.Create(new City() { CityCode = "BAS", CityName = "Basingstoke", Area = "Hampshire" });
@@ -230,7 +230,7 @@ namespace Entatea.Tests
         public async Task Read_Paged_With_OrderBy_Dictionary(Type dataContextType)
         {
             // Arrange
-            IDataContext dataContext = DataContextProvider.SetupDataContext(dataContextType);
+            using IDataContext dataContext = DataContextTestHelper.SetupDataContext(dataContextType);
             await dataContext.Create(new City() { CityCode = "PUP", CityName = "Portsmouth", Area = "Hampshire" });
             await dataContext.Create(new City() { CityCode = "SOU", CityName = "Southampton", Area = "Hampshire" });
             await dataContext.Create(new City() { CityCode = "BAS", CityName = "Basingstoke", Area = "Hampshire" });
@@ -273,7 +273,7 @@ namespace Entatea.Tests
         public async Task Read_Paged_With_Where_And_OrderBy(Type dataContextType)
         {
             // Arrange
-            IDataContext dataContext = DataContextProvider.SetupDataContext(dataContextType);
+            using IDataContext dataContext = DataContextTestHelper.SetupDataContext(dataContextType);
             await dataContext.Create(new City() { CityCode = "PUP", CityName = "Portsmouth", Area = "Hampshire" });
             await dataContext.Create(new City() { CityCode = "SOU", CityName = "Southampton", Area = "Hampshire" });
             await dataContext.Create(new City() { CityCode = "BAS", CityName = "Basingstoke", Area = "Hampshire" });
@@ -305,7 +305,7 @@ namespace Entatea.Tests
         public async Task Read_Paged_With_Where_Dictionary_And_OrderBy_Dictionary(Type dataContextType)
         {
             // Arrange
-            IDataContext dataContext = DataContextProvider.SetupDataContext(dataContextType);
+            using IDataContext dataContext = DataContextTestHelper.SetupDataContext(dataContextType);
             await dataContext.Create(new City() { CityCode = "PUP", CityName = "Portsmouth", Area = "Hampshire" });
             await dataContext.Create(new City() { CityCode = "SOU", CityName = "Southampton", Area = "Hampshire" });
             await dataContext.Create(new City() { CityCode = "BAS", CityName = "Basingstoke", Area = "Hampshire" });
@@ -337,7 +337,7 @@ namespace Entatea.Tests
         public async Task Read_Paged_With_Invalid_Where(Type dataContextType)
         {
             // Arrange
-            IDataContext dataContext = DataContextProvider.SetupDataContext(dataContextType);
+            using IDataContext dataContext = DataContextTestHelper.SetupDataContext(dataContextType);
             await dataContext.Create(new City() { CityCode = "PUP", CityName = "Portsmouth", Area = "Hampshire" });
             await dataContext.Create(new City() { CityCode = "SOU", CityName = "Southampton", Area = "Hampshire" });
             await dataContext.Create(new City() { CityCode = "BAS", CityName = "Basingstoke", Area = "Hampshire" });
@@ -361,7 +361,7 @@ namespace Entatea.Tests
         public async Task Read_Paged_With_Invalid_Where_Dictionary(Type dataContextType)
         {
             // Arrange
-            IDataContext dataContext = DataContextProvider.SetupDataContext(dataContextType);
+            using IDataContext dataContext = DataContextTestHelper.SetupDataContext(dataContextType);
             await dataContext.Create(new City() { CityCode = "PUP", CityName = "Portsmouth", Area = "Hampshire" });
             await dataContext.Create(new City() { CityCode = "SOU", CityName = "Southampton", Area = "Hampshire" });
             await dataContext.Create(new City() { CityCode = "BAS", CityName = "Basingstoke", Area = "Hampshire" });
@@ -388,7 +388,7 @@ namespace Entatea.Tests
         public async Task Read_Paged_With_Invalid_OrderBy(Type dataContextType)
         {
             // Arrange
-            IDataContext dataContext = DataContextProvider.SetupDataContext(dataContextType);
+            using IDataContext dataContext = DataContextTestHelper.SetupDataContext(dataContextType);
             await dataContext.Create(new City() { CityCode = "PUP", CityName = "Portsmouth", Area = "Hampshire" });
             await dataContext.Create(new City() { CityCode = "SOU", CityName = "Southampton", Area = "Hampshire" });
             await dataContext.Create(new City() { CityCode = "BAS", CityName = "Basingstoke", Area = "Hampshire" });
@@ -415,7 +415,7 @@ namespace Entatea.Tests
         public async Task Read_Paged_With_Invalid_OrderBy_Dictionary(Type dataContextType)
         {
             // Arrange
-            IDataContext dataContext = DataContextProvider.SetupDataContext(dataContextType);
+            using IDataContext dataContext = DataContextTestHelper.SetupDataContext(dataContextType);
             await dataContext.Create(new City() { CityCode = "PUP", CityName = "Portsmouth", Area = "Hampshire" });
             await dataContext.Create(new City() { CityCode = "SOU", CityName = "Southampton", Area = "Hampshire" });
             await dataContext.Create(new City() { CityCode = "BAS", CityName = "Basingstoke", Area = "Hampshire" });

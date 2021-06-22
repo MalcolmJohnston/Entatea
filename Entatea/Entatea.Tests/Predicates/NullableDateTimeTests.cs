@@ -25,7 +25,7 @@ namespace Entatea.Tests.Predicates
         public async Task Read_With_NullableDateTime_Equal_Predicate(Type dataContextType)
         {
             // Arrange
-            IDataContext dataContext = DataContextProvider.SetupDataContext(dataContextType);
+            using IDataContext dataContext = DataContextTestHelper.SetupDataContext(dataContextType);
             DateTime now = DateTime.Now.Date;
             await dataContext.Create(new Product2() { Updated = now });
             await dataContext.Create(new Product2() { Updated = now.AddDays(-1) });
@@ -45,7 +45,7 @@ namespace Entatea.Tests.Predicates
         public async Task Read_With_NullableDateTime_Equal_Null_Predicate(Type dataContextType)
         {
             // Arrange
-            IDataContext dataContext = DataContextProvider.SetupDataContext(dataContextType);
+            using IDataContext dataContext = DataContextTestHelper.SetupDataContext(dataContextType);
             DateTime now = DateTime.Now.Date;
             await dataContext.Create(new Product2() { Updated = null });
             await dataContext.Create(new Product2() { Updated = now });
@@ -65,7 +65,7 @@ namespace Entatea.Tests.Predicates
         public async Task Read_With_NullableDateTime_NotEqual_Predicate(Type dataContextType)
         {
             // Arrange
-            IDataContext dataContext = DataContextProvider.SetupDataContext(dataContextType);
+            using IDataContext dataContext = DataContextTestHelper.SetupDataContext(dataContextType);
             DateTime now = DateTime.Now.Date;
             await dataContext.Create(new Product2() { Updated = now });
             await dataContext.Create(new Product2() { Updated = now.AddDays(-1) });
@@ -85,7 +85,7 @@ namespace Entatea.Tests.Predicates
         public async Task Read_With_NullableDateTime_In_Predicate(Type dataContextType)
         {
             // Arrange
-            IDataContext dataContext = DataContextProvider.SetupDataContext(dataContextType);
+            using IDataContext dataContext = DataContextTestHelper.SetupDataContext(dataContextType);
             DateTime today = DateTime.Now.Date;
             DateTime yesterday = today.AddDays(-1);
             DateTime tomorrow = today.AddDays(1);
@@ -112,7 +112,7 @@ namespace Entatea.Tests.Predicates
         public async Task Read_With_NullableDateTime_NotIn_Predicate(Type dataContextType)
         {
             // Arrange
-            IDataContext dataContext = DataContextProvider.SetupDataContext(dataContextType);
+            using IDataContext dataContext = DataContextTestHelper.SetupDataContext(dataContextType);
             DateTime today = DateTime.Now.Date;
             DateTime yesterday = today.AddDays(-1);
             DateTime tomorrow = today.AddDays(1);
@@ -139,7 +139,7 @@ namespace Entatea.Tests.Predicates
         public async Task Read_With_NullableDateTime_GreaterThan_Predicate(Type dataContextType)
         {
             // Arrange
-            IDataContext dataContext = DataContextProvider.SetupDataContext(dataContextType);
+            using IDataContext dataContext = DataContextTestHelper.SetupDataContext(dataContextType);
             DateTime today = DateTime.Now.Date;
             DateTime yesterday = today.AddDays(-1);
             DateTime tomorrow = today.AddDays(1);
@@ -165,7 +165,7 @@ namespace Entatea.Tests.Predicates
         public async Task Read_With_NullableDateTime_GreaterThanOrEqual_Predicate(Type dataContextType)
         {
             // Arrange
-            IDataContext dataContext = DataContextProvider.SetupDataContext(dataContextType);
+            using IDataContext dataContext = DataContextTestHelper.SetupDataContext(dataContextType);
             DateTime today = DateTime.Now.Date;
             DateTime yesterday = today.AddDays(-1);
             DateTime tomorrow = today.AddDays(1);
@@ -191,7 +191,7 @@ namespace Entatea.Tests.Predicates
         public async Task Read_With_NullableDateTime_LessThanPredicate(Type dataContextType)
         {
             // Arrange
-            IDataContext dataContext = DataContextProvider.SetupDataContext(dataContextType);
+            using IDataContext dataContext = DataContextTestHelper.SetupDataContext(dataContextType);
             DateTime today = DateTime.Now.Date;
             DateTime yesterday = today.AddDays(-1);
             DateTime tomorrow = today.AddDays(1);
@@ -217,7 +217,7 @@ namespace Entatea.Tests.Predicates
         public async Task Read_With_NullableDateTime_LessThanOrEqual_Predicate(Type dataContextType)
         {
             // Arrange
-            IDataContext dataContext = DataContextProvider.SetupDataContext(dataContextType);
+            using IDataContext dataContext = DataContextTestHelper.SetupDataContext(dataContextType);
             DateTime today = DateTime.Now.Date;
             DateTime yesterday = today.AddDays(-1);
             DateTime tomorrow = today.AddDays(1);

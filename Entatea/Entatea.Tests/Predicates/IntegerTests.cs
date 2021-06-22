@@ -26,7 +26,7 @@ namespace Entatea.Tests.Predicates
         public async Task Read_With_Int_Equal_Predicate(Type dataContextType)
         {
             // Arrange
-            IDataContext dataContext = DataContextProvider.SetupDataContext(dataContextType);
+            using IDataContext dataContext = DataContextTestHelper.SetupDataContext(dataContextType);
             await dataContext.Create(new Product() { Stock = 10 });
             await dataContext.Create(new Product() { Stock = 11 });
 
@@ -45,7 +45,7 @@ namespace Entatea.Tests.Predicates
         public async Task Read_With_Int_NotEqual_Predicate(Type dataContextType)
         {
             // Arrange
-            IDataContext dataContext = DataContextProvider.SetupDataContext(dataContextType);
+            using IDataContext dataContext = DataContextTestHelper.SetupDataContext(dataContextType);
             await dataContext.Create(new Product() { Stock = 10 });
             await dataContext.Create(new Product() { Stock = 11 });
 
@@ -64,7 +64,7 @@ namespace Entatea.Tests.Predicates
         public async Task Read_With_Int_In_Predicate(Type dataContextType)
         {
             // Arrange
-            IDataContext dataContext = DataContextProvider.SetupDataContext(dataContextType);
+            using IDataContext dataContext = DataContextTestHelper.SetupDataContext(dataContextType);
             await dataContext.Create(new Product() { Stock = 10 });
             await dataContext.Create(new Product() { Stock = 10 });
             await dataContext.Create(new Product() { Stock = 11 });
@@ -86,7 +86,7 @@ namespace Entatea.Tests.Predicates
         public async Task Read_With_Int_NotIn_Predicate(Type dataContextType)
         {
             // Arrange
-            IDataContext dataContext = DataContextProvider.SetupDataContext(dataContextType);
+            using IDataContext dataContext = DataContextTestHelper.SetupDataContext(dataContextType);
             await dataContext.Create(new Product() { Stock = 10 });
             await dataContext.Create(new Product() { Stock = 10 });
             await dataContext.Create(new Product() { Stock = 11 });
@@ -108,7 +108,7 @@ namespace Entatea.Tests.Predicates
         public async Task Read_With_Int_GreaterThan_Predicate(Type dataContextType)
         {
             // Arrange
-            IDataContext dataContext = DataContextProvider.SetupDataContext(dataContextType);
+            using IDataContext dataContext = DataContextTestHelper.SetupDataContext(dataContextType);
             await dataContext.Create(new Product() { Stock = 10 });
             await dataContext.Create(new Product() { Stock = 10 });
             await dataContext.Create(new Product() { Stock = 11 });
@@ -129,7 +129,7 @@ namespace Entatea.Tests.Predicates
         public async Task Read_With_Int_GreaterThanOrEqual_Predicate(Type dataContextType)
         {
             // Arrange
-            IDataContext dataContext = DataContextProvider.SetupDataContext(dataContextType);
+            using IDataContext dataContext = DataContextTestHelper.SetupDataContext(dataContextType);
             await dataContext.Create(new Product() { Stock = 10 });
             await dataContext.Create(new Product() { Stock = 10 });
             await dataContext.Create(new Product() { Stock = 11 });
@@ -150,7 +150,7 @@ namespace Entatea.Tests.Predicates
         public async Task Read_With_Int_LessThanPredicate(Type dataContextType)
         {
             // Arrange
-            IDataContext dataContext = DataContextProvider.SetupDataContext(dataContextType);
+            using IDataContext dataContext = DataContextTestHelper.SetupDataContext(dataContextType);
             await dataContext.Create(new Product() { Stock = 10 });
             await dataContext.Create(new Product() { Stock = 10 });
             await dataContext.Create(new Product() { Stock = 11 });
@@ -171,7 +171,7 @@ namespace Entatea.Tests.Predicates
         public async Task Read_With_Int_LessThanOrEqual_Predicate(Type dataContextType)
         {
             // Arrange
-            IDataContext dataContext = DataContextProvider.SetupDataContext(dataContextType);
+            using IDataContext dataContext = DataContextTestHelper.SetupDataContext(dataContextType);
             await dataContext.Create(new Product() { Stock = 10 });
             await dataContext.Create(new Product() { Stock = 10 });
             await dataContext.Create(new Product() { Stock = 11 });
@@ -192,7 +192,7 @@ namespace Entatea.Tests.Predicates
         public async Task Read_With_Int_Between_Predicate(Type dataContextType)
         {
             // Arrange
-            IDataContext dataContext = DataContextProvider.SetupDataContext(dataContextType);
+            using IDataContext dataContext = DataContextTestHelper.SetupDataContext(dataContextType);
             await dataContext.Create(new Product() { Stock = 5 });
             await dataContext.Create(new Product() { Stock = 10 });
             await dataContext.Create(new Product() { Stock = 15 });
@@ -213,7 +213,7 @@ namespace Entatea.Tests.Predicates
         public async Task Read_With_Int_NotBetween_Predicate(Type dataContextType)
         {
             // Arrange
-            IDataContext dataContext = DataContextProvider.SetupDataContext(dataContextType);
+            using IDataContext dataContext = DataContextTestHelper.SetupDataContext(dataContextType);
             await dataContext.Create(new Product() { Stock = 5 });
             await dataContext.Create(new Product() { Stock = 10 });
             await dataContext.Create(new Product() { Stock = 15 });

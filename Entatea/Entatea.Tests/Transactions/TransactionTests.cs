@@ -21,7 +21,7 @@ namespace Entatea.Tests.Transactions
         public async Task Test_Created_Records_Commited(Type dataContextType)
         {
             // Arrange
-            using IDataContext dataContext = DataContextProvider.SetupDataContext(dataContextType);
+            using IDataContext dataContext = DataContextTestHelper.SetupDataContext(dataContextType);
 
             // Act
             dataContext.BeginTransaction();
@@ -40,7 +40,7 @@ namespace Entatea.Tests.Transactions
         public async Task Test_Created_Records_Rolledback_Explicit(Type dataContextType)
         {
             // Arrange
-            using IDataContext dataContext = DataContextProvider.SetupDataContext(dataContextType);
+            using IDataContext dataContext = DataContextTestHelper.SetupDataContext(dataContextType);
 
             // Act
             dataContext.BeginTransaction();
@@ -59,7 +59,7 @@ namespace Entatea.Tests.Transactions
         public async Task Test_Created_Records_Rolledback_Implicit(Type dataContextType)
         {
             // Arrange
-            using (IDataContext dc1 = DataContextProvider.SetupDataContext(dataContextType))
+            using (IDataContext dc1 = DataContextTestHelper.SetupDataContext(dataContextType))
             {
                 // Act
                 dc1.BeginTransaction();
@@ -68,7 +68,7 @@ namespace Entatea.Tests.Transactions
             }
 
             // Assert
-            using IDataContext dc2 = DataContextProvider.SetupDataContext(dataContextType);
+            using IDataContext dc2 = DataContextTestHelper.SetupDataContext(dataContextType);
             var products = await dc2.ReadAll<Product>();
             Assert.AreEqual(0, products.Count());
         }
@@ -79,7 +79,7 @@ namespace Entatea.Tests.Transactions
         public async Task Test_Updated_Records_Comitted(Type dataContextType)
         {
             // Arrange
-            using IDataContext dataContext = DataContextProvider.SetupDataContext(dataContextType);
+            using IDataContext dataContext = DataContextTestHelper.SetupDataContext(dataContextType);
             Product product1 = await dataContext.Create(new Product() { Name = "Product 1" }).ConfigureAwait(false);
             Product product2 = await dataContext.Create(new Product() { Name = "Product 1" }).ConfigureAwait(false);
             
@@ -105,7 +105,7 @@ namespace Entatea.Tests.Transactions
         public async Task Test_Updated_Records_Rolledback_Explicit(Type dataContextType)
         {
             // Arrange
-            using IDataContext dataContext = DataContextProvider.SetupDataContext(dataContextType);
+            using IDataContext dataContext = DataContextTestHelper.SetupDataContext(dataContextType);
             Product original1 = await dataContext.Create(new Product() { Name = "Product 1" }).ConfigureAwait(false);
             Product original2 = await dataContext.Create(new Product() { Name = "Product 2" }).ConfigureAwait(false);
 
@@ -131,7 +131,7 @@ namespace Entatea.Tests.Transactions
         {
             // Arrange
             Product original1, original2, updated1, updated2;
-            using (IDataContext dataContext = DataContextProvider.SetupDataContext(dataContextType))
+            using (IDataContext dataContext = DataContextTestHelper.SetupDataContext(dataContextType))
             {
                 original1 = await dataContext.Create(new Product() { Name = "Product 1" }).ConfigureAwait(false);
                 original2 = await dataContext.Create(new Product() { Name = "Product 2" }).ConfigureAwait(false);
@@ -143,7 +143,7 @@ namespace Entatea.Tests.Transactions
             }
 
             // Assert
-            using IDataContext dataContext2 = DataContextProvider.SetupDataContext(dataContextType);
+            using IDataContext dataContext2 = DataContextTestHelper.SetupDataContext(dataContextType);
             Product read1 = await dataContext2.Read<Product>(original1.Id);
             Product read2 = await dataContext2.Read<Product>(original2.Id);
             Assert.AreEqual(original1.Name, read1.Name);
@@ -152,22 +152,23 @@ namespace Entatea.Tests.Transactions
             Assert.AreNotEqual(updated2.Name, read2.Name);
         }
 
-        [Test]
-        public async Task Test_Nested_Transactions_Both_Committed_Sql_Server()
+        [TestCase(typeof(SqlServerDataContext))]
+        [TestCase(typeof(MySqlDataContext))]
+        [TestCase(typeof(SqliteDataContext))]
+        public async Task Test_Nested_Transactions_Both_Committed(Type dataContextType)
         {
             // Arrange
-            LocalDbTestHelper.CreateTestDatabase(TestContext.CurrentContext.Test.FullName);
-            string connectionString = LocalDbTestHelper.GetTestConnectionString(TestContext.CurrentContext.Test.FullName);
-            SqlServerConnectionProvider connectionProvider = new SqlServerConnectionProvider(connectionString);
+            DataContextTestHelper.CreateTestDatabase(dataContextType);
+            IConnectionProvider connectionProvider = DataContextTestHelper.GetConnectionProvider(dataContextType);
 
             // Act
-            using (IDataContext dataContext1 = new SqlServerDataContext(connectionProvider))
+            using (IDataContext dataContext1 = DataContextTestHelper.GetDataContext(dataContextType, connectionProvider))
             {
                 dataContext1.BeginTransaction();  // creates new transaction
                 await dataContext1.Create(new Product() { Name = "Product 1" }).ConfigureAwait(false);
 
                 // create second data context with same connection provider
-                using (IDataContext dataContext2 = new SqlServerDataContext(connectionProvider))
+                using (IDataContext dataContext2 = DataContextTestHelper.GetDataContext(dataContextType, connectionProvider))
                 {
                     dataContext2.BeginTransaction(); // adds a reference to the outer transaction
                     await dataContext2.Create(new Product() { Name = "Product 2" }).ConfigureAwait(false);
@@ -182,59 +183,68 @@ namespace Entatea.Tests.Transactions
             }
 
             // Assert
-            using IDataContext dataContext3 = new SqlServerDataContext(connectionString);
+            using IDataContext dataContext3 = DataContextTestHelper.GetDataContext(dataContextType, connectionProvider);
             var products = await dataContext3.ReadAll<Product>();
             Assert.AreEqual(4, products.Count());
         }
 
-        [Test]
-        public async Task Test_Nested_Transactions_Inner_Rollback_SqlServer()
+        [TestCase(typeof(SqlServerDataContext))]
+        [TestCase(typeof(MySqlDataContext))]
+        [TestCase(typeof(SqliteDataContext))]
+        public async Task Test_Nested_Transactions_Inner_Rollback(Type dataContextType)
         {
             // Arrange
-            LocalDbTestHelper.CreateTestDatabase(TestContext.CurrentContext.Test.FullName);
-            string connectionString = LocalDbTestHelper.GetTestConnectionString(TestContext.CurrentContext.Test.FullName);
-            SqlServerConnectionProvider connectionProvider = new SqlServerConnectionProvider(connectionString);
+            DataContextTestHelper.CreateTestDatabase(dataContextType);
+            IConnectionProvider connectionProvider = DataContextTestHelper.GetConnectionProvider(dataContextType);
 
             // Act / Assert
-            using (IDataContext dataContext1 = new SqlServerDataContext(connectionProvider))
+            using (IDataContext dataContext1 = DataContextTestHelper.GetDataContext(dataContextType, connectionProvider))
             {
                 dataContext1.BeginTransaction();  // creates new transaction
                 await dataContext1.Create(new Product() { Name = "Product 1" }).ConfigureAwait(false);
 
                 // create second data context with same connection provider
-                using (IDataContext dataContext2 = new SqlServerDataContext(connectionProvider))
+                using (IDataContext dataContext2 = DataContextTestHelper.GetDataContext(dataContextType, connectionProvider))
                 {
                     dataContext2.BeginTransaction(); // adds a reference to the outer transaction
                     await dataContext2.Create(new Product() { Name = "Product 2" }).ConfigureAwait(false);
                     await dataContext2.Create(new Product() { Name = "Product 3" }).ConfigureAwait(false);
 
                     // rollsback the transaction and throws exception
-                    Assert.Throws<InvalidOperationException>(() => { dataContext2.Rollback(); }); 
+                    try
+                    {
+                        dataContext2.Rollback();
+                    }
+                    catch (Exception ex)
+                    {
+                        Assert.IsTrue(ex.GetType().IsAssignableFrom(typeof(InvalidOperationException)));
+                    }
                 }
             }
 
             // Assert
-            using IDataContext dataContext3 = new SqlServerDataContext(connectionString);
+            using IDataContext dataContext3 = DataContextTestHelper.GetDataContext(dataContextType, connectionProvider);
             var products = await dataContext3.ReadAll<Product>();
             Assert.AreEqual(0, products.Count());
         }
 
-        [Test]
-        public async Task Test_Nested_Transactions_Outer_Rollback_SqlServer()
+        [TestCase(typeof(SqlServerDataContext))]
+        [TestCase(typeof(MySqlDataContext))]
+        [TestCase(typeof(SqliteDataContext))]
+        public async Task Test_Nested_Transactions_Outer_Rollback(Type dataContextType)
         {
             // Arrange
-            LocalDbTestHelper.CreateTestDatabase(TestContext.CurrentContext.Test.FullName);
-            string connectionString = LocalDbTestHelper.GetTestConnectionString(TestContext.CurrentContext.Test.FullName);
-            SqlServerConnectionProvider connectionProvider = new SqlServerConnectionProvider(connectionString);
+            DataContextTestHelper.CreateTestDatabase(dataContextType);
+            IConnectionProvider connectionProvider = DataContextTestHelper.GetConnectionProvider(dataContextType);
 
             // Act
-            using (IDataContext dataContext1 = new SqlServerDataContext(connectionProvider))
+            using (IDataContext dataContext1 = DataContextTestHelper.GetDataContext(dataContextType, connectionProvider))
             {
                 dataContext1.BeginTransaction();  // creates new transaction
                 await dataContext1.Create(new Product() { Name = "Product 1" }).ConfigureAwait(false);
 
                 // create second data context with same connection provider
-                using (IDataContext dataContext2 = new SqlServerDataContext(connectionProvider))
+                using (IDataContext dataContext2 = DataContextTestHelper.GetDataContext(dataContextType, connectionProvider))
                 {
                     dataContext2.BeginTransaction(); // adds a reference to the outer transaction
                     await dataContext2.Create(new Product() { Name = "Product 2" }).ConfigureAwait(false);
@@ -249,7 +259,7 @@ namespace Entatea.Tests.Transactions
             }
 
             // Assert
-            using IDataContext dataContext3 = new SqlServerDataContext(connectionString);
+            using IDataContext dataContext3 = DataContextTestHelper.GetDataContext(dataContextType, connectionProvider);
             var products = await dataContext3.ReadAll<Product>();
             Assert.AreEqual(0, products.Count());
         }

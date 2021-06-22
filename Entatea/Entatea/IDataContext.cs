@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Data;
 using System.Threading.Tasks;
 using Entatea.Predicate;
 
@@ -7,6 +8,8 @@ namespace Entatea
 {
     public interface IDataContext : IDisposable
     {
+        DataContextState State { get; }
+
         void BeginTransaction();
 
         void Commit();

@@ -30,7 +30,7 @@ namespace Entatea.Tests
         public async Task Update_Editable_Property(Type dataContextType)
         {
             // Arrange
-            IDataContext dataContext = DataContextProvider.SetupDataContext(dataContextType);
+            using IDataContext dataContext = DataContextTestHelper.SetupDataContext(dataContextType);
             City city = await dataContext.Create<City>(new City() { CityCode = "BAS", CityName = "Basingstoke", Area = "Hampshire" });
 
             // Act
@@ -53,7 +53,7 @@ namespace Entatea.Tests
         public async Task Update_Editable_Property_Expando_Object(Type dataContextType)
         {
             // Arrange
-            IDataContext dataContext = DataContextProvider.SetupDataContext(dataContextType);
+            using IDataContext dataContext = DataContextTestHelper.SetupDataContext(dataContextType);
             City city = await dataContext.Create<City>(new City() { CityCode = "BAS", CityName = "Basingstoke", Area = "Hampshire" });
 
             // Act
@@ -79,7 +79,7 @@ namespace Entatea.Tests
         public async Task Update_Editable_Properties(Type dataContextType)
         {
             // Arrange
-            IDataContext dataContext = DataContextProvider.SetupDataContext(dataContextType);
+            using IDataContext dataContext = DataContextTestHelper.SetupDataContext(dataContextType);
             City city = await dataContext.Create<City>(new City() { CityCode = "BAS", CityName = "Basingstoke", Area = "Hampshire" });
 
             // Act
@@ -110,7 +110,7 @@ namespace Entatea.Tests
         public async Task Update_With_Datestamp(Type dataContextType)
         {
             // Arrange
-            IDataContext dataContext = DataContextProvider.SetupDataContext(dataContextType);
+            using IDataContext dataContext = DataContextTestHelper.SetupDataContext(dataContextType);
 
             // insert row
             DateStamp row = await dataContext.Create(new DateStamp() { Name = "Key", Value = "Value" });
@@ -140,7 +140,7 @@ namespace Entatea.Tests
         public async Task Update_Soft_Delete_Column(Type dataContextType)
         {
             // Arrange
-            IDataContext dataContext = DataContextProvider.SetupDataContext(dataContextType);
+            using IDataContext dataContext = DataContextTestHelper.SetupDataContext(dataContextType);
             SoftDelete softDelete = await dataContext.Create<SoftDelete>(new SoftDelete());
 
             // Act / Assert
@@ -161,7 +161,7 @@ namespace Entatea.Tests
         public async Task Update_Soft_Delete_Entity(Type dataContextType)
         {
             // Arrange
-            IDataContext dataContext = DataContextProvider.SetupDataContext(dataContextType);
+            using IDataContext dataContext = DataContextTestHelper.SetupDataContext(dataContextType);
             SoftDelete original = await dataContext.Create<SoftDelete>(new SoftDelete() { Value = "Value" });
 
             // Act / Assert
@@ -183,7 +183,7 @@ namespace Entatea.Tests
         public async Task Update_Read_Only_Column(Type dataContextType)
         {
             // Arrange
-            IDataContext dataContext = DataContextProvider.SetupDataContext(dataContextType);
+            using IDataContext dataContext = DataContextTestHelper.SetupDataContext(dataContextType);
 
             // a value must be provided for the read-only property when used with an in memory 
             // data context, SQL based implementations will take the value from the columns 

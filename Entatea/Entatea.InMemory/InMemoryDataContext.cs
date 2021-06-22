@@ -28,6 +28,8 @@ namespace Entatea.InMemory
 
         private readonly Type iEnumerableType = typeof(IEnumerable);
 
+        public DataContextState State { get; } = DataContextState.NoTransaction;
+
         /// <summary>
         /// Adds test data for the specific classMap.
         /// If data already exists it will be overwritten.

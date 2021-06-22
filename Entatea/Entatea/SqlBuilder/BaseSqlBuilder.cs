@@ -94,7 +94,6 @@ namespace Entatea.SqlBuilder
         {
             ClassMap classMap = ClassMapper.GetClassMap<T>();
 
-            string sql = string.Empty;
             if (classMap.SoftDeleteProperty != null)
             {
                 return $"UPDATE {this.GetTableIdentifier(classMap)} SET " +

@@ -77,7 +77,7 @@ namespace Entatea.Tests.Resolvers
         public async Task Read_Test_Resolver_With_Default_Resolver(Type dataContextType)
         {
             // Arrange
-            IDataContext dataContext = DataContextProvider.SetupDataContext(dataContextType);
+            using IDataContext dataContext = DataContextTestHelper.SetupDataContext(dataContextType);
 
             // Act
             TestResolver testResolver = (await dataContext.ReadAll<TestResolver>()).Single();
@@ -93,7 +93,7 @@ namespace Entatea.Tests.Resolvers
         public async Task Read_Test_Resolver_With_Underscore_Resolver(Type dataContextType)
         {
             // Arrange
-            IDataContext dataContext = DataContextProvider.SetupDataContext(
+            IDataContext dataContext = DataContextTestHelper.SetupDataContext(
                 dataContextType,
                 new UnderscoreTableNameResolver(),
                 new UnderscoreColumnNameResolver());

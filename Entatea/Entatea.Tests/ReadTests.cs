@@ -30,7 +30,7 @@ namespace Entatea.Tests
         public async Task Read_All_With_Identity(Type dataContextType)
         {
             // Arrange
-            IDataContext dataContext = DataContextProvider.SetupDataContext(dataContextType);
+            using IDataContext dataContext = DataContextTestHelper.SetupDataContext(dataContextType);
             await dataContext.Create(new City() { CityCode = "PUP", CityName = "Portsmouth", Area = "Hampshire" });
             await dataContext.Create(new City() { CityCode = "BOU", CityName = "Bournemouth", Area = "Dorset" });
 
@@ -54,7 +54,7 @@ namespace Entatea.Tests
         public async Task Read_All_With_Assigned(Type dataContextType)
         {
             // Arrange
-            IDataContext dataContext = DataContextProvider.SetupDataContext(dataContextType);
+            using IDataContext dataContext = DataContextTestHelper.SetupDataContext(dataContextType);
             await dataContext.Create(new CityManual() { CityCode = "PUP", CityName = "Portsmouth" });
             await dataContext.Create(new CityManual() { CityCode = "NYC", CityName = "New York City" });
 
@@ -75,7 +75,7 @@ namespace Entatea.Tests
         public async Task Read_By_Id_With_Identity_Property_Bag(Type dataContextType)
         {
             // Arrange
-            IDataContext dataContext = DataContextProvider.SetupDataContext(dataContextType);
+            using IDataContext dataContext = DataContextTestHelper.SetupDataContext(dataContextType);
             City pup = await dataContext.Create(new City() { CityCode = "PUP", CityName = "Portsmouth", Area = "Hampshire" });
             await dataContext.Create(new City() { CityCode = "NYC", CityName = "New York City", Area = "New York" });
 
@@ -99,7 +99,7 @@ namespace Entatea.Tests
         public async Task Read_By_Id_With_Identity_Single_Typed_Argument(Type dataContextType)
         {
             // Arrange
-            IDataContext dataContext = DataContextProvider.SetupDataContext(dataContextType);
+            using IDataContext dataContext = DataContextTestHelper.SetupDataContext(dataContextType);
             City pup = await dataContext.Create(new City() { CityCode = "PUP", CityName = "Portsmouth", Area = "Hampshire" });
             await dataContext.Create(new City() { CityCode = "NYC", CityName = "New York City", Area = "New York" });
 
@@ -123,7 +123,7 @@ namespace Entatea.Tests
         public async Task Read_By_Id_With_Assigned_Property_Bag(Type dataContextType)
         {
             // Arrange
-            IDataContext dataContext = DataContextProvider.SetupDataContext(dataContextType);
+            using IDataContext dataContext = DataContextTestHelper.SetupDataContext(dataContextType);
             await dataContext.Create(new CityManual() { CityCode = "PUP", CityName = "Portsmouth" });
             await dataContext.Create(new CityManual() { CityCode = "NYC", CityName = "New York City" });
 
@@ -146,7 +146,7 @@ namespace Entatea.Tests
         public async Task Read_By_Id_With_Assigned_Single_Typed_Argument(Type dataContextType)
         {
             // Arrange
-            IDataContext dataContext = DataContextProvider.SetupDataContext(dataContextType);
+            using IDataContext dataContext = DataContextTestHelper.SetupDataContext(dataContextType);
             await dataContext.Create(new CityManual() { CityCode = "PUP", CityName = "Portsmouth" });
             await dataContext.Create(new CityManual() { CityCode = "NYC", CityName = "New York City" });
 
@@ -169,7 +169,7 @@ namespace Entatea.Tests
         public async Task Read_List_By_Where_Condition(Type dataContextType)
         {
             // Arrange
-            IDataContext dataContext = DataContextProvider.SetupDataContext(dataContextType);
+            using IDataContext dataContext = DataContextTestHelper.SetupDataContext(dataContextType);
             await dataContext.Create(new City() { CityCode = "PUP", CityName = "Portsmouth", Area = "Hampshire" });
             await dataContext.Create(new City() { CityCode = "SOU", CityName = "Southampton", Area = "Hampshire" });
             await dataContext.Create(new City() { CityCode = "BOU", CityName = "Bournemouth", Area = "Dorset" });
@@ -194,7 +194,7 @@ namespace Entatea.Tests
         public async Task Read_List_By_Where_Condition_Implied_In(Type dataContextType)
         {
             // Arrange
-            IDataContext dataContext = DataContextProvider.SetupDataContext(dataContextType);
+            using IDataContext dataContext = DataContextTestHelper.SetupDataContext(dataContextType);
             await dataContext.Create(new City() { CityCode = "PUP", CityName = "Portsmouth", Area = "Hampshire" });
             await dataContext.Create(new City() { CityCode = "SOU", CityName = "Southampton", Area = "Hampshire" });
             await dataContext.Create(new City() { CityCode = "BOU", CityName = "Bournemouth", Area = "Dorset" });
@@ -219,7 +219,7 @@ namespace Entatea.Tests
         public async Task Read_List_By_Where_Condition_Implied_Ins(Type dataContextType)
         {
             // Arrange
-            IDataContext dataContext = DataContextProvider.SetupDataContext(dataContextType);
+            using IDataContext dataContext = DataContextTestHelper.SetupDataContext(dataContextType);
             await dataContext.Create(new City() { CityCode = "PUP", CityName = "Portsmouth", Area = "Hampshire" });
             await dataContext.Create(new City() { CityCode = "SOU", CityName = "Southampton", Area = "Hampshire" });
             await dataContext.Create(new City() { CityCode = "CHI", CityName = "Chichester", Area = "West Sussex" });
@@ -250,7 +250,7 @@ namespace Entatea.Tests
         public async Task Read_List_By_Where_Condition_Implied_In_And_Equal(Type dataContextType)
         {
             // Arrange
-            IDataContext dataContext = DataContextProvider.SetupDataContext(dataContextType);
+            using IDataContext dataContext = DataContextTestHelper.SetupDataContext(dataContextType);
             await dataContext.Create(new City() { CityCode = "PUP", CityName = "Portsmouth", Area = "Hampshire" });
             await dataContext.Create(new City() { CityCode = "SOU", CityName = "Southampton", Area = "Hampshire" });
             await dataContext.Create(new City() { CityCode = "CHI", CityName = "Chichester", Area = "West Sussex" });
@@ -280,7 +280,7 @@ namespace Entatea.Tests
         public async Task Read_List_Discriminator_Entities(Type dataContextType)
         {
             // Arrange
-            IDataContext dataContext = DataContextProvider.SetupDataContext(dataContextType);
+            using IDataContext dataContext = DataContextTestHelper.SetupDataContext(dataContextType);
             await dataContext.Create(new DiscriminatorContact() { Name = "Paul" });
             await dataContext.Create(new DiscriminatorContact() { Name = "John" });
             
@@ -306,7 +306,7 @@ namespace Entatea.Tests
         public async Task Read_With_Guid_Key(Type dataContextType)
         {
             // Arrange
-            IDataContext dataContext = DataContextProvider.SetupDataContext(dataContextType);
+            using IDataContext dataContext = DataContextTestHelper.SetupDataContext(dataContextType);
             Uid unique1 = await dataContext.Create(new Uid() { Value = "It's Unique" });
 
             // Act
@@ -329,7 +329,7 @@ namespace Entatea.Tests
         public async Task Read_With_Predicates(Type dataContextType)
         {
             // Arrange
-            IDataContext dataContext = DataContextProvider.SetupDataContext(dataContextType);
+            using IDataContext dataContext = DataContextTestHelper.SetupDataContext(dataContextType);
             await dataContext.Create(new City() { CityCode = "PUP", CityName = "Portsmouth", Area = "Hampshire" });
             await dataContext.Create(new City() { CityCode = "SOU", CityName = "Southampton", Area = "Hampshire" });
             await dataContext.Create(new City() { CityCode = "CHI", CityName = "Chichester", Area = "West Sussex" });
@@ -354,7 +354,7 @@ namespace Entatea.Tests
         public async Task Read_With_Predicates_Return_Null(Type dataContextType)
         {
             // Arrange
-            IDataContext dataContext = DataContextProvider.SetupDataContext(dataContextType);
+            using IDataContext dataContext = DataContextTestHelper.SetupDataContext(dataContextType);
             await dataContext.Create(new City() { CityCode = "PUP", CityName = "Portsmouth", Area = "Hampshire" });
             await dataContext.Create(new City() { CityCode = "SOU", CityName = "Southampton", Area = "Hampshire" });
             await dataContext.Create(new City() { CityCode = "CHI", CityName = "Chichester", Area = "West Sussex" });
@@ -380,7 +380,7 @@ namespace Entatea.Tests
         public async Task Read_With_Predicates_Multiple_Results_Throws_Argument_Exception(Type dataContextType)
         {
             // Arrange
-            IDataContext dataContext = DataContextProvider.SetupDataContext(dataContextType);
+            using IDataContext dataContext = DataContextTestHelper.SetupDataContext(dataContextType);
             await dataContext.Create(new City() { CityCode = "PUP", CityName = "Portsmouth", Area = "Hampshire" });
             await dataContext.Create(new City() { CityCode = "SOU", CityName = "Southampton", Area = "Hampshire" });
             await dataContext.Create(new City() { CityCode = "CHI", CityName = "Chichester", Area = "West Sussex" });

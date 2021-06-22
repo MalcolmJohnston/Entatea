@@ -9,12 +9,11 @@ namespace Entatea
     {
         protected readonly string connectionString;
         
-        protected IDbConnection connection;
-        protected IDbTransaction transaction;
+        protected IDbTransaction sharedTransaction;
 
-        protected readonly ConcurrentStack<IDataContext> enlistedDataContexts = new ConcurrentStack<IDataContext>();
+        protected readonly ConcurrentDictionary<IDataContext, IDbConnection> dataContextConnections = new ConcurrentDictionary<IDataContext, IDbConnection>(); 
+        protected readonly ConcurrentStack<IDataContext> dataContextsInTransaction = new ConcurrentStack<IDataContext>();
 
-        protected readonly SemaphoreSlim connectionSemaphore = new SemaphoreSlim(1);
         protected readonly SemaphoreSlim transactionSemaphore = new SemaphoreSlim(1);
 
         public BaseConnectionProvider(string connectionString)
@@ -22,35 +21,19 @@ namespace Entatea
             this.connectionString = connectionString;
         }
 
-        public IDbConnection GetConnection()
+        public IDbConnection GetConnection(IDataContext dataContext)
         {
-            try
+            if (dataContext == null)
             {
-                this.transactionSemaphore.Wait();
-
-                if (this.transaction != null)
-                {
-                    return this.transaction.Connection;
-                }
-            }
-            finally
-            {
-                this.transactionSemaphore.Release();
+                throw new NullReferenceException();
             }
 
-            try
+            if (dataContext.State == DataContextState.InTransaction)
             {
-                this.connectionSemaphore.Wait();
-
-                this.CloseConnection(this.connection);
-                this.connection = this.GetOpenConnection();
-
-                return this.connection;
+                return this.GetTransactionConnection();
             }
-            finally
-            {
-                this.connectionSemaphore.Release();
-            }
+
+            return this.GetOrAddConnection(dataContext);
         }
 
         public IDbTransaction GetTransaction()
@@ -58,24 +41,11 @@ namespace Entatea
             try
             {
                 this.transactionSemaphore.Wait();
-                return this.transaction;
+                return this.sharedTransaction;
             }
             finally
             {
                 this.transactionSemaphore.Release();
-            }
-        }
-
-        public void CloseConnection()
-        {
-            try
-            {
-                this.connectionSemaphore.Wait();
-                this.CloseConnection(this.connection);
-            }
-            finally
-            {
-                this.connectionSemaphore.Release();
             }
         }
 
@@ -85,12 +55,13 @@ namespace Entatea
             {
                 this.transactionSemaphore.Wait();
 
-                this.CloseConnection();
-
-                if (this.transaction == null)
+                if (this.sharedTransaction == null)
                 {
-                    IDbConnection conn = this.GetOpenConnection();
-                    this.transaction = conn.BeginTransaction();
+                    if (!this.dataContextConnections.TryRemove(dataContext, out IDbConnection conn))
+                    {
+                        conn = this.GetOpenConnection();
+                    }
+                    this.sharedTransaction = conn.BeginTransaction();
                 }
             }
             finally
@@ -106,16 +77,16 @@ namespace Entatea
             {
                 this.transactionSemaphore.Wait();
 
-                if (this.transaction == null)
+                if (this.sharedTransaction == null)
                 {
                     throw new InvalidOperationException("Cannot commit when no transaction");
                 }
 
                 if (this.IsLastIn(dataContext))
                 {
-                    if (this.enlistedDataContexts.Count == 1)
+                    if (this.dataContextsInTransaction.Count == 1)
                     {
-                        this.transaction.Commit();
+                        this.sharedTransaction.Commit();
                         this.DisposeTransaction();
                     }
 
@@ -139,11 +110,11 @@ namespace Entatea
             {
                 this.transactionSemaphore.Wait();
 
-                throwException = this.enlistedDataContexts.Count != 1;
+                throwException = this.dataContextsInTransaction.Count > 1;
 
-                if (transaction != null)
+                if (sharedTransaction != null)
                 {
-                    this.transaction.Rollback();
+                    this.sharedTransaction.Rollback();
                     this.DisposeTransaction();
                 }
             }
@@ -152,7 +123,7 @@ namespace Entatea
             }
             finally
             {
-                this.enlistedDataContexts.Clear();
+                this.dataContextsInTransaction.Clear();
                 this.transactionSemaphore.Release();
             }
 
@@ -164,44 +135,70 @@ namespace Entatea
 
         public void NotifyDisposed(IDataContext dataContext)
         {
-            if (this.IsLastIn(dataContext))
+            if (dataContext.State == DataContextState.InTransaction)
             {
                 this.Rollback(dataContext);
+            }
+
+            if (dataContext.State == DataContextState.NoTransaction)
+            {
+                this.DisposeConnection(dataContext);
             }
         }
 
         protected abstract IDbConnection GetOpenConnection();
 
-        private void CloseConnection(IDbConnection connection)
+        private IDbConnection GetTransactionConnection()
         {
-            if (connection != null && connection.State == ConnectionState.Open)
+            IDbTransaction tran = this.GetTransaction();
+            return tran.Connection;
+        }
+
+        private IDbConnection GetOrAddConnection(IDataContext dataContext)
+        {
+            if (this.dataContextConnections.ContainsKey(dataContext))
             {
-                connection.Close();
+                return this.dataContextConnections[dataContext];
             }
+
+            if (this.dataContextConnections.TryAdd(dataContext, this.GetOpenConnection()))
+            {
+                return this.dataContextConnections[dataContext];
+            }
+
+            throw new DataException("Failed to open connection.");
         }
 
         private void DisposeTransaction()
         {
-            transaction.Dispose();
-            transaction = null;
+            sharedTransaction.Dispose();
+            sharedTransaction = null;
+        }
+
+        private void DisposeConnection(IDataContext dataContext)
+        {
+            if (this.dataContextConnections.TryRemove(dataContext, out IDbConnection conn) && conn != null)
+            {
+                conn.Dispose();
+            }
         }
 
         private void EnlistDataContext(IDataContext dataContext)
         {
-            this.enlistedDataContexts.Push(dataContext);
+            this.dataContextsInTransaction.Push(dataContext);
         }
 
         private void DelistDataContext(IDataContext dataContext)
         {
             if (this.IsLastIn(dataContext))
             {
-                this.enlistedDataContexts.TryPop(out dataContext);
+                this.dataContextsInTransaction.TryPop(out IDataContext _);
             }
         }
 
         private bool IsLastIn(IDataContext dataContext)
         {
-            this.enlistedDataContexts.TryPeek(out IDataContext lastDataContext);
+            this.dataContextsInTransaction.TryPeek(out IDataContext lastDataContext);
             return object.ReferenceEquals(dataContext, lastDataContext);
         }
     }

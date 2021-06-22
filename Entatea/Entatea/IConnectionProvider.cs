@@ -1,15 +1,12 @@
 ﻿using System.Data;
-using System.Threading.Tasks;
 
 namespace Entatea
 {
     public interface IConnectionProvider
     {
-        IDbConnection GetConnection();
+        IDbConnection GetConnection(IDataContext dataContext);
 
         IDbTransaction GetTransaction();
-
-        void CloseConnection();
 
         void BeginTransaction(IDataContext dataContext);
 

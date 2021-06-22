@@ -415,27 +415,29 @@ namespace Entatea.Model
 
         public IList<IPredicate> AddDefaultPredicates<T>(IEnumerable<IPredicate> predicates) where T : class
         {
-            List<IPredicate> newPredicates = new List<IPredicate>(predicates);
+            List<IPredicate> newPredicates = predicates.ToList();
             newPredicates.AddRange(this.GetDefaultPredicates<T>());
             return newPredicates;
         }
 
-        private IList<IPredicate> defaultPredicates = null;
-        public IList<IPredicate> GetDefaultPredicates<T>() where T : class
+        private IList<IFieldPredicate> defaultPredicates = null;
+        public IList<IFieldPredicate> GetDefaultPredicates<T>() where T : class
         {
             if (defaultPredicates == null)
             {
-                IList<IPredicate> predicates = new List<IPredicate>();
+                IList<IFieldPredicate> predicates = new List<IFieldPredicate>();
                 if (this.DiscriminatorProperties.Any())
                 {
                     foreach (PropertyMap discriminatorProperty in this.DiscriminatorProperties)
                     {
-                        predicates.Add(PredicateBuilder.Equal<T>(discriminatorProperty.PropertyName, discriminatorProperty.ValueOnInsert));
+                        FieldPredicate<T> p = PredicateBuilder.Equal<T>(discriminatorProperty.PropertyName, discriminatorProperty.ValueOnInsert) as FieldPredicate<T>;
+                        predicates.Add(p);
                     }
                 }
                 if (this.SoftDeleteProperty != null)
                 {
-                    predicates.Add(PredicateBuilder.Equal<T>(this.SoftDeleteProperty.PropertyName, this.SoftDeleteProperty.ValueOnInsert));
+                    FieldPredicate<T> p = PredicateBuilder.Equal<T>(this.SoftDeleteProperty.PropertyName, this.SoftDeleteProperty.ValueOnInsert) as FieldPredicate<T>;
+                    predicates.Add(p);
                 }
                 defaultPredicates = predicates;
             }

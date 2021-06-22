@@ -26,7 +26,7 @@ namespace Entatea.Tests
         public async Task Insert_With_Identity(Type dataContextType)
         {
             // Arrange
-            IDataContext dataContext = DataContextProvider.SetupDataContext(dataContextType);
+            using IDataContext dataContext = DataContextTestHelper.SetupDataContext(dataContextType);
 
             // Act
             City city = await dataContext.Create(new City() { CityCode = "BRI", CityName = "Brighton", Area = "Sussex" });
@@ -48,7 +48,7 @@ namespace Entatea.Tests
         public async Task Insert_With_Assigned_Key(Type dataContextType)
         {
             // Arrange
-            IDataContext dataContext = DataContextProvider.SetupDataContext(dataContextType);
+            using IDataContext dataContext = DataContextTestHelper.SetupDataContext(dataContextType);
 
             // Act
             CityManual city = await dataContext.Create(new CityManual() { CityCode = "BRI", CityName = "Brighton" });
@@ -68,7 +68,7 @@ namespace Entatea.Tests
         public async Task Insert_With_Sequential_Key(Type dataContextType)
         {
             // Arrange
-            IDataContext dataContext = DataContextProvider.SetupDataContext(dataContextType);
+            using IDataContext dataContext = DataContextTestHelper.SetupDataContext(dataContextType);
 
             // Act
             CitySequential city = await dataContext.Create(new CitySequential() { CityCode = "BRI", CityName = "Brighton" });
@@ -90,7 +90,7 @@ namespace Entatea.Tests
         public async Task Insert_With_Composite_Key_One_Assigned_And_One_Sequential(Type dataContextType)
         {
             // Arrange
-            IDataContext dataContext = DataContextProvider.SetupDataContext(dataContextType);
+            using IDataContext dataContext = DataContextTestHelper.SetupDataContext(dataContextType);
 
             // Act
             AssignedAndSequential one = await dataContext.Create(new AssignedAndSequential() { AssignedId = 1, Heading = "One" });
@@ -112,7 +112,7 @@ namespace Entatea.Tests
         public async Task Insert_With_Composite_Key_Two_Assigned_And_One_Sequential(Type dataContextType)
         {
             // Arrange
-            IDataContext dataContext = DataContextProvider.SetupDataContext(dataContextType);
+            using IDataContext dataContext = DataContextTestHelper.SetupDataContext(dataContextType);
 
             // Act
             AssignedPairAndSequential oneOneOne = await dataContext.Create(new AssignedPairAndSequential() { FirstAssignedId = 1, SecondAssignedId = 1, Heading = "One" });
@@ -137,7 +137,7 @@ namespace Entatea.Tests
         public async Task Insert_With_Datestamp(Type dataContextType)
         {
             // Arrange
-            IDataContext dataContext = DataContextProvider.SetupDataContext(dataContextType);
+            using IDataContext dataContext = DataContextTestHelper.SetupDataContext(dataContextType);
 
             // Act
             DateTime now = DateTime.Now;
@@ -157,7 +157,7 @@ namespace Entatea.Tests
         public async Task Insert_With_Soft_Delete(Type dataContextType)
         {
             // Arrange
-            IDataContext dataContext = DataContextProvider.SetupDataContext(dataContextType);
+            using IDataContext dataContext = DataContextTestHelper.SetupDataContext(dataContextType);
 
             // Act
             SoftDelete softDelete = await dataContext.Create(new SoftDelete()).ConfigureAwait(false);
@@ -179,7 +179,7 @@ namespace Entatea.Tests
         public async Task Insert_With_Discriminator(Type dataContextType)
         {
             // Arrange
-            IDataContext dataContext = DataContextProvider.SetupDataContext(dataContextType);
+            using IDataContext dataContext = DataContextTestHelper.SetupDataContext(dataContextType);
 
             // Act
             DiscriminatorContact contact = await dataContext.Create(new DiscriminatorContact() { Name = "Paul" });
@@ -205,7 +205,7 @@ namespace Entatea.Tests
         public async Task Insert_With_Guid_Key(Type dataContextType)
         {
             // Arrange
-            IDataContext dataContext = DataContextProvider.SetupDataContext(dataContextType);
+            using IDataContext dataContext = DataContextTestHelper.SetupDataContext(dataContextType);
 
             // Act
             Uid unique1 = await dataContext.Create(new Uid() { Value = "It's Unique" });

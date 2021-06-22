@@ -25,7 +25,7 @@ namespace Entatea.Tests.Predicates
         public async Task Read_With_DateTime_Equal_Predicate(Type dataContextType)
         {
             // Arrange
-            IDataContext dataContext = DataContextProvider.SetupDataContext(dataContextType);
+            using IDataContext dataContext = DataContextTestHelper.SetupDataContext(dataContextType);
             DateTime now = DateTime.Now.Date;
             await dataContext.Create(new Product() { Updated = now });
             await dataContext.Create(new Product() { Updated = now.AddDays(-1) });
@@ -45,7 +45,7 @@ namespace Entatea.Tests.Predicates
         public async Task Read_With_DateTime_NotEqual_Predicate(Type dataContextType)
         {
             // Arrange
-            IDataContext dataContext = DataContextProvider.SetupDataContext(dataContextType);
+            using IDataContext dataContext = DataContextTestHelper.SetupDataContext(dataContextType);
             DateTime now = DateTime.Now.Date;
             await dataContext.Create(new Product() { Updated = now });
             await dataContext.Create(new Product() { Updated = now.AddDays(-1) });
@@ -65,7 +65,7 @@ namespace Entatea.Tests.Predicates
         public async Task Read_With_DateTime_In_Predicate(Type dataContextType)
         {
             // Arrange
-            IDataContext dataContext = DataContextProvider.SetupDataContext(dataContextType);
+            using IDataContext dataContext = DataContextTestHelper.SetupDataContext(dataContextType);
             DateTime today = DateTime.Now.Date;
             DateTime yesterday = today.AddDays(-1);
             DateTime tomorrow = today.AddDays(1);
@@ -92,7 +92,7 @@ namespace Entatea.Tests.Predicates
         public async Task Read_With_DateTime_NotIn_Predicate(Type dataContextType)
         {
             // Arrange
-            IDataContext dataContext = DataContextProvider.SetupDataContext(dataContextType);
+            using IDataContext dataContext = DataContextTestHelper.SetupDataContext(dataContextType);
             DateTime today = DateTime.Now.Date;
             DateTime yesterday = today.AddDays(-1);
             DateTime tomorrow = today.AddDays(1);
@@ -119,7 +119,7 @@ namespace Entatea.Tests.Predicates
         public async Task Read_With_DateTime_GreaterThan_Predicate(Type dataContextType)
         {
             // Arrange
-            IDataContext dataContext = DataContextProvider.SetupDataContext(dataContextType);
+            using IDataContext dataContext = DataContextTestHelper.SetupDataContext(dataContextType);
             DateTime today = DateTime.Now.Date;
             DateTime yesterday = today.AddDays(-1);
             DateTime tomorrow = today.AddDays(1);
@@ -145,7 +145,7 @@ namespace Entatea.Tests.Predicates
         public async Task Read_With_DateTime_GreaterThanOrEqual_Predicate(Type dataContextType)
         {
             // Arrange
-            IDataContext dataContext = DataContextProvider.SetupDataContext(dataContextType);
+            using IDataContext dataContext = DataContextTestHelper.SetupDataContext(dataContextType);
             DateTime today = DateTime.Now.Date;
             DateTime yesterday = today.AddDays(-1);
             DateTime tomorrow = today.AddDays(1);
@@ -171,7 +171,7 @@ namespace Entatea.Tests.Predicates
         public async Task Read_With_DateTime_LessThanPredicate(Type dataContextType)
         {
             // Arrange
-            IDataContext dataContext = DataContextProvider.SetupDataContext(dataContextType);
+            using IDataContext dataContext = DataContextTestHelper.SetupDataContext(dataContextType);
             DateTime today = DateTime.Now.Date;
             DateTime yesterday = today.AddDays(-1);
             DateTime tomorrow = today.AddDays(1);
@@ -197,7 +197,7 @@ namespace Entatea.Tests.Predicates
         public async Task Read_With_DateTime_LessThanOrEqual_Predicate(Type dataContextType)
         {
             // Arrange
-            IDataContext dataContext = DataContextProvider.SetupDataContext(dataContextType);
+            using IDataContext dataContext = DataContextTestHelper.SetupDataContext(dataContextType);
             DateTime today = DateTime.Now.Date;
             DateTime yesterday = today.AddDays(-1);
             DateTime tomorrow = today.AddDays(1);
