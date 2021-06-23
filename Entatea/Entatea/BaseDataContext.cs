@@ -117,7 +117,7 @@ namespace Entatea
 
             // validate that all key properties are passed
             IList<IPredicate> predicates = classMap.ValidateKeyProperties<T>(id);
-            predicates = classMap.AddDefaultPredicates<IPredicate>(predicates);
+            predicates = classMap.AddDefaultPredicates<T>(predicates);
 
             return (await this.Connection.QueryAsync<T>(sqlProvider.GetSelectByIdSql<T>(), predicates.GetParameters(), this.Transaction)
                                          .ConfigureAwait(false))
@@ -129,7 +129,7 @@ namespace Entatea
             ClassMap classMap = ClassMapper.GetClassMap<T>();
 
             // validate that all key properties are passed
-            predicates = classMap.AddDefaultPredicates<IPredicate>(predicates).ToArray();
+            predicates = classMap.AddDefaultPredicates<T>(predicates).ToArray();
 
             IEnumerable<T> results = await this.Connection.QueryAsync<T>(
                 this.sqlProvider.GetSelectWhereSql<T>(predicates),
@@ -204,7 +204,7 @@ namespace Entatea
 
             // get the parameters for the WHERE clause
             IList<IPredicate> predicates = classMap.ValidateKeyProperties<T>(properties);
-            predicates = classMap.AddDefaultPredicates<IPredicate>(predicates);
+            predicates = classMap.AddDefaultPredicates<T>(predicates);
 
             IDictionary<string, object> keyParameters = predicates.GetParameters();
 
