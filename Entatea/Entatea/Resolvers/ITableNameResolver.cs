@@ -1,4 +1,6 @@
-﻿namespace Entatea.Resolvers
+﻿using System;
+
+namespace Entatea.Resolvers
 {
     public interface ITableNameResolver
     {

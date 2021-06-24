@@ -11,10 +11,13 @@ namespace Entatea.SqlServer
 {
     public class TSqlBuilder : BaseSqlBuilder, ISqlBuilder
     {
-        private readonly string defaultSchema = "dbo";
+        private const string DefaultSchema = "dbo";
+
+        private readonly ISchemaResolver schemaResolver;
 
         public TSqlBuilder() : base()
         {
+            this.schemaResolver = new DefaultSchemaResolver(DefaultSchema);
         }
 
         public TSqlBuilder(
@@ -23,6 +26,7 @@ namespace Entatea.SqlServer
                 tableNameResolver,
                 columnNameResolver)
         {
+            this.schemaResolver = new DefaultSchemaResolver(DefaultSchema);
         }
 
         public TSqlBuilder(
@@ -32,7 +36,17 @@ namespace Entatea.SqlServer
                 tableNameResolver,
                 columnNameResolver)
         {
-            this.defaultSchema = defaultSchema;
+            this.schemaResolver = new DefaultSchemaResolver(defaultSchema);
+        }
+
+        public TSqlBuilder(
+            ITableNameResolver tableNameResolver,
+            IColumnNameResolver columnNameResolver,
+            ISchemaResolver schemaResolver) : base(
+                tableNameResolver,
+                columnNameResolver)
+        {
+            this.schemaResolver = schemaResolver;
         }
 
         protected override string GetTableIdentifier(ClassMap classMap)
@@ -43,18 +57,9 @@ namespace Entatea.SqlServer
                 tableName = this.tableNameResolver.GetTableName(classMap.Name);
             }
 
-            tableName = this.Encapsulate(tableName);
-            string schemaName = string.Empty;
-            if (!string.IsNullOrWhiteSpace(classMap.ExplicitSchema))
-            {
-                schemaName = this.Encapsulate(classMap.ExplicitSchema);
-            }
-            else
-            {
-                schemaName = this.Encapsulate(this.defaultSchema);
-            }
+            string schemaName = this.schemaResolver.GetSchema(classMap);
             
-            return $"{schemaName}.{tableName}";
+            return $"{this.Encapsulate(schemaName)}.{this.Encapsulate(tableName)}";
         }
 
         public override string GetInsertSql<T>()

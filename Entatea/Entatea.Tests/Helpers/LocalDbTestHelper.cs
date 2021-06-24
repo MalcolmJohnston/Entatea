@@ -1,15 +1,8 @@
-﻿using System;
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
 using System.Data;
 using System.Data.SqlClient;
 using System.IO;
 using System.Reflection;
-
-using Microsoft.Extensions.DependencyInjection;
-
-using FluentMigrator.Runner;
-using FluentMigrator.Runner.Initialization;
-using NUnit.Framework;
 
 using Entatea.Tests.Configuration;
 
@@ -134,14 +127,11 @@ namespace Entatea.Tests.Helpers
                             DROP DATABASE [{dbName}];
                         END";
 
-                using (IDbConnection conn = OpenConnection(GetLocalDbConnectionString("master")))
-                {
-                    IDbCommand cmd = conn.CreateCommand();
-                    cmd.CommandText = dropDbSql;
-                    cmd.ExecuteNonQuery();
-
-                    return true;
-                }
+                using IDbConnection conn = OpenConnection(GetLocalDbConnectionString("master"));
+                IDbCommand cmd = conn.CreateCommand();
+                cmd.CommandText = dropDbSql;
+                cmd.ExecuteNonQuery();
+                return true;
             }
             catch
             {

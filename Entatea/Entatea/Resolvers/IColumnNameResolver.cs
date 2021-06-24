@@ -2,6 +2,6 @@
 {
     public interface IColumnNameResolver
     {
-        string GetColumnName(string propertyName);
+        string GetColumnName(string columnName);
     }
 }
