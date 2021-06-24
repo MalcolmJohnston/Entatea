@@ -50,5 +50,27 @@ namespace Entatea.SqlServer
                 new SqlCache())
         {
         }
+
+        public SqlServerDataContext(
+            string connectionString,
+            ITableNameResolver tableNameResolver,
+            IColumnNameResolver columnNameResolver,
+            ISchemaResolver schemaResolver) : base(
+            new SqlServerConnectionProvider(connectionString),
+            new TSqlBuilder(tableNameResolver, columnNameResolver, schemaResolver),
+            new SqlCache())
+        {
+        }
+
+        public SqlServerDataContext(
+            SqlServerConnectionProvider connectionProvider,
+            ITableNameResolver tableNameResolver,
+            IColumnNameResolver columnNameResolver,
+            ISchemaResolver schemaResolver) : base(
+                connectionProvider,
+                new TSqlBuilder(tableNameResolver, columnNameResolver, schemaResolver),
+                new SqlCache())
+        {
+        }
     }
 }
