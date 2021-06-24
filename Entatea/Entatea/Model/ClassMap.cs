@@ -11,6 +11,7 @@ namespace Entatea.Model
         public ClassMap(Type type)
         {
             this.Name = type.Name;
+            this.FullName = type.FullName;
 
             dynamic tableAttribute = ClassAttributeHelper.GetTableAttribute(type);
             this.ExplicitSchema = tableAttribute != null ? tableAttribute.Schema : string.Empty;
@@ -90,6 +91,8 @@ namespace Entatea.Model
         }
 
         public string Name { get; private set; }
+
+        public string FullName { get; private set; }
 
         public string ExplicitSchema { get; private set; }
 
