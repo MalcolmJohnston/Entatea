@@ -6,7 +6,7 @@
     <Company />
     <PackageLicenseExpression>MIT</PackageLicenseExpression>
     <PackageProjectUrl>https://github.com/MalcolmJohnston/Entatea</PackageProjectUrl>
-    <Version>1.1.3</Version>
+    <Version>1.1.4</Version>
   </PropertyGroup>
 
   <ItemGroup>
@@ -14,5 +14,24 @@
     <PackageReference Include="Humanizer.Core" Version="2.11.10" />
     <PackageReference Include="Microsoft.CSharp" Version="4.7.0" />
   </ItemGroup>
+  
+	<PropertyGroup>
+	 <!-- Optional: Declare that the Repository URL can be published to NuSpec -->
+	 <PublishRepositoryUrl>true</PublishRepositoryUrl>
+
+	 <!-- Optional: Embed source files that are not tracked by the source control manager to the PDB -->
+	 <!-- This is useful if you generate files during the build -->
+	 <EmbedUntrackedSources>false</EmbedUntrackedSources>
+
+	 <!-- Generate symbol packages (.snupkg) -->
+	 <!-- You must publish both packages, the package that contains the DLL (.nupkg) and the one that contains the symbols (.snupkg) -->
+	 <IncludeSymbols>true</IncludeSymbols>
+	 <SymbolPackageFormat>snupkg</SymbolPackageFormat>
+	</PropertyGroup>
+
+	<ItemGroup>
+	 <!-- Required if your repository is on GitHub -->
+	 <PackageReference Include="Microsoft.SourceLink.GitHub" Version="1.0.0-*" PrivateAssets="All" />
+	</ItemGroup>
 
 </Project>

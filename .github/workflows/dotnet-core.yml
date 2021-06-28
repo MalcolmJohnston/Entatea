@@ -28,6 +28,7 @@ jobs:
         PROJECT_FILE_PATH: ./Entatea/Entatea/Entatea.csproj
         # API key to authenticate with NuGet server
         NUGET_KEY: ${{ secrets.NUGET_API_KEY }}
+        INCLUDE_SYMBOLS: true
     - name: Publish Entatea.InMemory to NuGet
       uses: brandedoutcast/publish-nuget@v2.5.5
       with:
@@ -35,6 +36,7 @@ jobs:
         PROJECT_FILE_PATH: ./Entatea/Entatea.InMemory/Entatea.InMemory.csproj
         # API key to authenticate with NuGet server
         NUGET_KEY: ${{ secrets.NUGET_API_KEY }}
+        INCLUDE_SYMBOLS: true
     - name: Publish Entatea.MySql to NuGet
       uses: brandedoutcast/publish-nuget@v2.5.5
       with:
@@ -42,6 +44,7 @@ jobs:
         PROJECT_FILE_PATH: ./Entatea/Entatea.MySql/Entatea.MySql.csproj
         # API key to authenticate with NuGet server
         NUGET_KEY: ${{ secrets.NUGET_API_KEY }}
+        INCLUDE_SYMBOLS: true
     - name: Publish Entatea.Sqlite to NuGet
       uses: brandedoutcast/publish-nuget@v2.5.5
       with:
@@ -49,6 +52,7 @@ jobs:
         PROJECT_FILE_PATH: ./Entatea/Entatea.Sqlite/Entatea.Sqlite.csproj
         # API key to authenticate with NuGet server
         NUGET_KEY: ${{ secrets.NUGET_API_KEY }}
+        INCLUDE_SYMBOLS: true
     - name: Publish Entatea.SqlServer to NuGet
       uses: brandedoutcast/publish-nuget@v2.5.5
       with:
@@ -56,3 +60,4 @@ jobs:
         PROJECT_FILE_PATH: ./Entatea/Entatea.SqlServer/Entatea.SqlServer.csproj
         # API key to authenticate with NuGet server
         NUGET_KEY: ${{ secrets.NUGET_API_KEY }}
+        INCLUDE_SYMBOLS: true

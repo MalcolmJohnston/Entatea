@@ -6,7 +6,7 @@
     <Authors>Malcolm Johnston</Authors>
     <PackageLicenseExpression>MIT</PackageLicenseExpression>
     <PackageProjectUrl>https://github.com/MalcolmJohnston/Entatea</PackageProjectUrl>
-    <Version>1.1.1</Version>
+    <Version>1.1.3</Version>
     <AssemblyVersion>1.0.5.0</AssemblyVersion>
   </PropertyGroup>
 
@@ -17,5 +17,24 @@
   <ItemGroup>
     <ProjectReference Include="..\Entatea\Entatea.csproj" />
   </ItemGroup>
+
+	<PropertyGroup>
+		<!-- Optional: Declare that the Repository URL can be published to NuSpec -->
+		<PublishRepositoryUrl>true</PublishRepositoryUrl>
+
+		<!-- Optional: Embed source files that are not tracked by the source control manager to the PDB -->
+		<!-- This is useful if you generate files during the build -->
+		<EmbedUntrackedSources>false</EmbedUntrackedSources>
+
+		<!-- Generate symbol packages (.snupkg) -->
+		<!-- You must publish both packages, the package that contains the DLL (.nupkg) and the one that contains the symbols (.snupkg) -->
+		<IncludeSymbols>true</IncludeSymbols>
+		<SymbolPackageFormat>snupkg</SymbolPackageFormat>
+	</PropertyGroup>
+
+	<ItemGroup>
+		<!-- Required if your repository is on GitHub -->
+		<PackageReference Include="Microsoft.SourceLink.GitHub" Version="1.0.0-*" PrivateAssets="All" />
+	</ItemGroup>
 
 </Project>
