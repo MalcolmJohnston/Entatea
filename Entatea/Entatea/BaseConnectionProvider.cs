@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Concurrent;
 using System.Data;
+using System.Linq;
 using System.Threading;
 
 namespace Entatea
@@ -71,7 +72,7 @@ namespace Entatea
             }
         }
 
-        public void Commit(IDataContext dataContext)
+        public bool Commit(IDataContext dataContext)
         {
             try
             {
@@ -96,6 +97,8 @@ namespace Entatea
                 {
                     throw new InvalidOperationException("The last data context to enter the transaction must commit first.");
                 }
+
+                return this.ReferenceCount(dataContext) == 0;
             }
             finally
             {
@@ -194,6 +197,13 @@ namespace Entatea
             {
                 this.dataContextsInTransaction.TryPop(out IDataContext _);
             }
+        }
+
+        private int ReferenceCount(IDataContext dataContext)
+        {
+            return this.dataContextsInTransaction
+                       .AsEnumerable()
+                       .Count(x => object.ReferenceEquals(x, dataContext));
         }
 
         private bool IsLastIn(IDataContext dataContext)

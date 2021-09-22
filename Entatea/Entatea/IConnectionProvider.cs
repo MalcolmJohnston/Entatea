@@ -10,7 +10,7 @@ namespace Entatea
 
         void BeginTransaction(IDataContext dataContext);
 
-        void Commit(IDataContext dataContext);
+        bool Commit(IDataContext dataContext);
 
         void Rollback(IDataContext dataContext);
 

@@ -17,6 +17,9 @@ namespace Entatea
     {
         private readonly IConnectionProvider connectionProvider;
         private readonly ISqlProvider sqlProvider;
+        private readonly Guid id = Guid.NewGuid();
+
+        public Guid Id { get { return id; } }
 
         public DataContextState State { get; private set; } = DataContextState.NoTransaction;
 
@@ -317,8 +320,10 @@ namespace Entatea
 
         public void Commit()
         {
-            this.connectionProvider.Commit(this);
-            this.State = DataContextState.Committed;
+            if (this.connectionProvider.Commit(this))
+            {
+                this.State = DataContextState.Committed;
+            }
         }
 
         public void Rollback()
