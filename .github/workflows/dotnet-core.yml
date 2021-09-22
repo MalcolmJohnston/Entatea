@@ -29,6 +29,7 @@ jobs:
         # API key to authenticate with NuGet server
         NUGET_KEY: ${{ secrets.NUGET_API_KEY }}
         INCLUDE_SYMBOLS: true
+        TAG_COMMIT: false
     - name: Publish Entatea.InMemory to NuGet
       uses: Rebel028/publish-nuget@v2.6.3
       with:
@@ -37,6 +38,7 @@ jobs:
         # API key to authenticate with NuGet server
         NUGET_KEY: ${{ secrets.NUGET_API_KEY }}
         INCLUDE_SYMBOLS: true
+        TAG_COMMIT: false
     - name: Publish Entatea.MySql to NuGet
       uses: Rebel028/publish-nuget@v2.6.3
       with:
@@ -45,6 +47,7 @@ jobs:
         # API key to authenticate with NuGet server
         NUGET_KEY: ${{ secrets.NUGET_API_KEY }}
         INCLUDE_SYMBOLS: true
+        TAG_COMMIT: false
     - name: Publish Entatea.Sqlite to NuGet
       uses: Rebel028/publish-nuget@v2.6.3
       with:
@@ -53,6 +56,7 @@ jobs:
         # API key to authenticate with NuGet server
         NUGET_KEY: ${{ secrets.NUGET_API_KEY }}
         INCLUDE_SYMBOLS: true
+        TAG_COMMIT: false
     - name: Publish Entatea.SqlServer to NuGet
       uses: Rebel028/publish-nuget@v2.6.3
       with:
@@ -61,3 +65,4 @@ jobs:
         # API key to authenticate with NuGet server
         NUGET_KEY: ${{ secrets.NUGET_API_KEY }}
         INCLUDE_SYMBOLS: true
+        TAG_COMMIT: false
