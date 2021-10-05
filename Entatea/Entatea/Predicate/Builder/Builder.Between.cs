@@ -18,6 +18,11 @@ namespace Entatea.Predicate
             };
         }
 
+        public static IBetweenPredicate Between<T>(string propertyName, object value1, object value2) where T : class
+        {
+            return Between<T>(propertyName, value1, value2, false);
+        }
+
         public static IBetweenPredicate Between<T>(Expression<Func<T, byte>> expression, byte value1, byte value2) where T : class
         {
             PropertyInfo propertyInfo = ReflectionHelper.GetProperty(expression) as PropertyInfo;

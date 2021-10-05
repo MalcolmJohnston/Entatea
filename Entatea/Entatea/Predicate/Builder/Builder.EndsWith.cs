@@ -11,5 +11,10 @@ namespace Entatea.Predicate
             PropertyInfo propertyInfo = ReflectionHelper.GetProperty(expression) as PropertyInfo;
             return Field<T>(propertyInfo.Name, Operator.EndsWith, value);
         }
+
+        public static IFieldPredicate EndsWith<T>(string propertyName, string value) where T : class
+        {
+            return Field<T>(propertyName, Operator.EndsWith, value);
+        }
     }
 }

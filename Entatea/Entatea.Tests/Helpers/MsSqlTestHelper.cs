@@ -9,9 +9,9 @@ using Entatea.Tests.Configuration;
 namespace Entatea.Tests.Helpers
 {
     /// <summary>
-    /// Class that contains helper method for creating/deleting LocalDb databases whilst testing
+    /// Class that contains helper method for creating/deleting MsSql databases whilst testing
     /// </summary>
-    public class LocalDbTestHelper
+    public class MsSqlTestHelper
     {
         private static readonly Dictionary<string, string> testName2DbName = new Dictionary<string, string>();
 
@@ -39,20 +39,20 @@ namespace Entatea.Tests.Helpers
             }
 
             // create the database
-            using (SqlConnection conn = new SqlConnection(GetLocalDbConnectionString()))
+            using (SqlConnection conn = new SqlConnection(GetMsSqlConnectionString()))
             {
                 conn.Open();
 
                 string sql = $"CREATE DATABASE [{dbName}]";
-                sql += $" ON PRIMARY (NAME={dbName}, FILENAME = '{tempFolder}\\{dbName}.mdf')";
-                sql += $" LOG ON (NAME={dbName}_log, FILENAME = '{tempFolder}\\{dbName}_log.ldf')";
+                //sql += $" ON PRIMARY (NAME={dbName}, FILENAME = '{tempFolder}\\{dbName}.mdf')";
+                //sql += $" LOG ON (NAME={dbName}_log, FILENAME = '{tempFolder}\\{dbName}_log.ldf')";
 
                 SqlCommand command = new SqlCommand(sql, conn);
                 command.ExecuteNonQuery();
             }
 
             // create the database schema
-            FluentMigrationsRunner.UpLocalDb(GetLocalDbConnectionString(dbName, GetMdfPath(tempFolder, dbName)));
+            FluentMigrationsRunner.UpSqlServer(GetMsSqlConnectionString(dbName));
         }
 
         public static IDbConnection OpenTestConnection(string testName)
@@ -82,31 +82,21 @@ namespace Entatea.Tests.Helpers
         public static string GetTestConnectionString(string testName)
         {
             string dbName = testName2DbName[testName];
-            return GetLocalDbConnectionString(dbName, GetMdfPath(tempFolder, dbName));
+            return GetMsSqlConnectionString(dbName);
         }
 
-        private static string GetLocalDbConnectionString(string dbName, string dbFileName)
+        public static string GetMsSqlConnectionString(string dbName)
         {
-            return $"{GetLocalDbConnectionString(dbName)}AttachDbFileName={dbFileName};";
+            return $"{GetMsSqlConnectionString()}Initial Catalog={dbName};";
         }
 
-        private static string GetLocalDbConnectionString(string dbName)
-        {
-            return $"{GetLocalDbConnectionString()}Initial Catalog={dbName};";
-        }
-
-        private static string GetLocalDbConnectionString()
+        public static string GetMsSqlConnectionString()
         {
             TestConfiguration config = ConfigurationHelper.GetTestConfiguration();
-            return $"Data Source={config.LocalDbServer};Integrated Security=True;";
+            return $"Data Source={config.MsSqlServer},{config.MsSqlPort};User Id={config.MsSqlUsername};Password={config.MsSqlPassword};";
         }
 
-        private static string GetMdfPath(string folder, string dbName)
-        {
-            return Path.Combine(folder, $"{dbName}.mdf");
-        }
-
-        private static IDbConnection OpenConnection(string connectionString)
+        public static IDbConnection OpenConnection(string connectionString)
         {
             // open the connection
             IDbConnection conn = new SqlConnection(connectionString);
@@ -127,7 +117,7 @@ namespace Entatea.Tests.Helpers
                             DROP DATABASE [{dbName}];
                         END";
 
-                using IDbConnection conn = OpenConnection(GetLocalDbConnectionString("master"));
+                using IDbConnection conn = OpenConnection(GetMsSqlConnectionString("master"));
                 IDbCommand cmd = conn.CreateCommand();
                 cmd.CommandText = dropDbSql;
                 cmd.ExecuteNonQuery();

@@ -44,11 +44,7 @@ namespace Entatea
             if (classMap.HasSequentialKey)
             {
                 // read the next id from the database
-                var parameters = classMap.ValidateAssignedKeyProperties<T>(entity).GetParameters();
-                object id = await this.Connection.ExecuteScalarAsync(
-                    sqlProvider.GetSelectNextIdSql<T>(), 
-                    parameters,
-                    this.Transaction).ConfigureAwait(false);
+                object id = await this.GetNextId<T>(entity);
 
                 // set the sequential key on our entity
                 classMap.SequentialKey.PropertyInfo.SetValue(
@@ -310,6 +306,23 @@ namespace Entatea
 
             await this.Connection.QueryAsync<T>(sqlProvider.GetDeleteWhereSql<T>(predicates), predicates.GetParameters(), this.Transaction)
                                  .ConfigureAwait(false);
+        }
+
+        private async Task<object> GetNextId<T>(T entity) where T : class
+        {
+            ClassMap classMap = ClassMapper.GetClassMap<T>();
+
+            // get the predicates
+            List<IPredicate> predicates = classMap.ValidateAssignedKeyProperties<T>(entity).ToList();
+            predicates.AddRange(classMap.GetPartitionPredicates<T>());
+
+            // get the parameters
+            var parameters = predicates.GetParameters();
+
+            return await this.Connection.ExecuteScalarAsync(
+                sqlProvider.GetSelectNextIdSql<T>(),
+                parameters,
+                this.Transaction).ConfigureAwait(false);
         }
 
         public void BeginTransaction()

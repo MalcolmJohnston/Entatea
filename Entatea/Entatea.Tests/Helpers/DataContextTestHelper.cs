@@ -31,9 +31,9 @@ namespace Entatea.Tests.Helpers
             }
             else if (IsSqlServer(dataContextType))
             {
-                LocalDbTestHelper.CreateTestDatabase(TestContext.CurrentContext.Test.FullName);
+                MsSqlTestHelper.CreateTestDatabase(TestContext.CurrentContext.Test.FullName);
                 return new SqlServerDataContext(
-                    LocalDbTestHelper.GetTestConnectionString(TestContext.CurrentContext.Test.FullName),
+                    MsSqlTestHelper.GetTestConnectionString(TestContext.CurrentContext.Test.FullName),
                     tableNameResolver ?? new DefaultTableNameResolver(),
                     columnNameResolver ?? new DefaultColumnNameResolver());
             }
@@ -64,7 +64,7 @@ namespace Entatea.Tests.Helpers
             // check whether we are dealing with a type that we need to dispose of
             if (IsSqlServer(dataContextType))
             {
-                LocalDbTestHelper.DeleteTestDatabase(TestContext.CurrentContext.Test.FullName);
+                MsSqlTestHelper.DeleteTestDatabase(TestContext.CurrentContext.Test.FullName);
             } 
             else if (IsMySql(dataContextType))
             {
@@ -80,7 +80,7 @@ namespace Entatea.Tests.Helpers
         {
             if (IsSqlServer(dataContextType))
             {
-                LocalDbTestHelper.CreateTestDatabase(TestContext.CurrentContext.Test.FullName);
+                MsSqlTestHelper.CreateTestDatabase(TestContext.CurrentContext.Test.FullName);
             }
             else if (IsMySql(dataContextType))
             {
@@ -96,7 +96,7 @@ namespace Entatea.Tests.Helpers
         {
             if (IsSqlServer(dataContextType))
             {
-                return LocalDbTestHelper.GetTestConnectionString(TestContext.CurrentContext.Test.FullName);
+                return MsSqlTestHelper.GetTestConnectionString(TestContext.CurrentContext.Test.FullName);
             }
             else if (IsMySql(dataContextType))
             {

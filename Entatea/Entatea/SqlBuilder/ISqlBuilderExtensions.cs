@@ -70,9 +70,33 @@ namespace Entatea.SqlBuilder
             StringBuilder sb = new StringBuilder("WHERE ");
 
             int count = properties.Count();
+            int offset = 0;
             for (int i = 0; i < count; i++)
             {
-                sb.Append($"{sqlBuilder.GetColumnIdentifier(properties.ElementAt(i))} = @p{i}");
+                PropertyMap pm = properties.ElementAt(i);
+
+                int paramIdx = i + offset;
+
+                if (pm.IsPartition)
+                {
+                    if (pm.PartitionFromValue != null && pm.PartitionToValue != null)
+                    {
+                        sb.Append($"{(pm)} BETWEEN @p{paramIdx} AND @p{paramIdx + 1}");
+                        offset++;
+                    }
+                    else if (pm.PartitionFromValue != null)
+                    {
+                        sb.Append($"{sqlBuilder.GetColumnIdentifier(pm)} >= @p{paramIdx}");
+                    }
+                    else if (pm.PartitionToValue != null)
+                    {
+                        sb.Append($"{sqlBuilder.GetColumnIdentifier(pm)} <= @p{paramIdx}");
+                    }
+                }
+                else
+                {
+                    sb.Append($"{sqlBuilder.GetColumnIdentifier(pm)} = @p{paramIdx}");
+                }
 
                 // exclude AND on last property
                 if ((i + 1) < count)

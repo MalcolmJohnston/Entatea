@@ -46,6 +46,17 @@ namespace Entatea.Model
             return null;
         }
 
+        internal static dynamic GetPartition(PropertyInfo pi)
+        {
+            dynamic attr = GetAttribute(pi, "PartitionAttribute");
+            if (attr != null)
+            {
+                return attr;
+            }
+
+            return null;
+        }
+
         internal static bool IsEditable(PropertyInfo pi)
         {
             dynamic attr = GetAttribute(pi, "EditableAttribute");

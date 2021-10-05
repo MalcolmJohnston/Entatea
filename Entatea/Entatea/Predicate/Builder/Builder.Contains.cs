@@ -11,5 +11,10 @@ namespace Entatea.Predicate
             PropertyInfo propertyInfo = ReflectionHelper.GetProperty(expression) as PropertyInfo;
             return Field<T>(propertyInfo.Name, Operator.Contains, value);
         }
+
+        public static IFieldPredicate Contains<T>(string propertyName, string value) where T : class
+        {
+            return Field<T>(propertyName, Operator.Contains, value);
+        }
     }
 }

@@ -6,6 +6,11 @@ namespace Entatea.Predicate
 {
     public static partial class PredicateBuilder
     {
+        public static IFieldPredicate LessThan<T>(string propertyName, object value) where T : class
+        {
+            return Field<T>(propertyName, Operator.LessThan, value);
+        }
+
         public static IFieldPredicate LessThan<T>(Expression<Func<T, byte>> expression, byte value) where T : class
         {
             PropertyInfo propertyInfo = ReflectionHelper.GetProperty(expression) as PropertyInfo;

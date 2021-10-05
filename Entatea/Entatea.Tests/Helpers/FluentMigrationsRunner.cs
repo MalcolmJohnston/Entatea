@@ -6,7 +6,7 @@ namespace Entatea.Tests.Helpers
 {
     public static class FluentMigrationsRunner
     {
-        public static void UpLocalDb(string connectionString)
+        public static void UpSqlServer(string connectionString)
         {
             new ServiceCollection()
                 .AddFluentMigratorCore()

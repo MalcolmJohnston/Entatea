@@ -6,6 +6,11 @@ namespace Entatea.Predicate
 {
     public static partial class PredicateBuilder
     {
+        public static IBetweenPredicate NotBetween<T>(string propertyName, object value1, object value2) where T : class
+        {
+            return Between<T>(propertyName, value1, value2, true);
+        }
+
         public static IBetweenPredicate NotBetween<T>(Expression<Func<T, byte>> expression, byte value1, byte value2) where T : class
         {
             PropertyInfo propertyInfo = ReflectionHelper.GetProperty(expression) as PropertyInfo;

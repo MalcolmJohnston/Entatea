@@ -55,6 +55,11 @@ namespace Entatea.Model
         public bool IsDiscriminator { get; private set; }
 
         /// <summary>
+        /// Gets a value indication whether this instance is a partition.
+        /// </summary>
+        public bool IsPartition { get; private set; }
+
+        /// <summary>
         /// The value the property should be set to on insert (only applies if IsSoftDelete, or IsDiscriminator)
         /// </summary>
         public object ValueOnInsert { get; private set; }
@@ -63,6 +68,16 @@ namespace Entatea.Model
         /// The value the property should be set to on delete (only applies if IsSoftDelete)
         /// </summary>
         public object ValueOnDelete { get; private set; }
+
+        /// <summary>
+        /// The value to partition from (only applies if IsPartition, may be null)
+        /// </summary>
+        public object PartitionFromValue { get; private set; }
+
+        /// <summary>
+        /// The value to partition to (only applies if IsPartition, may be null)
+        /// </summary>
+        public object PartitionToValue { get; private set; }
 
         /// <summary>
         /// Loads the property map.
@@ -91,6 +106,7 @@ namespace Entatea.Model
             bool isDateStamp = PropertyAttributeHelper.IsDateStamp(propertyInfo);
             dynamic softDeleteAttribute = PropertyAttributeHelper.GetSoftDelete(propertyInfo);
             dynamic discriminatorAttribute = PropertyAttributeHelper.GetDiscriminator(propertyInfo);
+            dynamic partitionAttribute = PropertyAttributeHelper.GetPartition(propertyInfo);
 
             if (softDeleteAttribute != null && discriminatorAttribute != null)
             {
@@ -132,6 +148,7 @@ namespace Entatea.Model
             pm.IsDateStamp = isDateStamp;
             pm.IsSoftDelete = softDeleteAttribute != null;
             pm.IsDiscriminator = discriminatorAttribute != null;
+            pm.IsPartition = partitionAttribute != null;
             if (pm.IsSoftDelete)
             {
                 pm.ValueOnInsert = softDeleteAttribute.ValueOnInsert;
@@ -140,6 +157,11 @@ namespace Entatea.Model
             if (pm.IsDiscriminator)
             {
                 pm.ValueOnInsert = discriminatorAttribute.ValueOnInsert;
+            }
+            if (pm.IsPartition)
+            {
+                pm.PartitionFromValue = partitionAttribute.FromValue;
+                pm.PartitionToValue = partitionAttribute.ToValue;
             }
 
             // set read-only / editable

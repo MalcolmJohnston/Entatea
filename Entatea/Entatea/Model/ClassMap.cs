@@ -79,11 +79,9 @@ namespace Entatea.Model
                                                                                 !x.IsDiscriminator)
                                                                         .ToList();
 
-            // set the date stamp properties
             this.DateStampProperties = this.AllProperties.Values.Where(x => x.IsDateStamp).ToList();
-
-            // set the discriminator properties
             this.DiscriminatorProperties = this.AllProperties.Values.Where(x => x.IsDiscriminator).ToList();
+            this.PartitionProperties = this.AllProperties.Values.Where(x => x.IsPartition).ToList();
 
             // set the default sort order
             this.DefaultSortOrder = this.AllKeys.Select(x => new { Key = x.PropertyName, Value = SortOrder.Ascending })
@@ -143,6 +141,8 @@ namespace Entatea.Model
         public PropertyMap SoftDeleteProperty { get; private set; }
 
         public IList<PropertyMap> DiscriminatorProperties { get; private set; }
+
+        public IList<PropertyMap> PartitionProperties { get; private set; }
 
         public bool IsSoftDelete
         {
@@ -423,12 +423,34 @@ namespace Entatea.Model
             return newPredicates;
         }
 
+        public IList<IFieldPredicate> GetPartitionPredicates<T>() where T : class
+        {
+            List<IFieldPredicate> predicates = new List<IFieldPredicate>();
+            if (this.PartitionProperties.Any())
+            {
+                foreach (PropertyMap partitionProperty in this.PartitionProperties)
+                {
+                    if (partitionProperty.PartitionFromValue != null)
+                    {
+                        FieldPredicate<T> p = PredicateBuilder.GreaterThanOrEqual<T>(partitionProperty.PropertyName, partitionProperty.PartitionFromValue) as FieldPredicate<T>;
+                        predicates.Add(p);
+                    }
+                    if (partitionProperty.PartitionToValue != null)
+                    {
+                        FieldPredicate<T> p = PredicateBuilder.LessThanOrEqual<T>(partitionProperty.PropertyName, partitionProperty.PartitionToValue) as FieldPredicate<T>;
+                        predicates.Add(p);
+                    }
+                }
+            }
+            return predicates;
+        }
+
         private IList<IFieldPredicate> defaultPredicates = null;
         public IList<IFieldPredicate> GetDefaultPredicates<T>() where T : class
         {
             if (defaultPredicates == null)
             {
-                IList<IFieldPredicate> predicates = new List<IFieldPredicate>();
+                List<IFieldPredicate> predicates = new List<IFieldPredicate>();
                 if (this.DiscriminatorProperties.Any())
                 {
                     foreach (PropertyMap discriminatorProperty in this.DiscriminatorProperties)
@@ -442,6 +464,10 @@ namespace Entatea.Model
                     FieldPredicate<T> p = PredicateBuilder.Equal<T>(this.SoftDeleteProperty.PropertyName, this.SoftDeleteProperty.ValueOnInsert) as FieldPredicate<T>;
                     predicates.Add(p);
                 }
+
+                // add partition predicates
+                predicates.AddRange(this.GetPartitionPredicates<T>());
+
                 defaultPredicates = predicates;
             }
             return defaultPredicates;
