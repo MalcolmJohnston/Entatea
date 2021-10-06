@@ -58,21 +58,16 @@ namespace Entatea.InMemory
                 PropertyInfo pi = classMap.SequentialKey.PropertyInfo;
 
                 // initialise the key value
-                dynamic keyValue = Activator.CreateInstance(pi.PropertyType);
+                object keyValue = Activator.CreateInstance(pi.PropertyType);
 
                 // check for existing entities
                 if (list.Any())
                 {
-                    List<T> existingEntities = new List<T>(list);
-                    if (classMap.AssignedKeys.Count() > 0)
+                    IList<IFieldPredicate> predicates = classMap.GetDefaultPredicates<T>();
+                    IList<T> existingEntities = new List<T>(list);
+                    if (predicates.Any())
                     {
-                        // if this type has assigned keys then filter out objects from our candidates that do not have
-                        // matching assigned keys
-                        IDictionary<string, object> assignedValues = classMap.AssignedKeys
-                            .Select(kvp => new KeyValuePair<string, object>(kvp.PropertyName, kvp.PropertyInfo.GetValue(entity)))
-                            .ToDictionary(kvp => kvp.Key, kvp => kvp.Value);
-
-                        existingEntities = this.ReadList<T>(assignedValues).GetAwaiter().GetResult().ToList();
+                        existingEntities = this.Filter<T>(existingEntities, predicates).ToList<T>();
                     }
 
                     // now get the last item that was added to the list in order of the key
@@ -82,7 +77,15 @@ namespace Entatea.InMemory
 
                 // increment and set the key value on the object
                 Expression incrementExpr = Expression.Increment(Expression.Constant(keyValue));
-                pi.SetValue(entity, Expression.Lambda(incrementExpr).Compile().DynamicInvoke());
+                keyValue = Expression.Lambda(incrementExpr).Compile().DynamicInvoke();
+
+                // coalesce if value is not in correct range
+                if (classMap.HasSequentialPartitionKey)
+                {
+                    keyValue = classMap.CoalesceNextSequentialPartitionId(keyValue);
+                }
+
+                pi.SetValue(entity, keyValue);
             }
             else if (classMap.HasIdentityKey)
             {
@@ -450,17 +453,24 @@ namespace Entatea.InMemory
 
         private IEnumerable<T> ReadWhere<T>(IEnumerable<IPredicate> predicates) where T : class
         {
-            // get the type map
-            ClassMap classMap = ClassMapper.GetClassMap<T>();
-
             // get the data to query
-            IQueryable<T> data = this.GetData<T>().AsQueryable<T>();
-
-            // return an empty enumerable if no objects in collection
-            if (data.Count() == 0)
+            IEnumerable<T> data = this.GetData<T>();
+            if (!data.Any())
             {
-                return new T[0];
+                return Array.Empty<T>();
             }
+
+            return this.Filter<T>(data, predicates);
+        }
+
+        private IEnumerable<T> Filter<T>(IEnumerable<T> items, IEnumerable<IPredicate> predicates) where T : class
+        {
+            return items.AsQueryable<T>().Where(this.GetExpression<T>(predicates)).AsEnumerable<T>();
+        }
+
+        private Expression<Func<T, bool>> GetExpression<T>(IEnumerable<IPredicate> predicates) where T : class
+        {
+            ClassMap classMap = ClassMapper.GetClassMap<T>();
 
             // x =>
             ParameterExpression parameter = Expression.Parameter(typeof(T), "x");
@@ -488,9 +498,7 @@ namespace Entatea.InMemory
                 }
             }
 
-            var finalExpression = Expression.Lambda<Func<T, bool>>(body, parameter);
-
-            return data.Where(finalExpression).AsEnumerable<T>();
+            return Expression.Lambda<Func<T, bool>>(body, parameter);
         }
 
         private Expression GetExpression<T>(

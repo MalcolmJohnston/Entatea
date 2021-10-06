@@ -77,11 +77,11 @@ namespace Entatea.SqlBuilder
 
                 int paramIdx = i + offset;
 
-                if (pm.IsPartition)
+                if (pm.KeyType == KeyType.SequentialPartition)
                 {
                     if (pm.PartitionFromValue != null && pm.PartitionToValue != null)
                     {
-                        sb.Append($"{(pm)} BETWEEN @p{paramIdx} AND @p{paramIdx + 1}");
+                        sb.Append($"{sqlBuilder.GetColumnIdentifier(pm)} BETWEEN @p{paramIdx} AND @p{paramIdx + 1}");
                         offset++;
                     }
                     else if (pm.PartitionFromValue != null)

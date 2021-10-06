@@ -167,11 +167,14 @@ namespace Entatea.SqlBuilder
 
             // next id must be constrained by assigned keys and/or partition properties
             // note that they should be added in this order or the parameters WONT match!
-            if (classMap.AssignedKeys.Any() || classMap.PartitionProperties.Any())
+            List<PropertyMap> props = new List<PropertyMap>(classMap.AssignedKeys);
+            if (classMap.HasSequentialKey && classMap.SequentialKey.KeyType == KeyType.SequentialPartition)
             {
-                List<PropertyMap> props = new List<PropertyMap>(classMap.AssignedKeys);
-                props.AddRange(classMap.PartitionProperties);
+                props.Add(classMap.SequentialKey);
+            }
 
+            if (props.Any())
+            {
                 sb.Append($" {this.GetByPropertiesWhereClause(props)}");
             }
             

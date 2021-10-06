@@ -314,15 +314,22 @@ namespace Entatea
 
             // get the predicates
             List<IPredicate> predicates = classMap.ValidateAssignedKeyProperties<T>(entity).ToList();
-            predicates.AddRange(classMap.GetPartitionPredicates<T>());
+            predicates.AddRange(classMap.GetSequentialPartitionPredicates<T>());
 
             // get the parameters
             var parameters = predicates.GetParameters();
 
-            return await this.Connection.ExecuteScalarAsync(
+            object id = await this.Connection.ExecuteScalarAsync(
                 sqlProvider.GetSelectNextIdSql<T>(),
                 parameters,
                 this.Transaction).ConfigureAwait(false);
+
+            if (classMap.HasSequentialPartitionKey)
+            {
+                id = classMap.CoalesceNextSequentialPartitionId(id);
+            }
+
+            return id;
         }
 
         public void BeginTransaction()

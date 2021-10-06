@@ -9,16 +9,27 @@ namespace Entatea.Model
 
         internal static bool IsKey(PropertyInfo pi) { return HasAttribute(pi, "KeyAttribute"); }
 
+        internal static bool IsKeyType(PropertyInfo pi) { return HasAttribute(pi, "KeyTypeAttribute"); }
+
+        internal static bool IsSequentialPartitionKey(PropertyInfo pi) { return HasAttribute(pi, "SequentialPartitionKeyAttribute"); }
+
         internal static bool IsRequired(PropertyInfo pi) { return HasAttribute(pi, "RequiredAttribute"); }
 
         internal static bool IsDateStamp(PropertyInfo pi) { return HasAttribute(pi, "DateStampAttribute"); }
 
         internal static KeyType GetKeyType(PropertyInfo pi)
         {
-            dynamic attr = GetAttribute(pi, "KeyTypeAttribute");
-            if (attr != null)
+            if (IsSequentialPartitionKey(pi))
             {
-                return attr.KeyType;
+                return KeyType.SequentialPartition;
+            }
+            else if (IsKeyType(pi))
+            {
+                return GetAttribute(pi, "KeyTypeAttribute").Value;
+            }
+            else if (IsKey(pi))
+            {
+                return KeyType.Identity;
             }
 
             return KeyType.NotAKey;
@@ -46,9 +57,9 @@ namespace Entatea.Model
             return null;
         }
 
-        internal static dynamic GetPartition(PropertyInfo pi)
+        internal static dynamic GetSequentialPartitionKey(PropertyInfo pi)
         {
-            dynamic attr = GetAttribute(pi, "PartitionAttribute");
+            dynamic attr = GetAttribute(pi, "SequentialPartitionKeyAttribute");
             if (attr != null)
             {
                 return attr;

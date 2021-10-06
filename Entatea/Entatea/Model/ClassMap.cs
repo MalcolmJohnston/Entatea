@@ -48,7 +48,8 @@ namespace Entatea.Model
                 throw new ArgumentException("Type can only define a single Sequential key property.");
             }
 
-            this.SequentialKey = this.AllKeys.SingleOrDefault(x => x.KeyType == KeyType.Sequential);
+            this.SequentialKey = this.AllKeys.SingleOrDefault(x => x.KeyType == KeyType.Sequential || 
+                                                                   x.KeyType == KeyType.SequentialPartition);
 
             // check whether we have a soft delete column
             if (this.AllProperties.Values.Where(x => x.IsSoftDelete).Count() > 1)
@@ -81,7 +82,6 @@ namespace Entatea.Model
 
             this.DateStampProperties = this.AllProperties.Values.Where(x => x.IsDateStamp).ToList();
             this.DiscriminatorProperties = this.AllProperties.Values.Where(x => x.IsDiscriminator).ToList();
-            this.PartitionProperties = this.AllProperties.Values.Where(x => x.IsPartition).ToList();
 
             // set the default sort order
             this.DefaultSortOrder = this.AllKeys.Select(x => new { Key = x.PropertyName, Value = SortOrder.Ascending })
@@ -106,6 +106,11 @@ namespace Entatea.Model
         public bool HasSequentialKey
         {
             get { return this.SequentialKey != null; }
+        }
+
+        public bool HasSequentialPartitionKey
+        {
+            get { return this.HasSequentialKey && this.SequentialKey.KeyType == KeyType.SequentialPartition; }
         }
 
         public IEnumerable<PropertyMap> AssignedKeys
@@ -141,8 +146,6 @@ namespace Entatea.Model
         public PropertyMap SoftDeleteProperty { get; private set; }
 
         public IList<PropertyMap> DiscriminatorProperties { get; private set; }
-
-        public IList<PropertyMap> PartitionProperties { get; private set; }
 
         public bool IsSoftDelete
         {
@@ -364,6 +367,30 @@ namespace Entatea.Model
             return this.DefaultSortOrder;
         }
 
+        public object CoalesceNextSequentialPartitionId(object id)
+        {
+            if (this.HasSequentialPartitionKey)
+            {
+                long compId = (long)Convert.ChangeType(id, typeof(long));
+                if (this.SequentialKey.PartitionFromValue.HasValue)
+                {
+                    if (compId < this.SequentialKey.PartitionFromValue.Value)
+                    {
+                        id = this.SequentialKey.PartitionFromValue.Value;
+                    }
+                }
+                if (this.SequentialKey.PartitionToValue.HasValue)
+                {
+                    if (compId > this.SequentialKey.PartitionToValue.Value)
+                    {
+                        id = this.SequentialKey.PartitionToValue.Value;
+                    }
+                }
+            }
+
+            return Convert.ChangeType(id, this.SequentialKey.PropertyInfo.PropertyType);
+        }
+
         /// <summary>
         /// Validates the where properties.
         /// </summary>
@@ -423,23 +450,24 @@ namespace Entatea.Model
             return newPredicates;
         }
 
-        public IList<IFieldPredicate> GetPartitionPredicates<T>() where T : class
+        public IList<IFieldPredicate> GetSequentialPartitionPredicates<T>() where T : class
         {
             List<IFieldPredicate> predicates = new List<IFieldPredicate>();
-            if (this.PartitionProperties.Any())
+            if (this.HasSequentialKey && this.SequentialKey.KeyType == KeyType.SequentialPartition)
             {
-                foreach (PropertyMap partitionProperty in this.PartitionProperties)
+                if (this.SequentialKey.PartitionFromValue != null)
                 {
-                    if (partitionProperty.PartitionFromValue != null)
-                    {
-                        FieldPredicate<T> p = PredicateBuilder.GreaterThanOrEqual<T>(partitionProperty.PropertyName, partitionProperty.PartitionFromValue) as FieldPredicate<T>;
-                        predicates.Add(p);
-                    }
-                    if (partitionProperty.PartitionToValue != null)
-                    {
-                        FieldPredicate<T> p = PredicateBuilder.LessThanOrEqual<T>(partitionProperty.PropertyName, partitionProperty.PartitionToValue) as FieldPredicate<T>;
-                        predicates.Add(p);
-                    }
+                    FieldPredicate<T> p = PredicateBuilder.GreaterThanOrEqual<T>(
+                        this.SequentialKey.PropertyName, 
+                        this.SequentialKey.PartitionFromValue) as FieldPredicate<T>;
+                    predicates.Add(p);
+                }
+                if (this.SequentialKey.PartitionToValue != null)
+                {
+                    FieldPredicate<T> p = PredicateBuilder.LessThanOrEqual<T>(
+                        this.SequentialKey.PropertyName, 
+                        this.SequentialKey.PartitionToValue) as FieldPredicate<T>;
+                    predicates.Add(p);
                 }
             }
             return predicates;
@@ -466,7 +494,7 @@ namespace Entatea.Model
                 }
 
                 // add partition predicates
-                predicates.AddRange(this.GetPartitionPredicates<T>());
+                predicates.AddRange(this.GetSequentialPartitionPredicates<T>());
 
                 defaultPredicates = predicates;
             }

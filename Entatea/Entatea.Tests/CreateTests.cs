@@ -219,5 +219,30 @@ namespace Entatea.Tests
             Assert.AreEqual("So is this.", unique2.Value);
             Assert.AreNotEqual(unique1.Id, unique2.Id);
         }
+
+        /// <summary>
+        /// Test that we can insert with a partition and a sequential key
+        /// </summary>
+        /// <param name="dataContextType"></param>
+        /// <returns></returns>
+        [TestCase(typeof(InMemoryDataContext))]
+        [TestCase(typeof(MySqlDataContext))]
+        [TestCase(typeof(SqliteDataContext))]
+        [TestCase(typeof(SqlServerDataContext))]
+        public async Task Insert_With_Sequential_Partition_Key(Type dataContextType)
+        {
+            // Arrange
+            using IDataContext dataContext = DataContextTestHelper.SetupDataContext(dataContextType);
+
+            // Act
+            ProductPartition1 partition1 = await dataContext.Create(new ProductPartition1() { Name = "1" });
+            ProductPartition2 partition2 = await dataContext.Create(new ProductPartition2() { Name = "1" });
+            ProductPartition3 partition3 = await dataContext.Create(new ProductPartition3() { Name = "1" });
+
+            // Assert
+            Assert.AreEqual(1, partition1.Id);
+            Assert.AreEqual(100001, partition2.Id);
+            Assert.AreEqual(30000, partition3.Id);
+        }
     }
 }

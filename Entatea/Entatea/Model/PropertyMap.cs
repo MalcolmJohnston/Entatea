@@ -55,11 +55,6 @@ namespace Entatea.Model
         public bool IsDiscriminator { get; private set; }
 
         /// <summary>
-        /// Gets a value indication whether this instance is a partition.
-        /// </summary>
-        public bool IsPartition { get; private set; }
-
-        /// <summary>
         /// The value the property should be set to on insert (only applies if IsSoftDelete, or IsDiscriminator)
         /// </summary>
         public object ValueOnInsert { get; private set; }
@@ -72,12 +67,12 @@ namespace Entatea.Model
         /// <summary>
         /// The value to partition from (only applies if IsPartition, may be null)
         /// </summary>
-        public object PartitionFromValue { get; private set; }
+        public long? PartitionFromValue { get; private set; }
 
         /// <summary>
         /// The value to partition to (only applies if IsPartition, may be null)
         /// </summary>
-        public object PartitionToValue { get; private set; }
+        public long? PartitionToValue { get; private set; }
 
         /// <summary>
         /// Loads the property map.
@@ -98,7 +93,6 @@ namespace Entatea.Model
 
             // read the property metadata from custom attributes
             pm.KeyType = PropertyAttributeHelper.GetKeyType(propertyInfo);
-            bool isKey = pm.KeyType != KeyType.NotAKey || PropertyAttributeHelper.IsKey(propertyInfo);
             
             bool isRequired = PropertyAttributeHelper.IsRequired(propertyInfo);
             bool isReadOnly = PropertyAttributeHelper.IsReadOnly(propertyInfo);
@@ -106,38 +100,33 @@ namespace Entatea.Model
             bool isDateStamp = PropertyAttributeHelper.IsDateStamp(propertyInfo);
             dynamic softDeleteAttribute = PropertyAttributeHelper.GetSoftDelete(propertyInfo);
             dynamic discriminatorAttribute = PropertyAttributeHelper.GetDiscriminator(propertyInfo);
-            dynamic partitionAttribute = PropertyAttributeHelper.GetPartition(propertyInfo);
+            dynamic sequentialPartitionKey = PropertyAttributeHelper.GetSequentialPartitionKey(propertyInfo);
 
             if (softDeleteAttribute != null && discriminatorAttribute != null)
             {
                 throw new ArgumentException("Property cannot be soft delete and discriminator");
             }
 
-            // use the metadata to populate the property map
-
-            // not a key, check whether this property is an implied key
-            if (!isKey)
+            // not a key, check whether this property is an implied key and set key type
+            if (!pm.IsKey)
             {
-                isKey = propertyInfo.Name == "Id" || propertyInfo.Name == $"{propertyInfo.DeclaringType.Name}Id";
-            }
-
-            // key with no key type defined, then imply it
-            if (isKey && pm.KeyType == KeyType.NotAKey)
-            {
-                if (propertyInfo.PropertyType == typeof(int))
+                if (propertyInfo.Name == "Id" || propertyInfo.Name == $"{propertyInfo.DeclaringType.Name}Id")
                 {
-                    // if integer then treat as identity by default
-                    pm.KeyType = KeyType.Identity;
-                }
-                else if (propertyInfo.PropertyType == typeof(Guid))
-                {
-                    // if guid then treat as guid
-                    pm.KeyType = KeyType.Guid;
-                }
-                else
-                {
-                    // otherwise treat as assigned
-                    pm.KeyType = KeyType.Assigned;
+                    if (propertyInfo.PropertyType == typeof(int))
+                    {
+                        // if integer then treat as identity by default
+                        pm.KeyType = KeyType.Identity;
+                    }
+                    else if (propertyInfo.PropertyType == typeof(Guid))
+                    {
+                        // if guid then treat as guid
+                        pm.KeyType = KeyType.Guid;
+                    }
+                    else
+                    {
+                        // otherwise treat as assigned
+                        pm.KeyType = KeyType.Assigned;
+                    }
                 }
             }
 
@@ -148,7 +137,6 @@ namespace Entatea.Model
             pm.IsDateStamp = isDateStamp;
             pm.IsSoftDelete = softDeleteAttribute != null;
             pm.IsDiscriminator = discriminatorAttribute != null;
-            pm.IsPartition = partitionAttribute != null;
             if (pm.IsSoftDelete)
             {
                 pm.ValueOnInsert = softDeleteAttribute.ValueOnInsert;
@@ -158,10 +146,10 @@ namespace Entatea.Model
             {
                 pm.ValueOnInsert = discriminatorAttribute.ValueOnInsert;
             }
-            if (pm.IsPartition)
+            if (pm.KeyType == KeyType.SequentialPartition)
             {
-                pm.PartitionFromValue = partitionAttribute.FromValue;
-                pm.PartitionToValue = partitionAttribute.ToValue;
+                pm.PartitionFromValue = sequentialPartitionKey.FromValue;
+                pm.PartitionToValue = sequentialPartitionKey.ToValue;
             }
 
             // set read-only / editable
