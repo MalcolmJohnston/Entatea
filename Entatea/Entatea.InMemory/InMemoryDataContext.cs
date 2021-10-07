@@ -63,7 +63,9 @@ namespace Entatea.InMemory
                 // check for existing entities
                 if (list.Any())
                 {
-                    IList<IFieldPredicate> predicates = classMap.GetDefaultPredicates<T>();
+                    List<IPredicate> predicates = classMap.ValidateAssignedKeyProperties<T>(entity).ToList();
+                    predicates.AddRange(classMap.GetSequentialPartitionPredicates<T>());
+
                     IList<T> existingEntities = new List<T>(list);
                     if (predicates.Any())
                     {
@@ -510,23 +512,23 @@ namespace Entatea.InMemory
             switch (predicate.Operator)
             {
                 case Operator.GreaterThan:
-                    expr = Expression.GreaterThan(member, Expression.Constant(predicate.Value, pm.PropertyInfo.PropertyType));
+                    expr = Expression.GreaterThan(member, Expression.Convert(Expression.Constant(predicate.Value), pm.PropertyInfo.PropertyType));
                     break;
                 case Operator.GreaterThanOrEqual:
-                    expr = Expression.GreaterThanOrEqual(member, Expression.Constant(predicate.Value, pm.PropertyInfo.PropertyType));
+                    expr = Expression.GreaterThanOrEqual(member, Expression.Convert(Expression.Constant(predicate.Value), pm.PropertyInfo.PropertyType));
                     break;
                 case Operator.LessThan:
-                    expr = Expression.LessThan(member, Expression.Constant(predicate.Value, pm.PropertyInfo.PropertyType));
+                    expr = Expression.LessThan(member, Expression.Convert(Expression.Constant(predicate.Value), pm.PropertyInfo.PropertyType));
                     break;
                 case Operator.LessThanOrEqual:
-                    expr = Expression.LessThanOrEqual(member, Expression.Constant(predicate.Value, pm.PropertyInfo.PropertyType));
+                    expr = Expression.LessThanOrEqual(member, Expression.Convert(Expression.Constant(predicate.Value), pm.PropertyInfo.PropertyType));
                     break;
                 case Operator.Contains:
                 case Operator.StartsWith:
                 case Operator.EndsWith:
                     string methodName = Enum.GetName(typeof(Operator), predicate.Operator);
                     MethodInfo likeMethod = typeof(string).GetMethod(methodName, new[] { typeof(string) });
-                    expr = Expression.Call(member, likeMethod, Expression.Constant(predicate.Value, pm.PropertyInfo.PropertyType));
+                    expr = Expression.Call(member, likeMethod, Expression.Convert(Expression.Constant(predicate.Value), pm.PropertyInfo.PropertyType));
                     break;
                 case Operator.In:
                     // if this is a nullable type then use the underlying type for the expression
@@ -566,7 +568,7 @@ namespace Entatea.InMemory
                     }
                     break;
                 case Operator.Equal:
-                    expr = Expression.Equal(member, Expression.Constant(predicate.Value, pm.PropertyInfo.PropertyType));
+                    expr = Expression.Equal(member, Expression.Convert(Expression.Constant(predicate.Value), pm.PropertyInfo.PropertyType));
                     break;
                 default:
                     break;
@@ -588,8 +590,8 @@ namespace Entatea.InMemory
             if (predicate is IBetweenPredicate)
             {
                 IBetweenPredicate bPredicate = predicate as IBetweenPredicate;
-                Expression gte = Expression.GreaterThanOrEqual(member, Expression.Constant(bPredicate.Value, pm.PropertyInfo.PropertyType));
-                Expression lte = Expression.LessThanOrEqual(member, Expression.Constant(bPredicate.Value2, pm.PropertyInfo.PropertyType));
+                Expression gte = Expression.GreaterThanOrEqual(member, Expression.Convert(Expression.Constant(bPredicate.Value), pm.PropertyInfo.PropertyType));
+                Expression lte = Expression.LessThanOrEqual(member, Expression.Convert(Expression.Constant(bPredicate.Value2), pm.PropertyInfo.PropertyType));
                 
                 if (bPredicate.Not)
                 {

@@ -1,15 +1,9 @@
-﻿using System;
-using System.Collections.Generic;
-using System.ComponentModel.DataAnnotations.Schema;
-using System.Security.Cryptography.X509Certificates;
-using System.Text;
-
-using FluentMigrator;
+﻿using FluentMigrator;
 
 namespace Entatea.Tests.Migrations
 {
     [Migration(1)]
-    public class CreateSchema : AutoReversingMigration
+    public class M01_CreateSchema : AutoReversingMigration
     {
         public override void Up()
         {

@@ -389,5 +389,31 @@ namespace Entatea.Tests
             // Act / Assert
             Assert.ThrowsAsync<ArgumentException>(async() => await dataContext.Read<City>(Equal<City>(x => x.Area, "Hampshire")));
         }
+
+        /// <summary>
+        /// Test that when we read rows with a predicate that has candidates in more than one partition, that only 
+        /// the rows from the requested partition are returned.
+        /// </summary>
+        /// <returns></returns>
+        [TestCase(typeof(InMemoryDataContext))]
+        [TestCase(typeof(SqlServerDataContext))]
+        [TestCase(typeof(MySqlDataContext))]
+        [TestCase(typeof(SqliteDataContext))]
+        public async Task Read_With_Sequential_Partition_Key(Type dataContextType)
+        {
+            // Arrange
+            using IDataContext dataContext = DataContextTestHelper.SetupDataContext(dataContextType);
+            await dataContext.Create(new ProductPartition1() { Name = "Test", IsForSale = true });
+            await dataContext.Create(new ProductPartition1() { Name = "Test 2", IsForSale = true });
+            await dataContext.Create(new ProductPartition2() { Name = "Test", IsForSale = true });
+            await dataContext.Create(new ProductPartition2() { Name = "Test 2", IsForSale = true });
+
+            // Act
+            IEnumerable<ProductPartition2> twos = await dataContext.ReadList<ProductPartition2>(new { IsForSale = true });
+
+            // Assert
+            Assert.AreEqual(2, twos.Count());
+            Assert.That(twos.All(x => x.Id >= 100001));
+        }
     }
 }

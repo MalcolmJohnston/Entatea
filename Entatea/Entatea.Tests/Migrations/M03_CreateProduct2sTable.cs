@@ -3,7 +3,7 @@
 namespace Entatea.Tests.Migrations
 {
     [Migration(3)]
-    public class CreateProduct2sTable : AutoReversingMigration
+    public class M03_CreateProduct2sTable : AutoReversingMigration
     {
         public override void Up()
         {

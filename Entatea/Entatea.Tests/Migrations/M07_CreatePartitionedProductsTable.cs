@@ -1,20 +1,14 @@
-﻿using System;
-using System.Collections.Generic;
-using System.ComponentModel.DataAnnotations.Schema;
-using System.Security.Cryptography.X509Certificates;
-using System.Text;
-
-using FluentMigrator;
+﻿using FluentMigrator;
 
 namespace Entatea.Tests.Migrations
 {
-    [Migration(2)]
-    public class CreateProductsTable : AutoReversingMigration
+    [Migration(7)]
+    public class M07_CreatePartitionedProductsTable : AutoReversingMigration
     {
         public override void Up()
         {
-            Create.Table("Products")
-                .WithColumn("Id").AsInt32().PrimaryKey().Identity()
+            Create.Table("PartitionedProducts")
+                .WithColumn("Id").AsInt32().PrimaryKey().NotNullable()
                 .WithColumn("Name").AsString().Nullable()
                 .WithColumn("IsForSale").AsBoolean().NotNullable()
                 .WithColumn("Updated").AsDateTime().NotNullable()

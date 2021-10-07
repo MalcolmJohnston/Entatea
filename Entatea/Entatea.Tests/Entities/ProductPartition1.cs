@@ -4,11 +4,10 @@ using Entatea.Annotations;
 
 namespace Entatea.Tests.Entities
 {
-    [Table("Products")]
+    [Table("PartitionedProducts")]
     public class ProductPartition1
     {
-        [KeyType(KeyType.Sequential)]
-        [SequentialPartitionKey(100000, false)]
+        [SequentialPartitionKey(29999, false)]
         public int Id { get; set; }
 
         public string Name { get; set; }

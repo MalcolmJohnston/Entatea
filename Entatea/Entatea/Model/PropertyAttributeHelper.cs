@@ -25,7 +25,7 @@ namespace Entatea.Model
             }
             else if (IsKeyType(pi))
             {
-                return GetAttribute(pi, "KeyTypeAttribute").Value;
+                return GetAttribute(pi, "KeyTypeAttribute").KeyType;
             }
             else if (IsKey(pi))
             {

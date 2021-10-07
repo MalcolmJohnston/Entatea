@@ -5,7 +5,7 @@ using FluentMigrator;
 namespace Entatea.Tests.Migrations
 {
     [Migration(4)]
-    public class CreateTestResolverTables : AutoReversingMigration
+    public class M04_CreateTestResolverTables : AutoReversingMigration
     {
         public override void Up()
         {

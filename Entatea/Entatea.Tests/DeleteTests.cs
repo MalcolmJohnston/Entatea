@@ -199,5 +199,31 @@ namespace Entatea.Tests
             Assert.AreEqual(0, (await dataContext.ReadList<DiscriminatorContact>(In<DiscriminatorContact>(x => x.Name, "Paul"))).Count());
             Assert.AreEqual(1, (await dataContext.ReadList<DiscriminatorCompany>(In<DiscriminatorCompany>(x => x.Name, "Paul"))).Count());
         }
+
+        /// <summary>
+        /// Test that when we delete rows with a predicate that has candidates in more than one partition, that only 
+        /// the rows from the requested partition are deleted.
+        /// </summary>
+        /// <returns></returns>
+        [TestCase(typeof(InMemoryDataContext))]
+        [TestCase(typeof(SqlServerDataContext))]
+        [TestCase(typeof(MySqlDataContext))]
+        [TestCase(typeof(SqliteDataContext))]
+        public async Task Delete_With_Sequential_Partition_Key(Type dataContextType)
+        {
+            // Arrange
+            using IDataContext dataContext = DataContextTestHelper.SetupDataContext(dataContextType);
+            await dataContext.Create(new ProductPartition1() { Name = "Test", IsForSale = true });
+            await dataContext.Create(new ProductPartition1() { Name = "Test 2", IsForSale = true });
+            await dataContext.Create(new ProductPartition2() { Name = "Test", IsForSale = true });
+            await dataContext.Create(new ProductPartition2() { Name = "Test 2", IsForSale = true });
+
+            // Act
+            await dataContext.DeleteList<ProductPartition2>(new { IsForSale = true });
+
+            // Assert
+            Assert.IsFalse((await dataContext.ReadAll<ProductPartition2>()).Any());
+            Assert.IsTrue((await dataContext.ReadAll<ProductPartition1>()).Any());
+        }
     }
 }

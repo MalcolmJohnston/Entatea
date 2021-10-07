@@ -3,7 +3,7 @@
 namespace Entatea.Tests.Migrations
 {
     [Migration(5)]
-    public class CreateDiscriminatorsTable : AutoReversingMigration
+    public class M05_CreateDiscriminatorsTable : AutoReversingMigration
     {
         public override void Up()
         {

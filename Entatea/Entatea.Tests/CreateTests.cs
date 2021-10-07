@@ -221,7 +221,7 @@ namespace Entatea.Tests
         }
 
         /// <summary>
-        /// Test that we can insert with a partition and a sequential key
+        /// Test that we can insert with a sequential partition key when there are no rows
         /// </summary>
         /// <param name="dataContextType"></param>
         /// <returns></returns>
@@ -229,20 +229,53 @@ namespace Entatea.Tests
         [TestCase(typeof(MySqlDataContext))]
         [TestCase(typeof(SqliteDataContext))]
         [TestCase(typeof(SqlServerDataContext))]
-        public async Task Insert_With_Sequential_Partition_Key(Type dataContextType)
+        public async Task Insert_With_Sequential_Partition_Key_No_Existing_Rows(Type dataContextType)
         {
             // Arrange
             using IDataContext dataContext = DataContextTestHelper.SetupDataContext(dataContextType);
 
             // Act
             ProductPartition1 partition1 = await dataContext.Create(new ProductPartition1() { Name = "1" });
-            ProductPartition2 partition2 = await dataContext.Create(new ProductPartition2() { Name = "1" });
-            ProductPartition3 partition3 = await dataContext.Create(new ProductPartition3() { Name = "1" });
+            ProductPartition2 partition2 = await dataContext.Create(new ProductPartition2() { Name = "100001" });
+            ProductPartition3 partition3 = await dataContext.Create(new ProductPartition3() { Name = "30000" });
 
             // Assert
             Assert.AreEqual(1, partition1.Id);
             Assert.AreEqual(100001, partition2.Id);
             Assert.AreEqual(30000, partition3.Id);
+        }
+
+        // <summary>
+        /// Test that we can insert with a sequential partition key when there are already rows
+        /// </summary>
+        /// <param name="dataContextType"></param>
+        /// <returns></returns>
+        [TestCase(typeof(InMemoryDataContext))]
+        [TestCase(typeof(MySqlDataContext))]
+        [TestCase(typeof(SqliteDataContext))]
+        [TestCase(typeof(SqlServerDataContext))]
+        public async Task Insert_With_Sequential_Partition_Key_Existing_Rows(Type dataContextType)
+        {
+            // Arrange
+            int existingRows = 5;
+            using IDataContext dataContext = DataContextTestHelper.SetupDataContext(dataContextType);
+
+            for (int i = 1; i <= existingRows; i++)
+            {
+                await dataContext.Create(new ProductPartition1() { Name = i.ToString() });
+                await dataContext.Create(new ProductPartition2() { Name = (i + 100000).ToString() });
+                await dataContext.Create(new ProductPartition3() { Name = (i + 29999).ToString() });
+            }
+            
+            // Act
+            ProductPartition1 p1 = await dataContext.Create(new ProductPartition1() { Name = (existingRows + 1).ToString() });
+            ProductPartition2 p2 = await dataContext.Create(new ProductPartition2() { Name = (existingRows + 100001).ToString() });
+            ProductPartition3 p3 = await dataContext.Create(new ProductPartition3() { Name = (existingRows + 30000).ToString() });
+
+            // Assert
+            Assert.AreEqual(existingRows + 1, p1.Id);
+            Assert.AreEqual(existingRows + 100001, p2.Id);
+            Assert.AreEqual(existingRows + + 30000, p3.Id);
         }
     }
 }

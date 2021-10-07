@@ -51,6 +51,12 @@ namespace Entatea.Model
             this.SequentialKey = this.AllKeys.SingleOrDefault(x => x.KeyType == KeyType.Sequential || 
                                                                    x.KeyType == KeyType.SequentialPartition);
 
+            if (this.SequentialKey != null && this.SequentialKey.KeyType == KeyType.SequentialPartition &&
+                this.AllKeys.Count() > 1)
+            {
+                throw new ArgumentException("Type can only define a single key when using a Sequential Partition key property.");
+            }
+
             // check whether we have a soft delete column
             if (this.AllProperties.Values.Where(x => x.IsSoftDelete).Count() > 1)
             {
@@ -67,7 +73,10 @@ namespace Entatea.Model
             // all key properties except identity
             // any datestamp or discriminator properties
             // any non-key properties that are not readonly
-            this.InsertableProperties = this.AllProperties.Values.Where(x => x.KeyType == KeyType.Guid || x.KeyType == KeyType.Sequential || x.KeyType == KeyType.Assigned)
+            this.InsertableProperties = this.AllProperties.Values.Where(x => x.KeyType == KeyType.Guid || 
+                                                                             x.KeyType == KeyType.Sequential || 
+                                                                             x.KeyType == KeyType.SequentialPartition || 
+                                                                             x.KeyType == KeyType.Assigned)
                 .Union(this.AllProperties.Values.Where(x => x.KeyType == KeyType.NotAKey && (x.IsDateStamp || x.IsDiscriminator)))
                 .Union(this.AllProperties.Values.Where(x => x.KeyType == KeyType.NotAKey && !x.IsReadOnly))
                 .ToList();

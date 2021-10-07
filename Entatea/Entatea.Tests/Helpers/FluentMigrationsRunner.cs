@@ -14,7 +14,7 @@ namespace Entatea.Tests.Helpers
                     .AddSqlServer()
                     .WithGlobalConnectionString(connectionString)
                     // Define the assembly containing the migrations
-                    .ScanIn(typeof(Migrations.CreateSchema).Assembly).For.Migrations())
+                    .ScanIn(typeof(Migrations.M01_CreateSchema).Assembly).For.Migrations())
                 .AddLogging(lb => lb.AddFluentMigratorConsole())
                 .BuildServiceProvider(false)
                 .GetRequiredService<IMigrationRunner>()
@@ -29,7 +29,7 @@ namespace Entatea.Tests.Helpers
                     .AddMySql5()
                     .WithGlobalConnectionString(connectionString)
                     // Define the assembly containing the migrations
-                    .ScanIn(typeof(Migrations.CreateSchema).Assembly).For.Migrations())
+                    .ScanIn(typeof(Migrations.M01_CreateSchema).Assembly).For.Migrations())
                 .AddLogging(lb => lb.AddFluentMigratorConsole())
                 .BuildServiceProvider(false)
                 .GetRequiredService<IMigrationRunner>()
@@ -44,7 +44,7 @@ namespace Entatea.Tests.Helpers
                     .AddSQLite()
                     .WithGlobalConnectionString(connectionString)
                     // Define the assembly containing the migrations
-                    .ScanIn(typeof(Migrations.CreateSchema).Assembly).For.Migrations())
+                    .ScanIn(typeof(Migrations.M01_CreateSchema).Assembly).For.Migrations())
                 .AddLogging(lb => lb.AddFluentMigratorConsole())
                 .BuildServiceProvider(false)
                 .GetRequiredService<IMigrationRunner>()

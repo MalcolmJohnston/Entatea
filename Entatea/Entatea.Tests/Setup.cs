@@ -29,14 +29,29 @@ namespace Entatea.Tests
         [OneTimeTearDown]
         public async Task FixtureTearDown()
         {
-            await Task.WhenAll(StopContainer(MY_SQL_CONTAINER_NAME), StopContainer(MS_SQL_CONTAINER_NAME));
+            await Task.WhenAll(StopMsSqlContainer(), StopMySqlContainer());
         }
 
-        private static async Task StopContainer(string containerName)
+        private static async Task StopMsSqlContainer()
+        {
+            ProcessStartInfo killStartInfo = new ProcessStartInfo(
+                DOCKER_PROCESS,
+                $"exec {MS_SQL_CONTAINER_NAME} kill 1 || :");
+            Process killProcess = Process.Start(killStartInfo);
+            await killProcess.WaitForExitAsync();
+
+            ProcessStartInfo stopStartInfo = new ProcessStartInfo(
+                DOCKER_PROCESS,
+                $"container stop {MY_SQL_CONTAINER_NAME}");
+            Process stopProcess = Process.Start(stopStartInfo);
+            await stopProcess.WaitForExitAsync();
+        }
+
+        private static async Task StopMySqlContainer()
         {
             ProcessStartInfo stopStartInfo = new ProcessStartInfo(
                 DOCKER_PROCESS,
-                $"container stop {containerName}");
+                $"container stop {MY_SQL_CONTAINER_NAME}");
             Process stopProcess = Process.Start(stopStartInfo);
             await stopProcess.WaitForExitAsync();
         }
@@ -71,7 +86,7 @@ namespace Entatea.Tests
         {
             ProcessStartInfo startInfo = new ProcessStartInfo(
                 DOCKER_PROCESS,
-                $"run --rm --name {MS_SQL_CONTAINER_NAME} -e \"ACCEPT_EULA=Y\" -e \"SA_PASSWORD={password}\" -e \"MSSQL_PID=Express\" -e \"TZ=Europe/London\" -p{port}:1433 -d --name=sql mcr.microsoft.com/mssql/server:latest");
+                $"run --rm -e \"ACCEPT_EULA=Y\" -e \"SA_PASSWORD={password}\" -e \"MSSQL_PID=Express\" -e \"TZ=Europe/London\" -p{port}:1433 -d --name={MS_SQL_CONTAINER_NAME} mcr.microsoft.com/mssql/server:latest");
             Process startProcess = Process.Start(startInfo);
             await startProcess.WaitForExitAsync();
 

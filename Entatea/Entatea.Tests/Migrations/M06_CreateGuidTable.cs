@@ -3,7 +3,7 @@
 namespace Entatea.Tests.Migrations
 {
     [Migration(6)]
-    public class CreateGuidTable : AutoReversingMigration
+    public class M06_CreateGuidTable : AutoReversingMigration
     {
         public override void Up()
         {
