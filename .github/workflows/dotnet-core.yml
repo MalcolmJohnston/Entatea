@@ -2,9 +2,9 @@ name: .NET Core
 
 on:
   push:
-    branches: [ master ]
+    branches: [ main ]
   pull_request:
-    branches: [ master ]
+    branches: [ main ]
 
 jobs:
   build:
@@ -19,6 +19,8 @@ jobs:
         dotnet-version: 5.0.x
     - name: Install dependencies
       run: dotnet restore ./Entatea/Entatea.sln
+    - name: Test
+      run: dotnet test ./Entatea/Entatea.sln --no-restore
     - name: Build
       run: dotnet build ./Entatea/Entatea.sln --configuration Release --no-restore
     - name: Publish Entatea to NuGet
