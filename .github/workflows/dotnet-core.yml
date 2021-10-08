@@ -17,6 +17,8 @@ jobs:
       uses: actions/setup-dotnet@v1
       with:
         dotnet-version: 5.0.x
+    - name: Docker version
+      run: docker version
     - name: Install dependencies
       run: dotnet restore ./Entatea/Entatea.sln
     - name: Test
