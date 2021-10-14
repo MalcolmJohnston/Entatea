@@ -22,11 +22,6 @@ namespace Entatea
             this.cache = cache;
         }
 
-        public string GetDeleteByIdSql<T>() where T : class
-        {
-            return GetFromOrAddToCache(cache.GetDeleteByIdSql<T>, builder.GetDeleteByIdSql<T>, cache.SetDeleteByIdSql<T>);
-        }
-
         public string GetDeleteWhereSql<T>(IEnumerable<IPredicate> whereConditions) where T : class
         {
             return builder.GetDeleteWhereSql<T>(whereConditions);
@@ -45,11 +40,6 @@ namespace Entatea
         public string GetSelectAllSql<T>() where T : class
         {
             return GetFromOrAddToCache(cache.GetSelectAllSql<T>, builder.GetSelectAllSql<T>, cache.SetSelectAllSql<T>);
-        }
-
-        public string GetSelectByIdSql<T>() where T : class
-        {
-            return GetFromOrAddToCache(cache.GetSelectByIdSql<T>, builder.GetSelectByIdSql<T>, cache.SetSelectByIdSql<T>);
         }
 
         public string GetSelectCountSql<T>(IEnumerable<IPredicate> whereConditions) where T : class

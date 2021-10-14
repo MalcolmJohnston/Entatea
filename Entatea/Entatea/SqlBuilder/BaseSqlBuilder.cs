@@ -90,20 +90,6 @@ namespace Entatea.SqlBuilder
             return this.Encapsulate(this.columnNameResolver.GetColumnName(propertyMap.PropertyName));
         }
 
-        public virtual string GetDeleteByIdSql<T>() where T : class
-        {
-            ClassMap classMap = ClassMapper.GetClassMap<T>();
-
-            if (classMap.SoftDeleteProperty != null)
-            {
-                return $"UPDATE {this.GetTableIdentifier(classMap)} SET " +
-                    $"{this.GetColumnIdentifier(classMap.SoftDeleteProperty)} = {classMap.SoftDeleteProperty.ValueOnDelete} " + 
-                    $"{this.GetByIdWhereClause(classMap)}";
-            }
-            
-            return $"DELETE FROM {this.GetTableIdentifier(classMap)} {this.GetByIdWhereClause(classMap)}";
-        }
-
         public virtual string GetDeleteWhereSql<T>(IEnumerable<IPredicate> whereConditions) where T : class
         {
             ClassMap classMap = ClassMapper.GetClassMap<T>();
@@ -121,18 +107,6 @@ namespace Entatea.SqlBuilder
             sb.Append(string.Join(", ", classMap.SelectProperties.Select(x => this.EncapsulateSelect(x))));
             sb.Append(" FROM ");
             sb.Append(this.GetTableIdentifier<T>());
-
-            return sb.ToString();
-        }
-
-        public virtual string GetSelectByIdSql<T>() where T : class
-        {
-            ClassMap classMap = ClassMapper.GetClassMap<T>();
-
-            StringBuilder sb = new StringBuilder();
-            sb.Append(this.GetSelectAllSql<T>());
-            sb.Append(" ");
-            sb.Append(this.GetByIdWhereClause(classMap));
 
             return sb.ToString();
         }

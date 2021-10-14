@@ -32,8 +32,6 @@ namespace Entatea.SqlBuilder
 
         string GetSelectAllSql<T>() where T : class;
 
-        string GetSelectByIdSql<T>() where T : class;
-
         string GetSelectWhereSql<T>(IEnumerable<IPredicate> whereConditions) where T : class;
 
         string GetSelectWhereSql<T>(IEnumerable<IPredicate> whereConditions, object sortOrders, int firstRow, int lastRow) where T : class;
@@ -41,8 +39,6 @@ namespace Entatea.SqlBuilder
         string GetInsertSql<T>() where T : class;
 
         string GetUpdateSql<T>(object updateProperties) where T : class;
-
-        string GetDeleteByIdSql<T>() where T : class;
 
         string GetDeleteWhereSql<T>(IEnumerable<IPredicate> whereConditions) where T : class;
 

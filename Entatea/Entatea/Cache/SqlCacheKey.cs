@@ -4,14 +4,10 @@
     {
         SelectAll = 0,
 
-        SelectById = 1,
+        SelectCount = 1,
 
-        SelectCount = 2,
+        SelectNextId = 2,
 
-        SelectNextId = 3,
-
-        Insert = 4,
-
-        DeleteById = 5,
+        Insert = 3,
     }
 }

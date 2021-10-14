@@ -62,10 +62,13 @@ namespace Entatea.SqlBuilder
                 props.Add(classMap.SoftDeleteProperty);
             }
 
-            return GetByPropertiesWhereClause(sqlBuilder, props);
+            return GetByPropertiesWhereClause(sqlBuilder, props, true);
         }
 
-        public static string GetByPropertiesWhereClause(this ISqlBuilder sqlBuilder, IEnumerable<PropertyMap> properties)
+        public static string GetByPropertiesWhereClause(
+            this ISqlBuilder sqlBuilder, 
+            IEnumerable<PropertyMap> properties,
+            bool byIdMode = false)
         {
             StringBuilder sb = new StringBuilder("WHERE ");
 
@@ -79,6 +82,13 @@ namespace Entatea.SqlBuilder
 
                 if (pm.KeyType == KeyType.SequentialPartition)
                 {
+                    if (byIdMode)
+                    {
+                        // if we are getting a row by identifier then we need an equal predicate first
+                        // keep the partition predicates too, just in case
+                        sb.Append($"{sqlBuilder.GetColumnIdentifier(pm)} = @p{paramIdx} AND ");
+                    }
+                    
                     if (pm.PartitionFromValue != null && pm.PartitionToValue != null)
                     {
                         sb.Append($"{sqlBuilder.GetColumnIdentifier(pm)} BETWEEN @p{paramIdx} AND @p{paramIdx + 1}");

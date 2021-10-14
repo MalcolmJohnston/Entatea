@@ -14,11 +14,6 @@ namespace Entatea.Cache
             return GetCacheSql<T>(SqlCacheKey.SelectAll);
         }
 
-        public string GetSelectByIdSql<T>()
-        {
-            return GetCacheSql<T>(SqlCacheKey.SelectById);
-        }
-
         public string GetSelectCountSql<T>()
         {
             return GetCacheSql<T>(SqlCacheKey.SelectCount);
@@ -32,18 +27,10 @@ namespace Entatea.Cache
         {
             return GetCacheSql<T>(SqlCacheKey.Insert);
         }
-        public string GetDeleteByIdSql<T>()
-        {
-            return GetCacheSql<T>(SqlCacheKey.DeleteById);
-        }
 
         public void SetSelectAllSql<T>(string sql)
         {
             this.SetCacheSql<T>(SqlCacheKey.SelectAll, sql);
-        }
-        public void SetSelectByIdSql<T>(string sql)
-        {
-            this.SetCacheSql<T>(SqlCacheKey.SelectById, sql);
         }
 
         public void SetSelectCountSql<T>(string sql)
@@ -58,11 +45,6 @@ namespace Entatea.Cache
         public void SetInsertSql<T>(string sql)
         {
             this.SetCacheSql<T>(SqlCacheKey.Insert, sql);
-        }
-
-        public void SetDeleteByIdSql<T>(string sql)
-        {
-            this.SetCacheSql<T>(SqlCacheKey.DeleteById, sql);
         }
 
         private string GetCacheSql<T>(SqlCacheKey sqlType)

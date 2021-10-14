@@ -185,6 +185,10 @@ namespace Entatea.Tests
         /// </summary>
         /// <param name="dataContextType"></param>
         /// <returns></returns>
+        [TestCase(typeof(InMemoryDataContext))]
+        [TestCase(typeof(SqlServerDataContext))]
+        [TestCase(typeof(MySqlDataContext))]
+        [TestCase(typeof(SqliteDataContext))]
         public async Task Delete_Discriminator_Entity(Type dataContextType)
         {
             // Arrange
@@ -196,6 +200,7 @@ namespace Entatea.Tests
             await dataContext.DeleteList<DiscriminatorContact>(Equal<DiscriminatorContact>(x => x.Name, "Paul"));
 
             // Assert
+            var temp = await dataContext.ReadList<DiscriminatorContact>(In<DiscriminatorContact>(x => x.Name, "Paul"));
             Assert.AreEqual(0, (await dataContext.ReadList<DiscriminatorContact>(In<DiscriminatorContact>(x => x.Name, "Paul"))).Count());
             Assert.AreEqual(1, (await dataContext.ReadList<DiscriminatorCompany>(In<DiscriminatorCompany>(x => x.Name, "Paul"))).Count());
         }

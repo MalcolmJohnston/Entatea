@@ -9,6 +9,7 @@
   </PropertyGroup>
 
   <ItemGroup>
+    <PackageReference Include="Entatea.SqlServer" Version="1.1.4" />
     <PackageReference Include="FluentMigrator" Version="3.2.17" />
     <PackageReference Include="FluentMigrator.Runner" Version="3.2.17" />
     <PackageReference Include="Microsoft.Data.Sqlite" Version="5.0.7" />

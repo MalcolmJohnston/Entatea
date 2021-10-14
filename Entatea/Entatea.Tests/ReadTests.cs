@@ -399,6 +399,57 @@ namespace Entatea.Tests
         [TestCase(typeof(SqlServerDataContext))]
         [TestCase(typeof(MySqlDataContext))]
         [TestCase(typeof(SqliteDataContext))]
+        public async Task Read_By_Id_With_Sequential_Partition_Key(Type dataContextType)
+        {
+            // Arrange
+            using IDataContext dataContext = DataContextTestHelper.SetupDataContext(dataContextType);
+            ProductPartition1 p1 = await dataContext.Create(new ProductPartition1() { Name = "Test", IsForSale = true });
+            ProductPartition2 p2 = await dataContext.Create(new ProductPartition2() { Name = "Test", IsForSale = true });
+
+            // Act
+            ProductPartition1 one = await dataContext.Read<ProductPartition1>(p1.Id);
+            ProductPartition2 two = await dataContext.Read<ProductPartition2>(p2.Id);
+
+            // Assert
+            Assert.NotNull(one);
+            Assert.AreEqual(p1.Id, one.Id);
+
+            Assert.NotNull(two);
+            Assert.AreEqual(p2.Id, two.Id);
+        }
+
+        [TestCase(typeof(InMemoryDataContext))]
+        [TestCase(typeof(SqlServerDataContext))]
+        [TestCase(typeof(MySqlDataContext))]
+        [TestCase(typeof(SqliteDataContext))]
+        public async Task Read_By_Id_With_Soft_Delete_And_Sequential_Partition_Key(Type dataContextType)
+        {
+            // Arrange
+            using IDataContext dataContext = DataContextTestHelper.SetupDataContext(dataContextType);
+            SoftDeletePartition1 sd1 = await dataContext.Create(new SoftDeletePartition1() { Value = "Test 1" });
+            SoftDeletePartition2 sd2 = await dataContext.Create(new SoftDeletePartition2() { Value = "Test 2" });
+
+            // Act
+            SoftDeletePartition1 one = await dataContext.Read<SoftDeletePartition1>(sd1.Id);
+            SoftDeletePartition2 two = await dataContext.Read<SoftDeletePartition2>(sd2.Id);
+
+            // Assert
+            Assert.NotNull(one);
+            Assert.AreEqual(sd1.Id, one.Id);
+
+            Assert.NotNull(two);
+            Assert.AreEqual(sd2.Id, two.Id);
+        }
+
+        /// <summary>
+        /// Test that when we read rows with a predicate that has candidates in more than one partition, that only 
+        /// the rows from the requested partition are returned.
+        /// </summary>
+        /// <returns></returns>
+        [TestCase(typeof(InMemoryDataContext))]
+        [TestCase(typeof(SqlServerDataContext))]
+        [TestCase(typeof(MySqlDataContext))]
+        [TestCase(typeof(SqliteDataContext))]
         public async Task Read_With_Sequential_Partition_Key(Type dataContextType)
         {
             // Arrange

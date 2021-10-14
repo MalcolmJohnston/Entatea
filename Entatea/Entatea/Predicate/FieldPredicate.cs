@@ -1,4 +1,6 @@
-﻿using System.Collections.Generic;
+﻿using System.Collections;
+using System.Collections.Generic;
+using System.Linq;
 
 using Entatea.SqlBuilder;
 
@@ -31,6 +33,17 @@ namespace Entatea.Predicate
             else if (this.Operator == Operator.EndsWith)
             {
                 return $"{columnName} {GetOperatorString()} {sqlBuilder.CallConcatenate("'%'", $"@p{parameterIndex}")}";
+            }
+            else if (this.Operator == Operator.In)
+            {
+                var valueType = this.Value.GetType();
+                var iEnumType = typeof(IEnumerable);
+
+                // if the value is a string or doesn't implement IEnumerable then use Equals
+                if (valueType == typeof(string) || !iEnumType.IsAssignableFrom(valueType))
+                {
+                    return $"{columnName} = @p{parameterIndex}";
+                }
             }
             return $"{columnName} {GetOperatorString()} @p{parameterIndex}";
         }

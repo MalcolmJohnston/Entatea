@@ -118,9 +118,11 @@ namespace Entatea
             IList<IPredicate> predicates = classMap.ValidateKeyProperties<T>(id);
             predicates = classMap.AddDefaultPredicates<T>(predicates);
 
-            return (await this.Connection.QueryAsync<T>(sqlProvider.GetSelectByIdSql<T>(), predicates.GetParameters(), this.Transaction)
-                                         .ConfigureAwait(false))
-                                         .SingleOrDefault();
+            return 
+                (await this.Connection.QueryAsync<T>(
+                    sqlProvider.GetSelectWhereSql<T>(predicates),
+                    predicates.GetParameters(), this.Transaction).ConfigureAwait(false))
+                                                                 .SingleOrDefault();
         }
 
         public async Task<T> Read<T>(params IPredicate[] predicates) where T : class
@@ -224,8 +226,9 @@ namespace Entatea
             IList<IPredicate> predicates = classMap.ValidateKeyProperties<T>(id);
             predicates = classMap.AddDefaultPredicates<T>(predicates);
 
-            await this.Connection.QueryAsync<T>(sqlProvider.GetDeleteByIdSql<T>(), predicates.GetParameters(), this.Transaction)
-                                 .ConfigureAwait(false);
+            await this.Connection.QueryAsync<T>(
+                sqlProvider.GetDeleteWhereSql<T>(predicates), 
+                predicates.GetParameters(), this.Transaction).ConfigureAwait(false);
         }
 
         public async Task DeleteList<T>(object whereConditions) where T : class
