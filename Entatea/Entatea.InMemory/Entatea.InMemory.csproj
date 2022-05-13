@@ -7,7 +7,7 @@
     <Product>Entatea.InMemory</Product>
     <PackageLicenseExpression>MIT</PackageLicenseExpression>
     <PackageProjectUrl>https://github.com/MalcolmJohnston/Entatea</PackageProjectUrl>
-    <Version>1.1.6</Version>
+    <Version>1.1.7</Version>
     <AssemblyVersion>1.0.6.0</AssemblyVersion>
     <FileVersion>1.0.6.0</FileVersion>
   </PropertyGroup>
@@ -35,8 +35,7 @@
 	</PropertyGroup>
 
 	<ItemGroup>
-		<!-- Required if your repository is on GitHub -->
-		<PackageReference Include="Microsoft.SourceLink.GitHub" Version="1.0.0-*" PrivateAssets="All" />
+		<PackageReference Include="Microsoft.SourceLink.GitHub" Version="1.1.1" PrivateAssets="All" />
 	</ItemGroup>
 
 </Project>

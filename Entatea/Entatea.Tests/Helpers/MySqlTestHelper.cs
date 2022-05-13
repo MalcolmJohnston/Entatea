@@ -91,13 +91,13 @@ namespace Entatea.Tests.Helpers
         internal static string GetMySqlConnectionString()
         {
             TestConfiguration cfg = ConfigurationHelper.GetTestConfiguration();
-            return $"Server={cfg.MySqlServer};Database=sys;UId={cfg.MySqlUsername};Pwd={cfg.MySqlPassword};";
+            return $"Server={cfg.MySqlServer};Port={cfg.MySqlPort};Database=sys;UId={cfg.MySqlUsername};Pwd={cfg.MySqlPassword};";
         }
 
         private static string GetMySqlConnectionString(string dbName)
         {
             TestConfiguration cfg = ConfigurationHelper.GetTestConfiguration();
-            return $"Server={cfg.MySqlServer};Database={dbName};UId={cfg.MySqlUsername};Pwd={cfg.MySqlPassword};";
+            return $"Server={cfg.MySqlServer};Database={dbName};Port={cfg.MySqlPort};UId={cfg.MySqlUsername};Pwd={cfg.MySqlPassword};";
         }
 
         internal static IDbConnection OpenConnection(string connectionString)

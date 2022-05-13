@@ -23,7 +23,9 @@ namespace Entatea.Tests
         public async Task FixtureSetup()
         {
             TestConfiguration config = ConfigurationHelper.GetTestConfiguration();
-            await Task.WhenAll(StartMySqlContainer(config.MySqlPort), StartSqlServerContainer(config.MsSqlPassword, config.MsSqlPort));
+            Task mySqlTask = StartMySqlContainer(config.MySqlPort);
+            Task msSqlTask = StartSqlServerContainer(config.MsSqlPassword, config.MsSqlPort);
+            await Task.WhenAll(mySqlTask, msSqlTask);
         }
 
         [OneTimeTearDown]
@@ -60,7 +62,7 @@ namespace Entatea.Tests
         {
             ProcessStartInfo startInfo = new ProcessStartInfo(
                 DOCKER_PROCESS,
-                $"run --rm --name {MY_SQL_CONTAINER_NAME} -p{port}:3306 -e MYSQL_ALLOW_EMPTY_PASSWORD=yes -e TZ=Europe/London -d mysql:latest --max-connections=1000");
+                $"run --rm --name {MY_SQL_CONTAINER_NAME} -p {port}:3306 -e MYSQL_ALLOW_EMPTY_PASSWORD=yes -e TZ=Europe/London -d mysql:latest --max-connections=1000");
             Process startProcess = Process.Start(startInfo);
             await startProcess.WaitForExitAsync();
 
@@ -86,7 +88,7 @@ namespace Entatea.Tests
         {
             ProcessStartInfo startInfo = new ProcessStartInfo(
                 DOCKER_PROCESS,
-                $"run --rm -e \"ACCEPT_EULA=Y\" -e \"SA_PASSWORD={password}\" -e \"MSSQL_PID=Express\" -e \"TZ=Europe/London\" -p{port}:1433 -d --name={MS_SQL_CONTAINER_NAME} mcr.microsoft.com/mssql/server:latest");
+                $"run --rm -e \"ACCEPT_EULA=Y\" -e \"SA_PASSWORD={password}\" -e \"MSSQL_PID=Express\" -e \"TZ=Europe/London\" -p {port}:1433 -d --name={MS_SQL_CONTAINER_NAME} mcr.microsoft.com/mssql/server:2019-latest");
             Process startProcess = Process.Start(startInfo);
             await startProcess.WaitForExitAsync();
 

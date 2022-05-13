@@ -1,4 +1,4 @@
-<Project Sdk="Microsoft.NET.Sdk">
+﻿<Project Sdk="Microsoft.NET.Sdk">
 
   <PropertyGroup>
     <TargetFramework>netstandard2.0</TargetFramework>
@@ -6,7 +6,7 @@
     <Authors>Malcolm Johnston</Authors>
     <PackageLicenseExpression>MIT</PackageLicenseExpression>
     <PackageProjectUrl>https://github.com/MalcolmJohnston/Entatea</PackageProjectUrl>
-    <Version>1.1.4</Version>
+    <Version>1.1.5</Version>
     <AssemblyVersion>1.0.5.0</AssemblyVersion>
   </PropertyGroup>
 
@@ -33,8 +33,7 @@
 	</PropertyGroup>
 
 	<ItemGroup>
-		<!-- Required if your repository is on GitHub -->
-		<PackageReference Include="Microsoft.SourceLink.GitHub" Version="1.0.0-*" PrivateAssets="All" />
+		<PackageReference Include="Microsoft.SourceLink.GitHub" Version="1.1.1" PrivateAssets="All" />
 	</ItemGroup>
 
 </Project>
