@@ -16,7 +16,7 @@ jobs:
     - name: Setup .NET Core
       uses: actions/setup-dotnet@v1
       with:
-        dotnet-version: 5.0.x
+        dotnet-version: 6.0.x
     - name: Install dependencies
       run: dotnet restore ./Entatea/Entatea.sln
     - name: Build
@@ -28,7 +28,7 @@ jobs:
         PROJECT_FILE_PATH: ./Entatea/Entatea/Entatea.csproj
         # API key to authenticate with NuGet server
         NUGET_KEY: ${{ secrets.NUGET_API_KEY }}
-        INCLUDE_SYMBOLS: true
+        INCLUDE_SYMBOLS: false
         TAG_COMMIT: false
     - name: Publish Entatea.InMemory to NuGet
       uses: Rebel028/publish-nuget@v2.7.0
@@ -37,7 +37,7 @@ jobs:
         PROJECT_FILE_PATH: ./Entatea/Entatea.InMemory/Entatea.InMemory.csproj
         # API key to authenticate with NuGet server
         NUGET_KEY: ${{ secrets.NUGET_API_KEY }}
-        INCLUDE_SYMBOLS: true
+        INCLUDE_SYMBOLS: false
         TAG_COMMIT: false
     - name: Publish Entatea.MySql to NuGet
       uses: Rebel028/publish-nuget@v2.7.0
@@ -46,7 +46,7 @@ jobs:
         PROJECT_FILE_PATH: ./Entatea/Entatea.MySql/Entatea.MySql.csproj
         # API key to authenticate with NuGet server
         NUGET_KEY: ${{ secrets.NUGET_API_KEY }}
-        INCLUDE_SYMBOLS: true
+        INCLUDE_SYMBOLS: false
         TAG_COMMIT: false
     - name: Publish Entatea.Sqlite to NuGet
       uses: Rebel028/publish-nuget@v2.7.0
@@ -55,7 +55,7 @@ jobs:
         PROJECT_FILE_PATH: ./Entatea/Entatea.Sqlite/Entatea.Sqlite.csproj
         # API key to authenticate with NuGet server
         NUGET_KEY: ${{ secrets.NUGET_API_KEY }}
-        INCLUDE_SYMBOLS: true
+        INCLUDE_SYMBOLS: false
         TAG_COMMIT: false
     - name: Publish Entatea.SqlServer to NuGet
       uses: Rebel028/publish-nuget@v2.7.0
@@ -64,5 +64,5 @@ jobs:
         PROJECT_FILE_PATH: ./Entatea/Entatea.SqlServer/Entatea.SqlServer.csproj
         # API key to authenticate with NuGet server
         NUGET_KEY: ${{ secrets.NUGET_API_KEY }}
-        INCLUDE_SYMBOLS: true
+        INCLUDE_SYMBOLS: false
         TAG_COMMIT: false
