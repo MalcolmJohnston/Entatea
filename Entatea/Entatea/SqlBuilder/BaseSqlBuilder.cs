@@ -46,9 +46,9 @@ namespace Entatea.SqlBuilder
             return string.Format(this.EncapsulationFormat, identifier);
         }
 
-        public virtual string EncapsulateSelect(PropertyMap propertyMap)
+        public virtual string EncapsulateSelect(ClassMap classMap, PropertyMap propertyMap)
         {
-            string columnName = this.GetColumnIdentifier(propertyMap);
+            string columnName = this.GetColumnIdentifier(classMap, propertyMap);
             string propertyName = this.Encapsulate(propertyMap.PropertyName);
             
             // if the encapsulated property name and column name are not equal use the AS syntax
@@ -78,16 +78,16 @@ namespace Entatea.SqlBuilder
             }
 
             // otherwise encapsulate the table name returned by the resolver
-            return this.Encapsulate(this.tableNameResolver.GetTableName(classMap.Name));
+            return this.Encapsulate(this.tableNameResolver.GetTableName(classMap));
         }
 
-        public virtual string GetColumnIdentifier(PropertyMap propertyMap)
+        public virtual string GetColumnIdentifier(ClassMap classMap, PropertyMap propertyMap)
         {
             if (!string.IsNullOrWhiteSpace(propertyMap.ColumnName)) {
                 return this.Encapsulate(propertyMap.ColumnName);
             }
 
-            return this.Encapsulate(this.columnNameResolver.GetColumnName(propertyMap.PropertyName));
+            return this.Encapsulate(this.columnNameResolver.GetColumnName(classMap, propertyMap.PropertyName));
         }
 
         public virtual string GetDeleteWhereSql<T>(IEnumerable<IPredicate> whereConditions) where T : class
@@ -104,7 +104,7 @@ namespace Entatea.SqlBuilder
 
             StringBuilder sb = new StringBuilder();
             sb.Append("SELECT ");
-            sb.Append(string.Join(", ", classMap.SelectProperties.Select(x => this.EncapsulateSelect(x))));
+            sb.Append(string.Join(", ", classMap.SelectProperties.Select(x => this.EncapsulateSelect(classMap, x))));
             sb.Append(" FROM ");
             sb.Append(this.GetTableIdentifier<T>());
 
@@ -136,7 +136,7 @@ namespace Entatea.SqlBuilder
             }
 
             StringBuilder sb = new StringBuilder($"SELECT {this.IsNullFunctionName}(MAX(");
-            sb.Append(this.GetColumnIdentifier(classMap.SequentialKey));
+            sb.Append(this.GetColumnIdentifier(classMap, classMap.SequentialKey));
             sb.Append($"), 0) + 1 FROM {this.GetTableIdentifier<T>()}");
 
             // next id must be constrained by assigned keys and/or partition properties
@@ -149,7 +149,7 @@ namespace Entatea.SqlBuilder
 
             if (props.Any())
             {
-                sb.Append($" {this.GetByPropertiesWhereClause(props)}");
+                sb.Append($" {this.GetByPropertiesWhereClause(classMap, props)}");
             }
             
             return sb.ToString();
@@ -214,7 +214,7 @@ namespace Entatea.SqlBuilder
             // add all update properties to SET clause
             for (int i = 0; i < updateMaps.Count; i++)
             {
-                sb.Append($"{this.GetColumnIdentifier(updateMaps[i])} = @{updateMaps[i].PropertyName}, ");
+                sb.Append($"{this.GetColumnIdentifier(classMap, updateMaps[i])} = @{updateMaps[i].PropertyName}, ");
             }
 
             // deal with date stamp properties
@@ -224,7 +224,7 @@ namespace Entatea.SqlBuilder
                 // add any Date Stamp properties to the SET clause
                 foreach (PropertyMap pm in classMap.DateStampProperties.Where(x => !x.IsReadOnly))
                 {
-                    sb.Append($"{this.GetColumnIdentifier(pm)} = {this.GetDateFunctionCall}, ");
+                    sb.Append($"{this.GetColumnIdentifier(classMap, pm)} = {this.GetDateFunctionCall}, ");
                 }
             }
 

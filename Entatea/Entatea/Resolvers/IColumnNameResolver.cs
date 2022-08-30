@@ -1,7 +1,9 @@
-﻿namespace Entatea.Resolvers
+﻿using Entatea.Model;
+
+namespace Entatea.Resolvers
 {
     public interface IColumnNameResolver
     {
-        string GetColumnName(string columnName);
+        string GetColumnName(ClassMap classMap, string propertyName);
     }
 }

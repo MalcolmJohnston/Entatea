@@ -1,12 +1,14 @@
 ﻿using Humanizer;
 
+using Entatea.Model;
+
 namespace Entatea.Resolvers
 {
     public class UnderscoreColumnNameResolver : IColumnNameResolver
     {
-        public string GetColumnName(string columnName)
+        public string GetColumnName(ClassMap classMap, string propertyName)
         {
-            return columnName.Underscore();
+            return propertyName.Underscore();
         }
     }
 }

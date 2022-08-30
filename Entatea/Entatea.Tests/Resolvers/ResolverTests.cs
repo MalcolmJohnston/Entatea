@@ -2,13 +2,14 @@
 using System.Linq;
 using System.Threading.Tasks;
 
+using Entatea.Model;
 using Entatea.MySql;
 using Entatea.SqlServer;
 using Entatea.Resolvers;
 using Entatea.Tests.Entities;
 using Entatea.Tests.Helpers;
-using NUnit.Framework;
 using Entatea.Sqlite;
+using NUnit.Framework;
 
 namespace Entatea.Tests.Resolvers
 {
@@ -24,9 +25,10 @@ namespace Entatea.Tests.Resolvers
         {
             // Arrange
             ITableNameResolver resolver = new DefaultTableNameResolver();
+            ClassMap classMap = ClassMapper.GetClassMap<TestResolver>();
 
             // Act
-            string tableName = resolver.GetTableName(typeof(TestResolver).Name);
+            string tableName = resolver.GetTableName(classMap);
 
             // Assert
             Assert.AreEqual("TestResolvers", tableName);
@@ -37,9 +39,10 @@ namespace Entatea.Tests.Resolvers
         {
             // Arrange
             IColumnNameResolver resolver = new DefaultColumnNameResolver();
+            ClassMap classMap = ClassMapper.GetClassMap<TestResolver>();
 
             // Act
-            string columnName = resolver.GetColumnName("TestResolverId");
+            string columnName = resolver.GetColumnName(classMap, "TestResolverId");
 
             // Assert
             Assert.AreEqual("TestResolverId", columnName);
@@ -50,9 +53,10 @@ namespace Entatea.Tests.Resolvers
         {
             // Arrange
             ITableNameResolver resolver = new UnderscoreTableNameResolver();
+            ClassMap classMap = ClassMapper.GetClassMap<TestResolver>();
 
             // Act
-            string tableName = resolver.GetTableName(typeof(TestResolver).Name);
+            string tableName = resolver.GetTableName(classMap);
 
             // Assert
             Assert.AreEqual("test_resolvers", tableName);
@@ -63,9 +67,11 @@ namespace Entatea.Tests.Resolvers
         {
             // Arrange
             IColumnNameResolver resolver = new UnderscoreColumnNameResolver();
+            ClassMap classMap = ClassMapper.GetClassMap<TestResolver>();
+
 
             // Act
-            string columnName = resolver.GetColumnName("TestResolverId");
+            string columnName = resolver.GetColumnName(classMap, "TestResolverId");
 
             // Assert
             Assert.AreEqual("test_resolver_id", columnName);

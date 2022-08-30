@@ -20,11 +20,11 @@ namespace Entatea.SqlBuilder
 
         string GetTableIdentifier<T>() where T : class;
 
-        string GetColumnIdentifier(PropertyMap propertyMap);
+        string GetColumnIdentifier(ClassMap classMap, PropertyMap propertyName);
 
         string Encapsulate(string identifier);
 
-        string EncapsulateSelect(PropertyMap propertyMap);
+        string EncapsulateSelect(ClassMap classMap, PropertyMap propertyMap);
 
         string CallConcatenate(params object[] parameters);
 

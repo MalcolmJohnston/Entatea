@@ -40,7 +40,7 @@ namespace Entatea.Sqlite
             StringBuilder sb = new StringBuilder($"INSERT INTO {this.GetTableIdentifier(classMap)} (");
 
             // add the columns we are inserting
-            sb.Append(string.Join(", ", classMap.InsertableProperties.Select(x => this.GetColumnIdentifier(x))));
+            sb.Append(string.Join(", ", classMap.InsertableProperties.Select(x => this.GetColumnIdentifier(classMap, x))));
             sb.Append(")");
 
             // add parameterised values
@@ -70,7 +70,7 @@ namespace Entatea.Sqlite
             // build paging sql
             int offset = firstRow - 1;
             int count = lastRow - offset;
-            return $@"SELECT {string.Join(", ", classMap.SelectProperties.Select(x => this.EncapsulateSelect(x)))}
+            return $@"SELECT {string.Join(", ", classMap.SelectProperties.Select(x => this.EncapsulateSelect(classMap, x)))}
                         FROM { this.GetTableIdentifier(classMap)}
                         {where} {orderBy}
                         LIMIT {count} OFFSET({offset})";

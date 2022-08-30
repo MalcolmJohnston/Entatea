@@ -1,12 +1,14 @@
 ﻿using Humanizer;
 
+using Entatea.Model;
+
 namespace Entatea.Resolvers
 {
     public class DefaultTableNameResolver : ITableNameResolver
     {
-        public string GetTableName(string typeName)
+        public string GetTableName(ClassMap classMap)
         {
-            return typeName.Pluralize(false);
+            return classMap.Name.Pluralize(false);
         }
     }
 }

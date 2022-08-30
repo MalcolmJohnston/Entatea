@@ -10,19 +10,19 @@ namespace Entatea.Predicate
     {
         public static string GetColumnName<T>(this ISqlBuilder sqlBuilder, string propertyName) where T : class
         {
-            ClassMap map = ClassMapper.GetClassMap<T>();
-            if (map == null)
+            ClassMap classMap = ClassMapper.GetClassMap<T>();
+            if (classMap == null)
             {
                 throw new NullReferenceException($"Map was not found for {typeof(T)}");
             }
 
-            PropertyMap propertyMap = map.AllProperties[propertyName];
+            PropertyMap propertyMap = classMap.AllProperties[propertyName];
             if (propertyMap == null)
             {
                 throw new NullReferenceException($"{propertyName} was not found for {typeof(T)}");
             }
 
-            return sqlBuilder.GetColumnIdentifier(propertyMap);
+            return sqlBuilder.GetColumnIdentifier(classMap, propertyMap);
         }
 
         public static IDictionary<string, object> GetParameters(this IEnumerable<IPredicate> predicates)

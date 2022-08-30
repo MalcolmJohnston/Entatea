@@ -54,7 +54,7 @@ namespace Entatea.SqlServer
             string tableName = classMap.ExplicitTableName;
             if (string.IsNullOrEmpty(tableName))
             {
-                tableName = this.tableNameResolver.GetTableName(classMap.Name);
+                tableName = this.tableNameResolver.GetTableName(classMap);
             }
 
             string schemaName = this.schemaResolver.GetSchema(classMap);
@@ -70,13 +70,13 @@ namespace Entatea.SqlServer
             StringBuilder sb = new StringBuilder($"INSERT INTO {this.GetTableIdentifier(classMap)} (");
 
             // add the columns we are inserting
-            sb.Append(string.Join(", ", classMap.InsertableProperties.Select(x => this.GetColumnIdentifier(x))));
+            sb.Append(string.Join(", ", classMap.InsertableProperties.Select(x => this.GetColumnIdentifier(classMap, x))));
             sb.Append(")");
 
             // add identity column outputs
             if (classMap.HasIdentityKey)
             {
-                sb.Append($" OUTPUT inserted.{this.EncapsulateSelect(classMap.IdentityKey)}");
+                sb.Append($" OUTPUT inserted.{this.EncapsulateSelect(classMap, classMap.IdentityKey)}");
             }
 
             // add parameterised values
@@ -98,7 +98,7 @@ namespace Entatea.SqlServer
             string orderBy = this.GetOrderByClause<T>(sortOrders);
 
             // build paging sql
-            return $@"SELECT {string.Join(", ", classMap.SelectProperties.Select(x => this.EncapsulateSelect(x)))}
+            return $@"SELECT {string.Join(", ", classMap.SelectProperties.Select(x => this.EncapsulateSelect(classMap, x)))}
                         FROM (SELECT ROW_NUMBER() OVER ({orderBy}) AS RowNo, *
                                 FROM {this.GetTableIdentifier(classMap)}
                                 {where}) tmp
