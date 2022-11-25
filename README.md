@@ -1,3 +1,5 @@
+[![.NET Core](https://github.com/MalcolmJohnston/Entatea/actions/workflows/dotnet-core.yml/badge.svg)](https://github.com/MalcolmJohnston/Entatea/actions/workflows/dotnet-core.yml)
+
 # Entatea
 
 Entatea (phonectic-ish spelling of Entity) provides a simple data context for database operations, including;
