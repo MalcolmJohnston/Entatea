@@ -93,7 +93,7 @@ namespace Entatea.Tests.Helpers
         public static string GetMsSqlConnectionString()
         {
             TestConfiguration config = ConfigurationHelper.GetTestConfiguration();
-            return $"Data Source={config.MsSqlServer},{config.MsSqlPort};User Id={config.MsSqlUsername};Password={config.MsSqlPassword};";
+            return $"Data Source={config.MsSqlServer},{config.MsSqlPort};User Id={config.MsSqlUsername};Password={config.MsSqlPassword};TrustServerCertificate=True;";
         }
 
         public static IDbConnection OpenConnection(string connectionString)
