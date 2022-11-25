@@ -4,7 +4,7 @@
 
 ### NuGet Packages
 | Package | Version |
-| :--- | ---: |
+| :--- | :--- |
 | Entatea | ![Nuget](https://img.shields.io/nuget/v/Entatea) |
 | Entatea.SqlServer | ![Nuget](https://img.shields.io/nuget/v/Entatea.SqlServer) |
 | Entatea.MySql | ![Nuget](https://img.shields.io/nuget/v/Entatea.MySql) |
