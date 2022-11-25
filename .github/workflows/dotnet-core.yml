@@ -22,7 +22,7 @@ jobs:
     - name: Build Entatea
       run: dotnet build ./Entatea/Entatea.sln --configuration Release --no-restore
     - name: Test Entatea
-      run: dotnet test ./Entatea/Entatea/Tests/Entatea.Tests.csproj --configuration Release --no-build
+      run: dotnet test ./Entatea/Entatea.Tests/Entatea.Tests.csproj --configuration Release --no-build
     - name: Pack Entatea
       run: dotnet pack --include-symbols -p:SymbolPackageFormat=snupkg --no-build -c Release ./Entatea/Entatea/Entatea.csproj
     - name: Pack InMemory
