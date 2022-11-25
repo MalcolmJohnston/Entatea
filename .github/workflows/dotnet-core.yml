@@ -19,50 +19,17 @@ jobs:
         dotnet-version: 6.0.x
     - name: Install dependencies
       run: dotnet restore ./Entatea/Entatea.sln
-    - name: Build
+    - name: Build Entatea
       run: dotnet build ./Entatea/Entatea.sln --configuration Release --no-restore
-    - name: Publish Entatea to NuGet
-      uses: Rebel028/publish-nuget@v2.8.0
-      with:
-        # Filepath of the project to be packaged, relative to root of repository
-        PROJECT_FILE_PATH: ./Entatea/Entatea/Entatea.csproj
-        # API key to authenticate with NuGet server
-        NUGET_KEY: ${{ secrets.NUGET_API_KEY }}
-        INCLUDE_SYMBOLS: true
-        TAG_COMMIT: false
-    - name: Publish Entatea.InMemory to NuGet
-      uses: Rebel028/publish-nuget@v2.8.0
-      with:
-        # Filepath of the project to be packaged, relative to root of repository
-        PROJECT_FILE_PATH: ./Entatea/Entatea.InMemory/Entatea.InMemory.csproj
-        # API key to authenticate with NuGet server
-        NUGET_KEY: ${{ secrets.NUGET_API_KEY }}
-        INCLUDE_SYMBOLS: true
-        TAG_COMMIT: false
-    - name: Publish Entatea.MySql to NuGet
-      uses: Rebel028/publish-nuget@v2.8.0
-      with:
-        # Filepath of the project to be packaged, relative to root of repository
-        PROJECT_FILE_PATH: ./Entatea/Entatea.MySql/Entatea.MySql.csproj
-        # API key to authenticate with NuGet server
-        NUGET_KEY: ${{ secrets.NUGET_API_KEY }}
-        INCLUDE_SYMBOLS: true
-        TAG_COMMIT: false
-    - name: Publish Entatea.Sqlite to NuGet
-      uses: Rebel028/publish-nuget@v2.8.0
-      with:
-        # Filepath of the project to be packaged, relative to root of repository
-        PROJECT_FILE_PATH: ./Entatea/Entatea.Sqlite/Entatea.Sqlite.csproj
-        # API key to authenticate with NuGet server
-        NUGET_KEY: ${{ secrets.NUGET_API_KEY }}
-        INCLUDE_SYMBOLS: true
-        TAG_COMMIT: false
-    - name: Publish Entatea.SqlServer to NuGet
-      uses: Rebel028/publish-nuget@v2.8.0
-      with:
-        # Filepath of the project to be packaged, relative to root of repository
-        PROJECT_FILE_PATH: ./Entatea/Entatea.SqlServer/Entatea.SqlServer.csproj
-        # API key to authenticate with NuGet server
-        NUGET_KEY: ${{ secrets.NUGET_API_KEY }}
-        INCLUDE_SYMBOLS: true
-        TAG_COMMIT: false
+    - name: Pack Entatea
+      run: dotnet pack --include-symbols -p:SymbolPackageFormat=snupkg --no-build -c Release ./Entatea/Entatea/Entatea.csproj
+    - name: Pack InMemory
+      run: dotnet pack --include-symbols -p:SymbolPackageFormat=snupkg --no-build -c Release ./Entatea/Entatea.InMemory/Entatea.InMemory.csproj
+    - name: Pack SQL Server
+      run: dotnet pack --include-symbols -p:SymbolPackageFormat=snupkg --no-build -c Release ./Entatea/Entatea.SqlServer/Entatea.SqlServer.csproj
+    - name: Pack My SQL
+      run: dotnet pack --include-symbols -p:SymbolPackageFormat=snupkg --no-build -c Release ./Entatea/Entatea.MySql/Entatea.MySql.csproj
+    - name: Pack SQLite
+      run: dotnet pack --include-symbols -p:SymbolPackageFormat=snupkg --no-build -c Release ./Entatea/Entatea.Sqlite/Entatea.Sqlite.csproj
+    - name: Publish NuGet
+      run: dotnet nuget push *.nupkg --api-key ${{ secrets.NUGET_API_KEY }} --source https://api.nuget.org/v3/index.json
