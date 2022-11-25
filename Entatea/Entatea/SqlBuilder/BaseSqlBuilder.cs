@@ -217,17 +217,6 @@ namespace Entatea.SqlBuilder
                 sb.Append($"{this.GetColumnIdentifier(classMap, updateMaps[i])} = @{updateMaps[i].PropertyName}, ");
             }
 
-            // deal with date stamp properties
-            int dateStampCount = classMap.DateStampProperties.Where(x => !x.IsReadOnly).Count();
-            if (dateStampCount > 0)
-            {
-                // add any Date Stamp properties to the SET clause
-                foreach (PropertyMap pm in classMap.DateStampProperties.Where(x => !x.IsReadOnly))
-                {
-                    sb.Append($"{this.GetColumnIdentifier(classMap, pm)} = {this.GetDateFunctionCall}, ");
-                }
-            }
-
             // remove trailing separator (either from update maps or date stamps)
             sb.Remove(sb.Length - 2, 2);
 

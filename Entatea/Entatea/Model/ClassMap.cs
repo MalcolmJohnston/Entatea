@@ -85,7 +85,6 @@ namespace Entatea.Model
             this.UpdateableProperties = this.AllProperties.Values.Where(x => x.KeyType == KeyType.NotAKey &&
                                                                                 x.IsEditable &&
                                                                                 !x.IsSoftDelete &&
-                                                                                !x.IsDateStamp &&
                                                                                 !x.IsDiscriminator)
                                                                         .ToList();
 

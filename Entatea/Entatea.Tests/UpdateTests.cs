@@ -120,6 +120,38 @@ namespace Entatea.Tests
 
             // Act
             DateTime updateDate = DateTime.Now;
+            DateStamp upd = new DateStamp() { Name = row.Name, Value = "New Value" };
+            DateStamp updatedRow = await dataContext.Update<DateStamp>(upd);
+
+            // Assert
+            Assert.AreEqual(row.Name, updatedRow.Name);
+            Assert.AreEqual("New Value", updatedRow.Value);
+            Assert.AreNotEqual(row.InsertDate, updatedRow.UpdateDate);
+            Assert.That(updatedRow.UpdateDate, Is.EqualTo(updateDate).Within(TimeSpan.FromSeconds(2)));
+        }
+
+        /// <summary>
+        /// Test that insert and update date properties that have been marked as Date Stamps are automatically set
+        /// to the time now on insert.
+        /// </summary>
+        /// <returns></returns>
+        [TestCase(typeof(InMemoryDataContext))]
+        [TestCase(typeof(SqlServerDataContext))]
+        [TestCase(typeof(MySqlDataContext))]
+        [TestCase(typeof(SqliteDataContext))]
+        public async Task Update_With_Datestamp_Anonymous_Object(Type dataContextType)
+        {
+            // Arrange
+            using IDataContext dataContext = DataContextTestHelper.SetupDataContext(dataContextType);
+
+            // insert row
+            DateStamp row = await dataContext.Create(new DateStamp() { Name = "Key", Value = "Value" });
+
+            // sleep so that insert date and update date will be different when update called
+            Thread.Sleep(TimeSpan.FromMilliseconds(1000));
+
+            // Act
+            DateTime updateDate = DateTime.Now;
             DateStamp updatedRow = await dataContext.Update<DateStamp>(new { row.Name, Value = "New Value" });
 
             // Assert

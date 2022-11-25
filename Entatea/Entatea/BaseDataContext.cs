@@ -197,6 +197,23 @@ namespace Entatea
             // coalesce all properties into update dictionary
             IDictionary<string, object> updDictionary = classMap.CoalesceToDictionary(properties);
 
+            // set current date time on any editable date stamp properties
+            if (classMap.DateStampProperties.Any())
+            {
+                DateTime dateStamp = DateTime.Now;
+                foreach (PropertyMap dateStampProperty in classMap.DateStampProperties)
+                {
+                    if (dateStampProperty.IsReadOnly)
+                    {
+                        updDictionary.Remove(dateStampProperty.PropertyName);
+                    }
+                    else
+                    {
+                        updDictionary[dateStampProperty.PropertyName] = dateStamp;
+                    }
+                }
+            }
+
             // coalesce key properties
             IDictionary<string, object> keyDictionary = classMap.CoalesceKeyToDictionary(properties);
 
@@ -212,7 +229,7 @@ namespace Entatea
             // add the WHERE clause parameters to our update dictionary
             updDictionary = updDictionary.Union(keyParameters).ToDictionary(x => x.Key, x => x.Value);
 
-            await this.Connection.ExecuteAsync(sqlProvider.GetUpdateSql<T>(properties), updDictionary, this.Transaction)
+            await this.Connection.ExecuteAsync(sqlProvider.GetUpdateSql<T>(updDictionary), updDictionary, this.Transaction)
                                  .ConfigureAwait(false);
 
             return await this.Read<T>(keyDictionary);
