@@ -1,4 +1,15 @@
+### Build Status
+
 [![.NET Core](https://github.com/MalcolmJohnston/Entatea/actions/workflows/dotnet-core.yml/badge.svg)](https://github.com/MalcolmJohnston/Entatea/actions/workflows/dotnet-core.yml)
+
+### NuGet Packages
+| Package | Version |
+| :--- | ---: |
+| Entatea | ![Nuget](https://img.shields.io/nuget/v/Entatea) |
+| Entatea.SqlServer | ![Nuget](https://img.shields.io/nuget/v/Entatea.SqlServer) |
+| Entatea.MySql | ![Nuget](https://img.shields.io/nuget/v/Entatea.MySql) |
+| Entatea.Sqlite | ![Nuget](https://img.shields.io/nuget/v/Entatea.Sqlite) |
+| Entatea.InMemory | ![Nuget](https://img.shields.io/nuget/v/Entatea.InMemory) |
 
 # Entatea
 
