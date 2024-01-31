@@ -1,4 +1,6 @@
 ﻿using System;
+using System.Collections.Generic;
+using System.Data.SqlClient;
 using System.Linq;
 using System.Threading.Tasks;
 
@@ -11,6 +13,8 @@ using Entatea.SqlServer;
 using Entatea.Tests.Helpers;
 using Entatea.Tests.Entities;
 
+using Dapper;
+using MySql.Data.MySqlClient;
 using NUnit.Framework;
 
 namespace Entatea.Tests
@@ -152,6 +156,74 @@ namespace Entatea.Tests
 
             // Assert
             Assert.IsNull(await dataContext.Read<SoftDelete>(new { softDelete.SoftDeleteId }));
+
+            if (DataContextTestHelper.IsSqlServer(dataContextType))
+            {
+                using SqlConnection conn = new SqlConnection(DataContextTestHelper.GetTestConnectionString(dataContextType));
+                conn.Open();
+
+                SoftDeleteShort deleted = (await conn.QueryAsync<SoftDeleteShort>(
+                    "SELECT * FROM [Entatea].[SoftDeleteTest] WHERE SoftDeleteId = @SoftDeleteId",
+                        new { softDelete.SoftDeleteId })).Single();
+
+                Assert.That(deleted.RecordStatus, Is.EqualTo(0));
+            }
+
+            if (DataContextTestHelper.IsMySql(dataContextType))
+            {
+                using MySqlConnection conn = new MySqlConnection(DataContextTestHelper.GetTestConnectionString(dataContextType));
+                conn.Open();
+
+                SoftDeleteShort deleted = (await conn.QueryAsync<SoftDeleteShort>(
+                    "SELECT * FROM SoftDeleteTest WHERE SoftDeleteId = @SoftDeleteId",
+                        new { softDelete.SoftDeleteId })).Single();
+
+                Assert.That(deleted.RecordStatus, Is.EqualTo(0));
+            }
+        }
+
+        /// <summary>
+        /// Test that we can soft delete a single entity.
+        /// </summary>
+        [TestCase(typeof(InMemoryDataContext))]
+        [TestCase(typeof(SqlServerDataContext))]
+        [TestCase(typeof(MySqlDataContext))]
+        [TestCase(typeof(SqliteDataContext))]
+        public async Task Soft_Delete_Short_Entity(Type dataContextType)
+        {
+            // Arrange
+            using IDataContext dataContext = DataContextTestHelper.SetupDataContext(dataContextType);
+            SoftDeleteShort softDelete = await dataContext.Create(new SoftDeleteShort());
+
+            // Act
+            await dataContext.Delete<SoftDeleteShort>(new { softDelete.SoftDeleteId, });
+
+            // Assert
+            Assert.IsNull(await dataContext.Read<SoftDeleteShort>(new { softDelete.SoftDeleteId }));
+            
+            if (DataContextTestHelper.IsSqlServer(dataContextType))
+            {
+                using SqlConnection conn = new SqlConnection(DataContextTestHelper.GetTestConnectionString(dataContextType));
+                conn.Open();
+
+                SoftDeleteShort deleted = (await conn.QueryAsync<SoftDeleteShort>(
+                    "SELECT COUNT(*) FROM SoftDeleteShortTest WHERE SoftDeleteId = @SoftDeleteId",
+                        new { softDelete.SoftDeleteId })).Single();
+
+                Assert.That(deleted.RecordStatus, Is.EqualTo(0));
+            }
+
+            if (DataContextTestHelper.IsMySql(dataContextType))
+            {
+                using MySqlConnection conn = new MySqlConnection(DataContextTestHelper.GetTestConnectionString(dataContextType));
+                conn.Open();
+
+                SoftDeleteShort deleted = (await conn.QueryAsync<SoftDeleteShort>(
+                    "SELECT COUNT(*) FROM SoftDeleteShortTest WHERE SoftDeleteId = @SoftDeleteId",
+                        new { softDelete.SoftDeleteId })).Single();
+
+                Assert.That(deleted.RecordStatus, Is.EqualTo(0));
+            }
         }
 
         /// <summary>
@@ -177,6 +249,30 @@ namespace Entatea.Tests
             Assert.AreEqual(0, (await dataContext.ReadList<SoftDelete>(
                 In<SoftDelete>(x => x.SoftDeleteId, new int[] { sd2.SoftDeleteId, sd3.SoftDeleteId }))).Count());
             Assert.AreEqual(1, (await dataContext.ReadAll<SoftDelete>()).Count());
+
+            if (DataContextTestHelper.IsSqlServer(dataContextType))
+            {
+                using SqlConnection conn = new SqlConnection(DataContextTestHelper.GetTestConnectionString(dataContextType));
+                conn.Open();
+
+                IEnumerable<SoftDelete> deleted = await conn.QueryAsync<SoftDelete>(
+                    "SELECT * FROM [Entatea].[SoftDeleteTest] WHERE SoftDeleteId IN @SoftDeleteIds",
+                        new { SoftDeleteIds = new int [ sd2.SoftDeleteId, sd3.SoftDeleteId ]});
+
+                Assert.That(deleted.Select(x => x.RecordStatus), Is.All.EqualTo(0));
+            }
+
+            if (DataContextTestHelper.IsMySql(dataContextType))
+            {
+                using MySqlConnection conn = new MySqlConnection(DataContextTestHelper.GetTestConnectionString(dataContextType));
+                conn.Open();
+
+                IEnumerable<SoftDelete> deleted = await conn.QueryAsync<SoftDelete>(
+                    "SELECT * FROM SoftDeleteTest WHERE SoftDeleteId IN @SoftDeleteIds",
+                        new { SoftDeleteIds = new int[sd2.SoftDeleteId, sd3.SoftDeleteId] });
+
+                Assert.That(deleted.Select(x => x.RecordStatus), Is.All.EqualTo(0));
+            }
         }
 
         /// <summary>

@@ -147,27 +147,27 @@ namespace Entatea.Tests.Helpers
             return null;
         }
 
-        private static bool IsDataContext(Type type)
+        public static bool IsDataContext(Type type)
         {
             return typeof(IDataContext).IsAssignableFrom(type);
         }
 
-        private static bool IsSqlServer(Type dataContextType)
+        public static bool IsSqlServer(Type dataContextType)
         {
             return typeof(SqlServerDataContext).IsAssignableFrom(dataContextType);
         }
 
-        private static bool IsMySql(Type dataContextType)
+        public static bool IsMySql(Type dataContextType)
         {
             return typeof(MySqlDataContext).IsAssignableFrom(dataContextType);
         }
 
-        private static bool IsSqlite(Type dataContextType)
+        public static bool IsSqlite(Type dataContextType)
         {
             return typeof(SqliteDataContext).IsAssignableFrom(dataContextType);
         }
 
-        private static bool IsInMemory(Type dataContextType)
+        public static bool IsInMemory(Type dataContextType)
         {
             return typeof(InMemoryDataContext).IsAssignableFrom(dataContextType);
         }

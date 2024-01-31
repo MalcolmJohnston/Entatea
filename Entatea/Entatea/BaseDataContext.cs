@@ -67,7 +67,9 @@ namespace Entatea
             {
                 classMap.SoftDeleteProperty.PropertyInfo.SetValue(
                     entity,
-                    classMap.SoftDeleteProperty.ValueOnInsert);
+                    Convert.ChangeType(
+                        classMap.SoftDeleteProperty.ValueOnInsert,
+                        classMap.SoftDeleteProperty.PropertyInfo.PropertyType));
             }
 
             // set discriminator properties
@@ -77,7 +79,9 @@ namespace Entatea
                 {
                     discriminatorProperty.PropertyInfo.SetValue(
                         entity,
-                        discriminatorProperty.ValueOnInsert);
+                        Convert.ChangeType(
+                            discriminatorProperty.ValueOnInsert,
+                            discriminatorProperty.PropertyInfo.PropertyType));
                 }
             }
 
@@ -242,10 +246,12 @@ namespace Entatea
             // validate the key properties
             IList<IPredicate> predicates = classMap.ValidateKeyProperties<T>(id);
             predicates = classMap.AddDefaultPredicates<T>(predicates);
+            
+            IDictionary<string, object> @params = predicates.GetParameters();
+            @params = this.AddSoftDeleteParameter<T>(@params);
 
-            await this.Connection.QueryAsync<T>(
-                sqlProvider.GetDeleteWhereSql<T>(predicates), 
-                predicates.GetParameters(), this.Transaction).ConfigureAwait(false);
+            await this.Connection.QueryAsync<T>(sqlProvider.GetDeleteWhereSql<T>(predicates), @params, this.Transaction)
+                                 .ConfigureAwait(false);
         }
 
         public async Task DeleteList<T>(object whereConditions) where T : class
@@ -259,7 +265,10 @@ namespace Entatea
             ClassMap classMap = ClassMapper.GetClassMap<T>();
             IList<IPredicate> predicates = classMap.ValidateWhereProperties<T>(whereConditions);
 
-            await this.DeleteList<T>(predicates);
+            IDictionary<string, object> @params = new Dictionary<string, object>();
+            @params = this.AddSoftDeleteParameter<T>(@params);
+            
+            await this.DeleteList<T>(predicates, @params);
         }
 
         public async Task DeleteList<T>(params IPredicate[] predicates) where T : class
@@ -269,7 +278,10 @@ namespace Entatea
                 throw new ArgumentException("Please pass where conditions");
             }
 
-            await this.DeleteList<T>(predicates.AsEnumerable());
+            IDictionary<string, object> @params = new Dictionary<string, object>();
+            @params = this.AddSoftDeleteParameter<T>(@params);
+
+            await this.DeleteList<T>(predicates.AsEnumerable(), @params);
         }
 
         private async Task<IEnumerable<T>> ReadList<T>(IEnumerable<IPredicate> predicates) where T : class
@@ -314,7 +326,7 @@ namespace Entatea
             };
         }
 
-        private async Task DeleteList<T>(IEnumerable<IPredicate> predicates) where T : class
+        private async Task DeleteList<T>(IEnumerable<IPredicate> predicates, IDictionary<string, object> @params) where T : class
         {
             if (predicates.Count() == 0)
             {
@@ -324,8 +336,12 @@ namespace Entatea
             ClassMap classMap = ClassMapper.GetClassMap<T>();
             predicates = classMap.AddDefaultPredicates<T>(predicates);
 
-            await this.Connection.QueryAsync<T>(sqlProvider.GetDeleteWhereSql<T>(predicates), predicates.GetParameters(), this.Transaction)
-                                 .ConfigureAwait(false);
+            @params = predicates.GetParameters(@params);
+
+            await this.Connection.QueryAsync<T>(
+                sqlProvider.GetDeleteWhereSql<T>(predicates), 
+                @params, 
+                this.Transaction).ConfigureAwait(false);
         }
 
         private async Task<object> GetNextId<T>(T entity) where T : class
@@ -350,6 +366,26 @@ namespace Entatea
             }
 
             return id;
+        }
+
+        private IDictionary<string, object> AddSoftDeleteParameter<T>(IDictionary<string, object> @params) where T : class
+        {
+            ClassMap classMap = ClassMapper.GetClassMap<T>();
+            if (classMap == null)
+            {
+                throw new NullReferenceException($"Map was not found for {typeof(T)}");
+            }
+
+            if (classMap.SoftDeleteProperty != null)
+            {
+                @params.Add(
+                    $"{classMap.SoftDeleteProperty.PropertyName}",
+                    Convert.ChangeType(
+                        classMap.SoftDeleteProperty.ValueOnDelete, 
+                        classMap.SoftDeleteProperty.PropertyInfo.PropertyType));
+            }
+
+            return @params;
         }
 
         public void BeginTransaction()

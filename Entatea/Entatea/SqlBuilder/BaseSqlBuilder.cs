@@ -93,6 +93,14 @@ namespace Entatea.SqlBuilder
         public virtual string GetDeleteWhereSql<T>(IEnumerable<IPredicate> whereConditions) where T : class
         {
             ClassMap classMap = ClassMapper.GetClassMap<T>();
+            if (classMap.SoftDeleteProperty != null)
+            {
+                return $"UPDATE {this.GetTableIdentifier(classMap)} " +
+                    $"SET {this.GetColumnIdentifier(classMap, classMap.SoftDeleteProperty)} = @{classMap.SoftDeleteProperty.PropertyName} " +
+                    $"{this.GetWhereClause(whereConditions)}";
+
+            }
+
             return $"DELETE FROM {this.GetTableIdentifier(classMap)} {this.GetWhereClause(whereConditions)}";
         }
 
@@ -113,6 +121,8 @@ namespace Entatea.SqlBuilder
 
         public virtual string GetSelectCountSql<T>(IEnumerable<IPredicate> whereConditions) where T : class
         {
+            // TODO: ensure this is not counting soft deleted records
+
             ClassMap classMap = ClassMapper.GetClassMap<T>();
 
             StringBuilder sb = new StringBuilder($"SELECT COUNT(*) FROM {this.GetTableIdentifier(classMap)}");
@@ -157,6 +167,8 @@ namespace Entatea.SqlBuilder
 
         public virtual string GetSelectWhereSql<T>(IEnumerable<IPredicate> whereConditions) where T : class
         {
+            // TODO: ensure this always adds a discriminator on the SoftDelete property if it exists
+
             StringBuilder sb = new StringBuilder(this.GetSelectAllSql<T>());
             sb.Append(" ");
             sb.Append(this.GetWhereClause(whereConditions));

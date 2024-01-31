@@ -167,6 +167,23 @@ namespace Entatea.Tests
             Assert.AreEqual(1, softDelete.RecordStatus);
         }
 
+        [TestCase(typeof(InMemoryDataContext))]
+        [TestCase(typeof(SqlServerDataContext))]
+        [TestCase(typeof(MySqlDataContext))]
+        [TestCase(typeof(SqliteDataContext))]
+        public async Task Insert_With_Soft_Delete_Short(Type dataContextType)
+        {
+            // Arrange
+            using IDataContext dataContext = DataContextTestHelper.SetupDataContext(dataContextType);
+
+            // Act
+            SoftDeleteShort softDelete = await dataContext.Create(new SoftDeleteShort()).ConfigureAwait(false);
+
+            // Assert
+            Assert.Greater(softDelete.SoftDeleteId, 0);
+            Assert.AreEqual(1, softDelete.RecordStatus);
+        }
+
         /// <summary>
         /// Test that we can create records with a discriminator attribute and their discriminator property is set accordingly
         /// </summary>

@@ -129,7 +129,9 @@ namespace Entatea.InMemory
             {
                 classMap.SoftDeleteProperty.PropertyInfo.SetValue(
                     entity,
-                    classMap.SoftDeleteProperty.ValueOnInsert);
+                    Convert.ChangeType(
+                        classMap.SoftDeleteProperty.ValueOnInsert,
+                        classMap.SoftDeleteProperty.PropertyInfo.PropertyType));
             }
 
             // set discriminator properties
@@ -139,7 +141,9 @@ namespace Entatea.InMemory
                 {
                     discriminatorProperty.PropertyInfo.SetValue(
                         entity,
-                        discriminatorProperty.ValueOnInsert);
+                        Convert.ChangeType(
+                            discriminatorProperty.ValueOnInsert,
+                            discriminatorProperty.PropertyInfo.PropertyType));
                 }
             }
 

@@ -25,20 +25,25 @@ namespace Entatea.Predicate
             return sqlBuilder.GetColumnIdentifier(classMap, propertyMap);
         }
 
-        public static IDictionary<string, object> GetParameters(this IEnumerable<IPredicate> predicates)
+        public static IDictionary<string, object> GetParameters(
+            this IEnumerable<IPredicate> predicates,
+            IDictionary<string, object> nonIndexedParameters = null)
         {
+            if (nonIndexedParameters == null)
+            {
+                nonIndexedParameters = new Dictionary<string, object>();
+            }
+
             int parameterIndex = 0;
-            Dictionary<string, object> parameters = new Dictionary<string, object>();
-            
-            foreach(IPredicate predicate in predicates)
+            foreach (IPredicate predicate in predicates)
             {
                 var kvps = predicate.GetParameters(parameterIndex, out int parameterCount).ToList();
-                kvps.ForEach(x => parameters.Add(x.Key, x.Value));
+                kvps.ForEach(x => nonIndexedParameters.Add(x.Key, x.Value));
 
                 parameterIndex += parameterCount;
             }
 
-            return parameters;
+            return nonIndexedParameters;
         }
     }
 }
