@@ -4,7 +4,7 @@ namespace Entatea.Annotations
 {
     /// <summary>
     /// Optional Editable attribute.
-    /// TdDb treats all properties as editable by default use the editable attribute with false to specify they are not editable.
+    /// Entatea treats all properties as editable by default use the editable attribute with false to specify they are not editable.
     /// You can use the System.ComponentModel.DataAnnotations version in its place.
     /// </summary>
     [AttributeUsage(AttributeTargets.Property)]
