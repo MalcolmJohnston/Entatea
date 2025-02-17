@@ -10,20 +10,20 @@ namespace Entatea.Tests.Builders
         public void Get_Table_Name_With_Default_Schema()
         {
             // Arrange
-            TSqlBuilder sqlBuilder = new TSqlBuilder();
+            TSqlBuilder sqlBuilder = new();
 
             // Act
             string tableName = sqlBuilder.GetTableIdentifier<NoSchema>();
 
             // Assert
-            Assert.AreEqual("[dbo].[NoSchemas]", tableName);
+            Assert.That(tableName, Is.EqualTo("[dbo].[NoSchemas]"));
         }
 
         [Test]
         public void Get_Table_Name_With_Specified_Default_Schema()
         {
             // Arrange
-            TSqlBuilder sqlBuilder = new TSqlBuilder(
+            TSqlBuilder sqlBuilder = new(
                 new Entatea.Resolvers.DefaultTableNameResolver(),
                 new Entatea.Resolvers.DefaultColumnNameResolver(),
                 "abc");
@@ -32,14 +32,14 @@ namespace Entatea.Tests.Builders
             string tableName = sqlBuilder.GetTableIdentifier<NoSchema>();
 
             // Assert
-            Assert.AreEqual("[abc].[NoSchemas]", tableName);
+            Assert.That(tableName, Is.EqualTo("[abc].[NoSchemas]"));
         }
 
         [Test]
         public void Get_Table_Name_With_Explicit_Schema()
         {
             // Arrange
-            TSqlBuilder sqlBuilder = new TSqlBuilder(
+            TSqlBuilder sqlBuilder = new(
                 new Entatea.Resolvers.DefaultTableNameResolver(),
                 new Entatea.Resolvers.DefaultColumnNameResolver(),
                 "abc");
@@ -48,7 +48,7 @@ namespace Entatea.Tests.Builders
             string tableName = sqlBuilder.GetTableIdentifier<Schema>();
 
             // Assert
-            Assert.AreEqual("[explicit].[Schemas]", tableName);
+            Assert.That(tableName, Is.EqualTo("[explicit].[Schemas]"));
         }
     }
 }

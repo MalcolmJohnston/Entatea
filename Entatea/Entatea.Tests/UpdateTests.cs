@@ -37,10 +37,10 @@ namespace Entatea.Tests
             City basVegas = await dataContext.Update<City>(new { city.CityId, CityName = "Bas Vegas!" });
 
             // Assert
-            Assert.AreEqual(city.CityId, basVegas.CityId);
-            Assert.AreEqual(city.CityCode, basVegas.CityCode);
-            Assert.AreEqual(city.Area, basVegas.Area);
-            Assert.AreEqual("Bas Vegas!", basVegas.CityName);
+            Assert.That(basVegas.CityId, Is.EqualTo(city.CityId));
+            Assert.That(basVegas.CityCode, Is.EqualTo(city.CityCode));
+            Assert.That(basVegas.Area, Is.EqualTo(city.Area));
+            Assert.That(basVegas.CityName, Is.EqualTo("Bas Vegas!"));
         }
 
         /// <summary>
@@ -63,10 +63,10 @@ namespace Entatea.Tests
             City basVegas = await dataContext.Update<City>(eo);
 
             // Assert
-            Assert.AreEqual(city.CityId, basVegas.CityId);
-            Assert.AreEqual(city.CityCode, basVegas.CityCode);
-            Assert.AreEqual(city.Area, basVegas.Area);
-            Assert.AreEqual("Bas Vegas!", basVegas.CityName);
+            Assert.That(basVegas.CityId, Is.EqualTo(city.CityId));
+            Assert.That(basVegas.CityCode, Is.EqualTo(city.CityCode));
+            Assert.That(basVegas.Area, Is.EqualTo(city.Area));
+            Assert.That(basVegas.CityName, Is.EqualTo("Bas Vegas!"));
         }
 
         /// <summary>
@@ -92,10 +92,10 @@ namespace Entatea.Tests
             });
 
             // Assert
-            Assert.AreEqual(city.CityId, basVegas.CityId);
-            Assert.AreEqual("BV", basVegas.CityCode);
-            Assert.AreEqual("The Strip", basVegas.Area);
-            Assert.AreEqual("Bas Vegas!", basVegas.CityName);
+            Assert.That(basVegas.CityId, Is.EqualTo(city.CityId));
+            Assert.That(basVegas.CityCode, Is.EqualTo("BV"));
+            Assert.That(basVegas.Area, Is.EqualTo("The Strip"));
+            Assert.That(basVegas.CityName, Is.EqualTo("Bas Vegas!"));
         }
 
         /// <summary>
@@ -120,13 +120,13 @@ namespace Entatea.Tests
 
             // Act
             DateTime updateDate = DateTime.Now;
-            DateStamp upd = new DateStamp() { Name = row.Name, Value = "New Value" };
+            DateStamp upd = new() { Name = row.Name, Value = "New Value" };
             DateStamp updatedRow = await dataContext.Update<DateStamp>(upd);
 
             // Assert
-            Assert.AreEqual(row.Name, updatedRow.Name);
-            Assert.AreEqual("New Value", updatedRow.Value);
-            Assert.AreNotEqual(row.InsertDate, updatedRow.UpdateDate);
+            Assert.That(updatedRow.Name, Is.EqualTo(row.Name));
+            Assert.That(updatedRow.Value, Is.EqualTo("New Value"));
+            Assert.That(row.InsertDate, Is.Not.EqualTo(updatedRow.UpdateDate));
             Assert.That(updatedRow.UpdateDate, Is.EqualTo(updateDate).Within(TimeSpan.FromSeconds(2)));
         }
 
@@ -155,9 +155,9 @@ namespace Entatea.Tests
             DateStamp updatedRow = await dataContext.Update<DateStamp>(new { row.Name, Value = "New Value" });
 
             // Assert
-            Assert.AreEqual(row.Name, updatedRow.Name);
-            Assert.AreEqual("New Value", updatedRow.Value);
-            Assert.AreNotEqual(row.InsertDate, updatedRow.UpdateDate);
+            Assert.That(updatedRow.Name, Is.EqualTo(row.Name));
+            Assert.That(updatedRow.Value, Is.EqualTo("New Value"));
+            Assert.That(row.InsertDate, Is.Not.EqualTo(updatedRow.UpdateDate));
             Assert.That(updatedRow.UpdateDate, Is.EqualTo(updateDate).Within(TimeSpan.FromSeconds(2)));
         }
 
@@ -200,8 +200,8 @@ namespace Entatea.Tests
             SoftDelete updated = await dataContext.Update<SoftDelete>(new { original.SoftDeleteId, Value = "Another Value" });
 
             // Assert
-            Assert.AreEqual(original.SoftDeleteId, updated.SoftDeleteId);
-            Assert.AreEqual("Another Value", updated.Value);
+            Assert.That(updated.SoftDeleteId, Is.EqualTo(original.SoftDeleteId));
+            Assert.That(updated.Value, Is.EqualTo("Another Value"));
         }
 
         /// <summary>
@@ -235,8 +235,8 @@ namespace Entatea.Tests
             });
 
             // Assert
-            Assert.AreEqual("Goodbye", readOnly.Editable);
-            Assert.AreEqual("Default", readOnly.ReadOnlyProperty);
+            Assert.That(readOnly.Editable, Is.EqualTo("Goodbye"));
+            Assert.That(readOnly.ReadOnlyProperty, Is.EqualTo("Default"));
         }
     }
 }

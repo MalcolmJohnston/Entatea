@@ -1,8 +1,9 @@
 ﻿using System.Collections.Generic;
 using System.Data;
-using System.Data.SqlClient;
 using System.IO;
 using System.Reflection;
+
+using Microsoft.Data.SqlClient;
 
 using Entatea.Tests.Configuration;
 
@@ -13,7 +14,7 @@ namespace Entatea.Tests.Helpers
     /// </summary>
     public class MsSqlTestHelper
     {
-        private static readonly Dictionary<string, string> testName2DbName = new Dictionary<string, string>();
+        private static readonly Dictionary<string, string> testName2DbName = new();
 
         private static readonly string tempFolder = Path.Combine(Path.GetTempPath(), Assembly.GetExecutingAssembly().GetName().Name, "LocalDb");
 
@@ -39,7 +40,7 @@ namespace Entatea.Tests.Helpers
             }
 
             // create the database
-            using (SqlConnection conn = new SqlConnection(GetMsSqlConnectionString()))
+            using (SqlConnection conn = new (GetMsSqlConnectionString()))
             {
                 conn.Open();
 
@@ -47,7 +48,7 @@ namespace Entatea.Tests.Helpers
                 //sql += $" ON PRIMARY (NAME={dbName}, FILENAME = '{tempFolder}\\{dbName}.mdf')";
                 //sql += $" LOG ON (NAME={dbName}_log, FILENAME = '{tempFolder}\\{dbName}_log.ldf')";
 
-                SqlCommand command = new SqlCommand(sql, conn);
+                SqlCommand command = new (sql, conn);
                 command.ExecuteNonQuery();
             }
 

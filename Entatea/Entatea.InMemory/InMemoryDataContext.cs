@@ -481,7 +481,8 @@ namespace Entatea.InMemory
             // x =>
             ParameterExpression parameter = Expression.Parameter(typeof(T), "x");
             Expression body = null;
-            foreach (IFieldPredicate predicate in predicates)
+            foreach (IFieldPredicate predicate in predicates.Where(x => x is IFieldPredicate)
+                                                            .Select(x => x as IFieldPredicate))
             {
                 // add a paramater equals expression for each property in the property bag
                 PropertyMap pm = classMap.AllProperties[predicate.PropertyName];

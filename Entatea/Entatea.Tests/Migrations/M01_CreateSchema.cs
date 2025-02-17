@@ -44,12 +44,19 @@ namespace Entatea.Tests.Migrations
                 .WithColumn("Editable").AsString()
                 .WithColumn("ReadOnly").AsString().WithDefaultValue("Default");
 
-            Create.Schema("Entatea");
-            Create.Table("SoftDeleteTest")
-                .InSchema("Entatea")
-                .WithColumn("SoftDeleteId").AsInt32().PrimaryKey().Identity()
-                .WithColumn("Value").AsString().NotNullable()
-                .WithColumn("RecordStatus").AsInt32().NotNullable();
+            IfDatabase(ProcessorId.SQLite)
+                .Create.Table("SoftDeleteTest")
+                    .WithColumn("SoftDeleteId").AsInt32().PrimaryKey().Identity()
+                    .WithColumn("Value").AsString().NotNullable()
+                    .WithColumn("RecordStatus").AsInt32().NotNullable();
+
+            IfDatabase(x => x != ProcessorId.SQLite).Create.Schema("Entatea");
+            IfDatabase(x => x != ProcessorId.SQLite)
+                .Create.Table("SoftDeleteTest")
+                    .InSchema("Entatea")
+                    .WithColumn("SoftDeleteId").AsInt32().PrimaryKey().Identity()
+                    .WithColumn("Value").AsString().NotNullable()
+                    .WithColumn("RecordStatus").AsInt32().NotNullable();
         }
     }
 }

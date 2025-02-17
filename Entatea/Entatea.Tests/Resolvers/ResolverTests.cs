@@ -31,7 +31,7 @@ namespace Entatea.Tests.Resolvers
             string tableName = resolver.GetTableName(classMap);
 
             // Assert
-            Assert.AreEqual("TestResolvers", tableName);
+            Assert.That(tableName, Is.EqualTo("TestResolvers"));
         }
 
         [TestCase]
@@ -45,7 +45,7 @@ namespace Entatea.Tests.Resolvers
             string columnName = resolver.GetColumnName(classMap, "TestResolverId");
 
             // Assert
-            Assert.AreEqual("TestResolverId", columnName);
+            Assert.That(columnName, Is.EqualTo("TestResolverId"));
         }
 
         [TestCase]
@@ -59,7 +59,7 @@ namespace Entatea.Tests.Resolvers
             string tableName = resolver.GetTableName(classMap);
 
             // Assert
-            Assert.AreEqual("test_resolvers", tableName);
+            Assert.That(tableName, Is.EqualTo("test_resolvers"));
         }
 
         [TestCase]
@@ -74,7 +74,7 @@ namespace Entatea.Tests.Resolvers
             string columnName = resolver.GetColumnName(classMap, "TestResolverId");
 
             // Assert
-            Assert.AreEqual("test_resolver_id", columnName);
+            Assert.That(columnName, Is.EqualTo("test_resolver_id"));
         }
 
         [TestCase(typeof(SqlServerDataContext))]
@@ -90,7 +90,7 @@ namespace Entatea.Tests.Resolvers
 
 
             // Assert
-            Assert.AreEqual("Default", testResolver.ResolverValue);
+            Assert.That(testResolver.ResolverValue, Is.EqualTo("Default"));
         }
 
         [TestCase(typeof(SqlServerDataContext))]
@@ -108,7 +108,7 @@ namespace Entatea.Tests.Resolvers
             TestResolver testResolver = (await dataContext.ReadAll<TestResolver>()).Single();
 
             // Assert
-            Assert.AreEqual("Underscore", testResolver.ResolverValue);
+            Assert.That(testResolver.ResolverValue, Is.EqualTo("Underscore"));
         }
     }
 }

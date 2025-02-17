@@ -34,8 +34,8 @@ namespace Entatea.Tests.Predicates
             IEnumerable<Product> products = await dataContext.ReadList<Product>(Equal<Product>(x => x.Name, "Spanner"));
 
             // Assert
-            Assert.AreEqual(1, products.Count());
-            Assert.AreEqual("Spanner", products.ElementAt(0).Name);
+            Assert.That(products.Count(), Is.EqualTo(1));
+            Assert.That(products.ElementAt(0).Name, Is.EqualTo("Spanner"));
         }
 
         [TestCase(typeof(InMemoryDataContext))]
@@ -53,8 +53,8 @@ namespace Entatea.Tests.Predicates
             IEnumerable<Product> products = await dataContext.ReadList<Product>(Equal<Product>(x => x.Name, null));
 
             // Assert
-            Assert.AreEqual(1, products.Count());
-            Assert.AreEqual(null, products.ElementAt(0).Name);
+            Assert.That(products.Count(), Is.EqualTo(1));
+            Assert.That(products.ElementAt(0).Name, Is.Null);
         }
 
         [TestCase(typeof(InMemoryDataContext))]
@@ -72,8 +72,8 @@ namespace Entatea.Tests.Predicates
             IEnumerable<Product> products = await dataContext.ReadList<Product>(NotEqual<Product>(x => x.Name, "Spanner"));
 
             // Assert
-            Assert.AreEqual(1, products.Count());
-            Assert.AreEqual("Hammer", products.ElementAt(0).Name);
+            Assert.That(products.Count(), Is.EqualTo(1));
+            Assert.That(products.ElementAt(0).Name, Is.EqualTo("Hammer"));
         }
 
         [TestCase(typeof(InMemoryDataContext))]
@@ -93,7 +93,7 @@ namespace Entatea.Tests.Predicates
             IEnumerable<Product> products = await dataContext.ReadList<Product>(In<Product>(x => x.Name, productNames));
             
             // Assert
-            Assert.That(productNames, Is.EquivalentTo(products.Select(x => x.Name)));
+            Assert.That(products.Select(x => x.Name), Is.EquivalentTo(productNames));
         }
 
         [TestCase(typeof(InMemoryDataContext))]
@@ -113,8 +113,8 @@ namespace Entatea.Tests.Predicates
             IEnumerable<Product> products = await dataContext.ReadList<Product>(NotIn<Product>(x => x.Name, productNames));
 
             // Assert
-            Assert.AreEqual(1, products.Count());
-            Assert.AreEqual("Spanner", products.ElementAt(0).Name);
+            Assert.That(products.Count(), Is.EqualTo(1));
+            Assert.That(products.ElementAt(0).Name, Is.EqualTo("Spanner"));
         }
 
         [TestCase(typeof(InMemoryDataContext))]
@@ -134,7 +134,7 @@ namespace Entatea.Tests.Predicates
             IEnumerable<Product> products = await dataContext.ReadList<Product>(Contains<Product>(x => x.Name, "Hammer"));
 
             // Assert
-            Assert.AreEqual(3, products.Count());
+            Assert.That(products.Count(), Is.EqualTo(3));
         }
 
         [TestCase(typeof(InMemoryDataContext))]
@@ -154,8 +154,8 @@ namespace Entatea.Tests.Predicates
             IEnumerable<Product> products = await dataContext.ReadList<Product>(StartsWith<Product>(x => x.Name, "Hammer"));
 
             // Assert
-            Assert.AreEqual(1, products.Count());
-            Assert.AreEqual("Hammer B&Q", products.ElementAt(0).Name);
+            Assert.That(products.Count(), Is.EqualTo(1));
+            Assert.That(products.ElementAt(0).Name, Is.EqualTo("Hammer B&Q"));
         }
 
         [TestCase(typeof(InMemoryDataContext))]
@@ -175,8 +175,8 @@ namespace Entatea.Tests.Predicates
             IEnumerable<Product> products = await dataContext.ReadList<Product>(EndsWith<Product>(x => x.Name, "Hammer"));
 
             // Assert
-            Assert.AreEqual(1, products.Count());
-            Assert.AreEqual("Black and Decker Hammer", products.ElementAt(0).Name);
+            Assert.That(products.Count(), Is.EqualTo(1));
+            Assert.That(products.ElementAt(0).Name, Is.EqualTo("Black and Decker Hammer"));
         }
     }
 }

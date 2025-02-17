@@ -43,11 +43,11 @@ namespace Entatea.Tests
             PagedList<City> pagedList = await dataContext.ReadList<City>(null, null, 4, 1);
 
             // Assert
-            Assert.AreEqual(4, pagedList.Rows.Count());
-            Assert.AreEqual(false, pagedList.HasPrevious);
-            Assert.AreEqual(true, pagedList.HasNext);
-            Assert.AreEqual(2, pagedList.TotalPages);
-            Assert.AreEqual(8, pagedList.TotalRows);
+            Assert.That(pagedList.Rows.Count(), Is.EqualTo(4));
+            Assert.That(pagedList.HasPrevious, Is.False);
+            Assert.That(pagedList.HasNext, Is.True);
+            Assert.That(pagedList.TotalPages, Is.EqualTo(2));
+            Assert.That(pagedList.TotalRows, Is.EqualTo(8));
         }
 
         [TestCase(typeof(InMemoryDataContext))]
@@ -71,11 +71,11 @@ namespace Entatea.Tests
             PagedList<City> pagedList = await dataContext.ReadList<City>(null, null, 2, 2);
 
             // Assert
-            Assert.AreEqual(2, pagedList.Rows.Count());
-            Assert.AreEqual(true, pagedList.HasPrevious);
-            Assert.AreEqual(true, pagedList.HasNext);
-            Assert.AreEqual(4, pagedList.TotalPages);
-            Assert.AreEqual(8, pagedList.TotalRows);
+            Assert.That(pagedList.Rows.Count(), Is.EqualTo(2));
+            Assert.That(pagedList.HasPrevious, Is.True);
+            Assert.That(pagedList.HasNext, Is.True);
+            Assert.That(pagedList.TotalPages, Is.EqualTo(4));
+            Assert.That(pagedList.TotalRows, Is.EqualTo(8));
         }
 
         /// <summary>
@@ -105,10 +105,11 @@ namespace Entatea.Tests
             PagedList<City> pagedList = await dataContext.ReadList<City>(null, null, 3, lastPage);
 
             // Assert
-            Assert.AreEqual(pagedList.TotalRows - ((lastPage - 1) * 3), pagedList.Rows.Count());
-            Assert.AreEqual(true, pagedList.HasPrevious);
-            Assert.AreEqual(false, pagedList.HasNext);
-            Assert.AreEqual(lastPage, pagedList.TotalPages);
+            Assert.That(pagedList.Rows.Count(), Is.EqualTo(pagedList.TotalRows - ((lastPage - 1) * 3)));
+            Assert.That(pagedList.HasPrevious, Is.True);
+            Assert.That(pagedList.HasNext, Is.False);
+            Assert.That(pagedList.TotalPages, Is.EqualTo(3));
+            Assert.That(pagedList.TotalRows, Is.EqualTo(8));
         }
 
         /// <summary>
@@ -135,11 +136,11 @@ namespace Entatea.Tests
             PagedList<City> pagedList = await dataContext.ReadList<City>(new { Area = "Hampshire" }, null, 4, 1);
 
             // Assert
-            Assert.AreEqual(4, pagedList.Rows.Count());
-            Assert.AreEqual(false, pagedList.HasPrevious);
-            Assert.AreEqual(true, pagedList.HasNext);
-            Assert.AreEqual(2, pagedList.TotalPages);
-            Assert.AreEqual(5, pagedList.TotalRows);
+            Assert.That(pagedList.Rows.Count(), Is.EqualTo(4));
+            Assert.That(pagedList.HasPrevious, Is.False);
+            Assert.That(pagedList.HasNext, Is.True);
+            Assert.That(pagedList.TotalPages, Is.EqualTo(2));
+            Assert.That(pagedList.TotalRows, Is.EqualTo(5));
         }
 
         /// <summary>
@@ -170,11 +171,11 @@ namespace Entatea.Tests
                 1);
 
             // Assert
-            Assert.AreEqual(4, pagedList.Rows.Count());
-            Assert.AreEqual(false, pagedList.HasPrevious);
-            Assert.AreEqual(true, pagedList.HasNext);
-            Assert.AreEqual(2, pagedList.TotalPages);
-            Assert.AreEqual(5, pagedList.TotalRows);
+            Assert.That(pagedList.Rows.Count(), Is.EqualTo(4));
+            Assert.That(pagedList.HasPrevious, Is.False);
+            Assert.That(pagedList.HasNext, Is.True);
+            Assert.That(pagedList.TotalPages, Is.EqualTo(2));
+            Assert.That(pagedList.TotalRows, Is.EqualTo(5));
         }
 
         /// <summary>
@@ -217,7 +218,7 @@ namespace Entatea.Tests
                     "Bournemouth"
             };
 
-            Assert.IsTrue(pagedList.Rows.Select(x => x.CityName).SequenceEqual(expectedOrder));
+            Assert.That(pagedList.Rows.Select(x => x.CityName).SequenceEqual(expectedOrder), Is.True);
         }
 
         /// <summary>
@@ -260,7 +261,7 @@ namespace Entatea.Tests
                     "Bournemouth"
             };
 
-            Assert.IsTrue(pagedList.Rows.Select(x => x.CityName).SequenceEqual(expectedOrder));
+            Assert.That(pagedList.Rows.Select(x => x.CityName).SequenceEqual(expectedOrder), Is.True);
         }
 
         /// <summary>
@@ -292,7 +293,7 @@ namespace Entatea.Tests
 
             // Assert
             string[] expectedOrder = { "Winchester", "Southampton", "Portsmouth", "Petersfield", "Basingstoke" };
-            Assert.IsTrue(pagedList.Rows.Select(x => x.CityName).SequenceEqual(expectedOrder));
+            Assert.That(pagedList.Rows.Select(x => x.CityName).SequenceEqual(expectedOrder), Is.True);
         }
 
         /// <summary>
@@ -324,7 +325,7 @@ namespace Entatea.Tests
 
             // Assert
             string[] expectedOrder = { "Winchester", "Southampton", "Portsmouth", "Petersfield", "Basingstoke" };
-            Assert.IsTrue(pagedList.Rows.Select(x => x.CityName).SequenceEqual(expectedOrder));
+            Assert.That(pagedList.Rows.Select(x => x.CityName).SequenceEqual(expectedOrder), Is.True);
         }
 
         /// <summary>

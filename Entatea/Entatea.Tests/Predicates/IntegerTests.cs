@@ -34,8 +34,8 @@ namespace Entatea.Tests.Predicates
             IEnumerable<Product> products = await dataContext.ReadList<Product>(Equal<Product>(x => x.Stock, 10));
 
             // Assert
-            Assert.AreEqual(1, products.Count());
-            Assert.AreEqual(10, products.ElementAt(0).Stock);
+            Assert.That(products.Count(), Is.EqualTo(1));
+            Assert.That(products.ElementAt(0).Stock, Is.EqualTo(10));
         }
 
         [TestCase(typeof(InMemoryDataContext))]
@@ -53,8 +53,8 @@ namespace Entatea.Tests.Predicates
             IEnumerable<Product> products = await dataContext.ReadList<Product>(NotEqual<Product>(x => x.Stock, 10));
 
             // Assert
-            Assert.AreEqual(1, products.Count());
-            Assert.AreEqual(11, products.ElementAt(0).Stock);
+            Assert.That(products.Count(), Is.EqualTo(1));
+            Assert.That(products.ElementAt(0).Stock, Is.EqualTo(11));
         }
 
         [TestCase(typeof(InMemoryDataContext))]
@@ -75,7 +75,7 @@ namespace Entatea.Tests.Predicates
             IEnumerable<Product> products = await dataContext.ReadList<Product>(In<Product>(x => x.Stock, stock));
 
             // Assert
-            Assert.AreEqual(3, products.Count());
+            Assert.That(products.Count(), Is.EqualTo(3));
             Assert.That(stock, Is.EquivalentTo(products.Select(x => x.Stock).Distinct()));
         }
 
@@ -97,8 +97,8 @@ namespace Entatea.Tests.Predicates
             IEnumerable<Product> products = await dataContext.ReadList<Product>(NotIn<Product>(x => x.Stock, stock));
 
             // Assert
-            Assert.AreEqual(1, products.Count());
-            Assert.AreEqual(11, products.ElementAt(0).Stock);
+            Assert.That(products.Count(), Is.EqualTo(1));
+            Assert.That(products.ElementAt(0).Stock, Is.EqualTo(11));
         }
 
         [TestCase(typeof(InMemoryDataContext))]
@@ -118,8 +118,8 @@ namespace Entatea.Tests.Predicates
             IEnumerable<Product> products = await dataContext.ReadList<Product>(GreaterThan<Product>(x => x.Stock, 11));
 
             // Assert
-            Assert.AreEqual(1, products.Count());
-            Assert.AreEqual(12, products.ElementAt(0).Stock);
+            Assert.That(products.Count(), Is.EqualTo(1));
+            Assert.That(products.ElementAt(0).Stock, Is.EqualTo(12));
         }
 
         [TestCase(typeof(InMemoryDataContext))]
@@ -139,7 +139,7 @@ namespace Entatea.Tests.Predicates
             IEnumerable<Product> products = await dataContext.ReadList<Product>(GreaterThanOrEqual<Product>(x => x.Stock, 11));
 
             // Assert
-            Assert.AreEqual(2, products.Count());
+            Assert.That(products.Count(), Is.EqualTo(2));
             Assert.That(new[] { 11, 12 }, Is.EquivalentTo(products.Select(x => x.Stock)));
         }
 
@@ -160,7 +160,7 @@ namespace Entatea.Tests.Predicates
             IEnumerable<Product> products = await dataContext.ReadList<Product>(LessThan<Product>(x => x.Stock, 11));
 
             // Assert
-            Assert.AreEqual(2, products.Count());
+            Assert.That(products.Count(), Is.EqualTo(2));
             Assert.That(new[] { 10 }, Is.EquivalentTo(products.Select(x => x.Stock).Distinct()));
         }
 
@@ -181,7 +181,7 @@ namespace Entatea.Tests.Predicates
             IEnumerable<Product> products = await dataContext.ReadList<Product>(LessThanOrEqual<Product>(x => x.Stock, 11));
 
             // Assert
-            Assert.AreEqual(3, products.Count());
+            Assert.That(products.Count(), Is.EqualTo(3));
             Assert.That(new[] { 10, 11 }, Is.EquivalentTo(products.Select(x => x.Stock).Distinct()));
         }
 
@@ -202,7 +202,7 @@ namespace Entatea.Tests.Predicates
             IEnumerable<Product> products = await dataContext.ReadList<Product>(Between<Product>(x => x.Stock, 11, 20));
 
             // Assert
-            Assert.AreEqual(2, products.Count());
+            Assert.That(products.Count(), Is.EqualTo(2));
             Assert.That(new[] { 15, 20 }, Is.EquivalentTo(products.Select(x => x.Stock).Distinct()));
         }
 
@@ -223,7 +223,7 @@ namespace Entatea.Tests.Predicates
             IEnumerable<Product> products = await dataContext.ReadList<Product>(NotBetween<Product>(x => x.Stock, 11, 20));
 
             // Assert
-            Assert.AreEqual(2, products.Count());
+            Assert.That(products.Count(), Is.EqualTo(2));
             Assert.That(new[] { 5, 10 }, Is.EquivalentTo(products.Select(x => x.Stock).Distinct()));
         }
     }

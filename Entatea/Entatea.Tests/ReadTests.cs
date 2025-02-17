@@ -38,9 +38,9 @@ namespace Entatea.Tests
             IEnumerable<City> cities = await dataContext.ReadAll<City>();
 
             // Assert
-            Assert.AreEqual(2, cities.Count());
-            Assert.Greater(cities.ElementAt(0).CityId, 0);
-            Assert.Greater(cities.ElementAt(1).CityId, cities.ElementAt(0).CityId);
+            Assert.That(cities.Count(), Is.EqualTo(2));
+            Assert.That(cities.ElementAt(0).CityId, Is.GreaterThan(0));
+            Assert.That(cities.ElementAt(1).CityId, Is.GreaterThan(cities.ElementAt(0).CityId));
         }
 
         /// <summary>
@@ -62,7 +62,7 @@ namespace Entatea.Tests
             IEnumerable<CityManual> cities = dataContext.ReadAll<CityManual>().GetAwaiter().GetResult();
 
             // Assert
-            Assert.AreEqual(2, cities.Count());
+            Assert.That(cities.Count(), Is.EqualTo(2));
         }
 
         /// <summary>
@@ -83,9 +83,9 @@ namespace Entatea.Tests
             City city = await dataContext.Read<City>(new { pup.CityId });
 
             // Assert
-            Assert.AreEqual(pup.CityId, city.CityId);
-            Assert.AreEqual("PUP", city.CityCode);
-            Assert.AreEqual("Portsmouth", city.CityName);
+            Assert.That(city.CityId, Is.EqualTo(pup.CityId));
+            Assert.That(city.CityCode, Is.EqualTo("PUP"));
+            Assert.That(city.CityName, Is.EqualTo("Portsmouth"));
         }
 
         /// <summary>
@@ -107,9 +107,9 @@ namespace Entatea.Tests
             City city = await dataContext.Read<City>(pup.CityId);
 
             // Assert
-            Assert.AreEqual(pup.CityId, city.CityId);
-            Assert.AreEqual("PUP", city.CityCode);
-            Assert.AreEqual("Portsmouth", city.CityName);
+            Assert.That(city.CityId, Is.EqualTo(pup.CityId));
+            Assert.That(city.CityCode, Is.EqualTo("PUP"));
+            Assert.That(city.CityName, Is.EqualTo("Portsmouth"));
         }
 
         /// <summary>
@@ -131,8 +131,8 @@ namespace Entatea.Tests
             CityManual city = await dataContext.Read<CityManual>(new { CityCode = "NYC" });
 
             // Assert
-            Assert.AreEqual("NYC", city.CityCode);
-            Assert.AreEqual("New York City", city.CityName);
+            Assert.That(city.CityCode, Is.EqualTo("NYC"));
+            Assert.That(city.CityName, Is.EqualTo("New York City"));
         }
 
         /// <summary>
@@ -154,8 +154,8 @@ namespace Entatea.Tests
             CityManual city = await dataContext.Read<CityManual>("NYC");
 
             // Assert
-            Assert.AreEqual("NYC", city.CityCode);
-            Assert.AreEqual("New York City", city.CityName);
+            Assert.That(city.CityCode, Is.EqualTo("NYC"));
+            Assert.That(city.CityName, Is.EqualTo("New York City"));
         }
 
         /// <summary>
@@ -179,7 +179,7 @@ namespace Entatea.Tests
 
             // Assert
             // NOTE: there is only one team in Hampshire
-            Assert.AreEqual(2, cities.Count());
+            Assert.That(cities.Count(), Is.EqualTo(2));
         }
 
         /// <summary>
@@ -204,7 +204,7 @@ namespace Entatea.Tests
             IEnumerable<City> cities = await dataContext.ReadList<City>(new { CityCode = cityCodes });
 
             // Assert
-            Assert.That(cityCodes, Is.EquivalentTo(cities.Select(x => x.CityCode)));
+            Assert.That(cities.Select(x => x.CityCode), Is.EquivalentTo(cityCodes));
         }
 
         /// <summary>
@@ -292,7 +292,7 @@ namespace Entatea.Tests
             IEnumerable<DiscriminatorCompany> companies = await dataContext.ReadAll<DiscriminatorCompany>();
 
             // Assert
-            Assert.AreEqual(3, companies.Count());
+            Assert.That(companies.Count(), Is.EqualTo(3));
             Assert.That(companies.Select(x => x.DiscriminatorType), Is.All.EqualTo(DiscriminatorType.Company));
         }
 
@@ -313,8 +313,8 @@ namespace Entatea.Tests
             Uid read = await dataContext.Read<Uid>(unique1.Id);
 
             // Assert
-            Assert.AreEqual(unique1.Id, read.Id);
-            Assert.AreEqual(unique1.Value, read.Value);
+            Assert.That(read.Id, Is.EqualTo(unique1.Id));
+            Assert.That(read.Value, Is.EqualTo(unique1.Value));
         }
 
         /// <summary>
@@ -339,7 +339,7 @@ namespace Entatea.Tests
             City city = await dataContext.Read<City>(Equal<City>(x => x.Area, "West Sussex"));
 
             // Assert
-            Assert.AreEqual(city.CityCode, "CHI");
+            Assert.That(city.CityCode, Is.EqualTo("CHI"));
         }
 
         /// <summary>
@@ -364,7 +364,7 @@ namespace Entatea.Tests
             City city = await dataContext.Read<City>(Equal<City>(x => x.Area, "East Sussex"));
 
             // Assert
-            Assert.IsNull(city);
+            Assert.That(city, Is.Null);
         }
 
         /// <summary>
@@ -411,11 +411,11 @@ namespace Entatea.Tests
             ProductPartition2 two = await dataContext.Read<ProductPartition2>(p2.Id);
 
             // Assert
-            Assert.NotNull(one);
-            Assert.AreEqual(p1.Id, one.Id);
+            Assert.That(one, Is.Not.Null);
+            Assert.That(one.Id, Is.EqualTo(p1.Id));
 
-            Assert.NotNull(two);
-            Assert.AreEqual(p2.Id, two.Id);
+            Assert.That(two, Is.Not.Null);
+            Assert.That(two.Id, Is.EqualTo(p2.Id));
         }
 
         [TestCase(typeof(InMemoryDataContext))]
@@ -434,11 +434,11 @@ namespace Entatea.Tests
             SoftDeletePartition2 two = await dataContext.Read<SoftDeletePartition2>(sd2.Id);
 
             // Assert
-            Assert.NotNull(one);
-            Assert.AreEqual(sd1.Id, one.Id);
+            Assert.That(one, Is.Not.Null);
+            Assert.That(one.Id, Is.EqualTo(sd1.Id));
 
-            Assert.NotNull(two);
-            Assert.AreEqual(sd2.Id, two.Id);
+            Assert.That(two, Is.Not.Null);
+            Assert.That(two.Id, Is.EqualTo(sd2.Id));
         }
 
         /// <summary>
@@ -463,7 +463,7 @@ namespace Entatea.Tests
             IEnumerable<ProductPartition2> twos = await dataContext.ReadList<ProductPartition2>(new { IsForSale = true });
 
             // Assert
-            Assert.AreEqual(2, twos.Count());
+            Assert.That(twos.Count(), Is.EqualTo(2));
             Assert.That(twos.All(x => x.Id >= 100001));
         }
     }

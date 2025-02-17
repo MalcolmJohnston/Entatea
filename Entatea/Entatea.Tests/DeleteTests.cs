@@ -1,8 +1,9 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Data.SqlClient;
 using System.Linq;
 using System.Threading.Tasks;
+
+using Microsoft.Data.SqlClient;
 
 using Entatea.InMemory;
 using Entatea.MySql;
@@ -39,7 +40,7 @@ namespace Entatea.Tests
             await dataContext.Delete<City>(new { city.CityId, });
 
             // Assert
-            Assert.IsNull(await dataContext.Read<City>(new { city.CityId }));
+            Assert.That(await dataContext.Read<City>(new { city.CityId }), Is.Null);
         }
 
         /// <summary>
@@ -60,7 +61,7 @@ namespace Entatea.Tests
             await dataContext.Delete<City>(city.CityId);
 
             // Assert
-            Assert.IsNull(await dataContext.Read<City>(new { city.CityId }));
+            Assert.That(await dataContext.Read<City>(new { city.CityId }), Is.Null);
         }
 
         /// <summary>
@@ -83,8 +84,8 @@ namespace Entatea.Tests
             await dataContext.DeleteList<City>(new { Area = "Hampshire" });
 
             // Assert
-            Assert.AreEqual(0, (await dataContext.ReadList<City>(new { Area = "Hampshire" })).Count());
-            Assert.AreEqual(1, (await dataContext.ReadAll<City>()).Count());   
+            Assert.That((await dataContext.ReadList<City>(new { Area = "Hampshire" })).Count(), Is.EqualTo(0));
+            Assert.That((await dataContext.ReadAll<City>()).Count(), Is.EqualTo(1));   
         }
 
         /// <summary>
@@ -155,11 +156,11 @@ namespace Entatea.Tests
             await dataContext.Delete<SoftDelete>(new { softDelete.SoftDeleteId, });
 
             // Assert
-            Assert.IsNull(await dataContext.Read<SoftDelete>(new { softDelete.SoftDeleteId }));
+            Assert.That(await dataContext.Read<SoftDelete>(new { softDelete.SoftDeleteId }), Is.Null);
 
             if (DataContextTestHelper.IsSqlServer(dataContextType))
             {
-                using SqlConnection conn = new SqlConnection(DataContextTestHelper.GetTestConnectionString(dataContextType));
+                using SqlConnection conn = new(DataContextTestHelper.GetTestConnectionString(dataContextType));
                 conn.Open();
 
                 SoftDeleteShort deleted = (await conn.QueryAsync<SoftDeleteShort>(
@@ -171,7 +172,7 @@ namespace Entatea.Tests
 
             if (DataContextTestHelper.IsMySql(dataContextType))
             {
-                using MySqlConnection conn = new MySqlConnection(DataContextTestHelper.GetTestConnectionString(dataContextType));
+                using MySqlConnection conn = new(DataContextTestHelper.GetTestConnectionString(dataContextType));
                 conn.Open();
 
                 SoftDeleteShort deleted = (await conn.QueryAsync<SoftDeleteShort>(
@@ -199,11 +200,11 @@ namespace Entatea.Tests
             await dataContext.Delete<SoftDeleteShort>(new { softDelete.SoftDeleteId, });
 
             // Assert
-            Assert.IsNull(await dataContext.Read<SoftDeleteShort>(new { softDelete.SoftDeleteId }));
+            Assert.That(await dataContext.Read<SoftDeleteShort>(new { softDelete.SoftDeleteId }), Is.Null);
             
             if (DataContextTestHelper.IsSqlServer(dataContextType))
             {
-                using SqlConnection conn = new SqlConnection(DataContextTestHelper.GetTestConnectionString(dataContextType));
+                using SqlConnection conn = new(DataContextTestHelper.GetTestConnectionString(dataContextType));
                 conn.Open();
 
                 SoftDeleteShort deleted = (await conn.QueryAsync<SoftDeleteShort>(
@@ -215,7 +216,7 @@ namespace Entatea.Tests
 
             if (DataContextTestHelper.IsMySql(dataContextType))
             {
-                using MySqlConnection conn = new MySqlConnection(DataContextTestHelper.GetTestConnectionString(dataContextType));
+                using MySqlConnection conn = new(DataContextTestHelper.GetTestConnectionString(dataContextType));
                 conn.Open();
 
                 SoftDeleteShort deleted = (await conn.QueryAsync<SoftDeleteShort>(
@@ -246,13 +247,14 @@ namespace Entatea.Tests
                 In<SoftDelete>(x => x.SoftDeleteId, new int[] { sd2.SoftDeleteId, sd3.SoftDeleteId }));
 
             // Assert
-            Assert.AreEqual(0, (await dataContext.ReadList<SoftDelete>(
-                In<SoftDelete>(x => x.SoftDeleteId, new int[] { sd2.SoftDeleteId, sd3.SoftDeleteId }))).Count());
-            Assert.AreEqual(1, (await dataContext.ReadAll<SoftDelete>()).Count());
+            Assert.That((await dataContext.ReadList<SoftDelete>(
+                In<SoftDelete>(x => x.SoftDeleteId, new int[] { sd2.SoftDeleteId, sd3.SoftDeleteId }))).Count(),
+                Is.EqualTo(0));
+            Assert.That((await dataContext.ReadAll<SoftDelete>()).Count(), Is.EqualTo(1));
 
             if (DataContextTestHelper.IsSqlServer(dataContextType))
             {
-                using SqlConnection conn = new SqlConnection(DataContextTestHelper.GetTestConnectionString(dataContextType));
+                using SqlConnection conn = new(DataContextTestHelper.GetTestConnectionString(dataContextType));
                 conn.Open();
 
                 IEnumerable<SoftDelete> deleted = await conn.QueryAsync<SoftDelete>(
@@ -264,7 +266,7 @@ namespace Entatea.Tests
 
             if (DataContextTestHelper.IsMySql(dataContextType))
             {
-                using MySqlConnection conn = new MySqlConnection(DataContextTestHelper.GetTestConnectionString(dataContextType));
+                using MySqlConnection conn = new(DataContextTestHelper.GetTestConnectionString(dataContextType));
                 conn.Open();
 
                 IEnumerable<SoftDelete> deleted = await conn.QueryAsync<SoftDelete>(
@@ -297,8 +299,10 @@ namespace Entatea.Tests
 
             // Assert
             var temp = await dataContext.ReadList<DiscriminatorContact>(In<DiscriminatorContact>(x => x.Name, "Paul"));
-            Assert.AreEqual(0, (await dataContext.ReadList<DiscriminatorContact>(In<DiscriminatorContact>(x => x.Name, "Paul"))).Count());
-            Assert.AreEqual(1, (await dataContext.ReadList<DiscriminatorCompany>(In<DiscriminatorCompany>(x => x.Name, "Paul"))).Count());
+            Assert.That((await dataContext.ReadList<DiscriminatorContact>(In<DiscriminatorContact>(x => x.Name, "Paul"))).Count(),
+                Is.EqualTo(0));
+            Assert.That((await dataContext.ReadList<DiscriminatorCompany>(In<DiscriminatorCompany>(x => x.Name, "Paul"))).Count(),
+                Is.EqualTo(1));
         }
 
         /// <summary>
@@ -323,8 +327,8 @@ namespace Entatea.Tests
             await dataContext.DeleteList<ProductPartition2>(new { IsForSale = true });
 
             // Assert
-            Assert.IsFalse((await dataContext.ReadAll<ProductPartition2>()).Any());
-            Assert.IsTrue((await dataContext.ReadAll<ProductPartition1>()).Any());
+            Assert.That((await dataContext.ReadAll<ProductPartition2>()).Any(), Is.False);
+            Assert.That((await dataContext.ReadAll<ProductPartition1>()).Any(), Is.True);
         }
     }
 }

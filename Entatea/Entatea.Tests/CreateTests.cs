@@ -32,10 +32,10 @@ namespace Entatea.Tests
             City city = await dataContext.Create(new City() { CityCode = "BRI", CityName = "Brighton", Area = "Sussex" });
 
             // Assert
-            Assert.Greater(city.CityId, 0);
-            Assert.AreEqual("BRI", city.CityCode);
-            Assert.AreEqual("Brighton", city.CityName);
-            Assert.AreEqual("Sussex", city.Area);
+            Assert.That(city.CityId, Is.GreaterThan(0));
+            Assert.That(city.CityCode, Is.EqualTo("BRI"));
+            Assert.That(city.CityName, Is.EqualTo("Brighton"));
+            Assert.That(city.Area, Is.EqualTo("Sussex"));
         }
 
         /// <summary>
@@ -54,8 +54,8 @@ namespace Entatea.Tests
             CityManual city = await dataContext.Create(new CityManual() { CityCode = "BRI", CityName = "Brighton" });
 
             // Assert
-            Assert.AreEqual("BRI", city.CityCode);
-            Assert.AreEqual("Brighton", city.CityName);
+            Assert.That(city.CityCode, Is.EqualTo("BRI"));
+            Assert.That(city.CityName, Is.EqualTo("Brighton"));
         }
 
         /// <summary>
@@ -74,9 +74,9 @@ namespace Entatea.Tests
             CitySequential city = await dataContext.Create(new CitySequential() { CityCode = "BRI", CityName = "Brighton" });
 
             // Assert
-            Assert.Greater(city.CityId, 0);
-            Assert.AreEqual("BRI", city.CityCode);
-            Assert.AreEqual("Brighton", city.CityName);
+            Assert.That(city.CityId, Is.GreaterThan(0));
+            Assert.That(city.CityCode, Is.EqualTo("BRI"));
+            Assert.That(city.CityName, Is.EqualTo("Brighton"));
         }
 
         /// <summary>
@@ -97,8 +97,8 @@ namespace Entatea.Tests
             AssignedAndSequential two = await dataContext.Create(new AssignedAndSequential() { AssignedId = 1, Heading = "Two" });
 
             // Assert
-            Assert.AreEqual(1, one.SequentialId);
-            Assert.AreEqual(2, two.SequentialId);
+            Assert.That(one.SequentialId, Is.EqualTo(1));
+            Assert.That(two.SequentialId, Is.EqualTo(2));
         }
 
         /// <summary>
@@ -120,9 +120,9 @@ namespace Entatea.Tests
             AssignedPairAndSequential oneTwoOne = await dataContext.Create(new AssignedPairAndSequential() { FirstAssignedId = 1, SecondAssignedId = 2, Heading = "One" });
 
             // Assert
-            Assert.AreEqual(1, oneOneOne.SequentialId);
-            Assert.AreEqual(2, oneOneTwo.SequentialId);
-            Assert.AreEqual(1, oneTwoOne.SequentialId);
+            Assert.That(oneOneOne.SequentialId, Is.EqualTo(1));
+            Assert.That(oneOneTwo.SequentialId, Is.EqualTo(2));
+            Assert.That(oneTwoOne.SequentialId, Is.EqualTo(1));
         }
 
         /// <summary>
@@ -144,9 +144,9 @@ namespace Entatea.Tests
             DateStamp row = await dataContext.Create(new DateStamp() { Name = "Key", Value = "Value" });
 
             // Assert
-            Assert.AreEqual("Key", row.Name);
-            Assert.AreEqual("Value", row.Value);
-            Assert.AreEqual(row.InsertDate, row.UpdateDate);
+            Assert.That(row.Name, Is.EqualTo("Key"));
+            Assert.That(row.Value, Is.EqualTo("Value"));
+            Assert.That(row.UpdateDate, Is.EqualTo(row.UpdateDate));
             Assert.That(row.InsertDate, Is.EqualTo(now).Within(TimeSpan.FromSeconds(1)));
         }
 
@@ -160,11 +160,11 @@ namespace Entatea.Tests
             using IDataContext dataContext = DataContextTestHelper.SetupDataContext(dataContextType);
 
             // Act
-            SoftDelete softDelete = await dataContext.Create(new SoftDelete()).ConfigureAwait(false);
+            SoftDelete softDelete = await dataContext.Create(new SoftDelete());
 
             // Assert
-            Assert.Greater(softDelete.SoftDeleteId, 0);
-            Assert.AreEqual(1, softDelete.RecordStatus);
+            Assert.That(softDelete.SoftDeleteId, Is.GreaterThan(0));
+            Assert.That(softDelete.RecordStatus, Is.EqualTo(1));
         }
 
         [TestCase(typeof(InMemoryDataContext))]
@@ -177,11 +177,11 @@ namespace Entatea.Tests
             using IDataContext dataContext = DataContextTestHelper.SetupDataContext(dataContextType);
 
             // Act
-            SoftDeleteShort softDelete = await dataContext.Create(new SoftDeleteShort()).ConfigureAwait(false);
+            SoftDeleteShort softDelete = await dataContext.Create(new SoftDeleteShort());
 
             // Assert
-            Assert.Greater(softDelete.SoftDeleteId, 0);
-            Assert.AreEqual(1, softDelete.RecordStatus);
+            Assert.That(softDelete.SoftDeleteId, Is.GreaterThan(0));
+            Assert.That(softDelete.RecordStatus, Is.EqualTo(1));
         }
 
         /// <summary>
@@ -203,13 +203,13 @@ namespace Entatea.Tests
             DiscriminatorCompany company = await dataContext.Create(new DiscriminatorCompany() { Name = "The Beatles" });
 
             // Assert
-            Assert.Greater(contact.ContactId, 0);
-            Assert.AreEqual(DiscriminatorType.Contact, contact.DiscriminatorType);
-            Assert.AreEqual("Paul", contact.Name);
+            Assert.That(contact.ContactId, Is.GreaterThan(0));
+            Assert.That(contact.DiscriminatorType, Is.EqualTo(DiscriminatorType.Contact));
+            Assert.That(contact.Name, Is.EqualTo("Paul"));
 
-            Assert.Greater(company.CompanyId, 0);
-            Assert.AreEqual(DiscriminatorType.Company, company.DiscriminatorType);
-            Assert.AreEqual("The Beatles", company.Name);
+            Assert.That(company.CompanyId, Is.GreaterThan(0));
+            Assert.That(company.DiscriminatorType, Is.EqualTo(DiscriminatorType.Company));
+            Assert.That(company.Name, Is.EqualTo("The Beatles"));
         }
 
         /// <summary>
@@ -229,12 +229,12 @@ namespace Entatea.Tests
             Uid unique2 = await dataContext.Create(new Uid() { Value = "So is this." });
 
             // Assert
-            Assert.NotNull(unique1.Id);
-            Assert.AreEqual("It's Unique", unique1.Value);
+            Assert.That(unique1.Id, Is.Not.Null);
+            Assert.That(unique1.Value, Is.EqualTo("It's Unique"));
 
-            Assert.NotNull(unique2.Id);
-            Assert.AreEqual("So is this.", unique2.Value);
-            Assert.AreNotEqual(unique1.Id, unique2.Id);
+            Assert.That(unique2.Id, Is.Not.Null);
+            Assert.That(unique2.Value, Is.EqualTo("So is this."));
+            Assert.That(unique1.Id, Is.Not.EqualTo(unique2.Id));
         }
 
         /// <summary>
@@ -257,9 +257,9 @@ namespace Entatea.Tests
             ProductPartition3 partition3 = await dataContext.Create(new ProductPartition3() { Name = "30000" });
 
             // Assert
-            Assert.AreEqual(1, partition1.Id);
-            Assert.AreEqual(100001, partition2.Id);
-            Assert.AreEqual(30000, partition3.Id);
+            Assert.That(partition1.Id, Is.EqualTo(1));
+            Assert.That(partition2.Id, Is.EqualTo(100001));
+            Assert.That(partition3.Id, Is.EqualTo(30000));
         }
 
         // <summary>
@@ -290,9 +290,9 @@ namespace Entatea.Tests
             ProductPartition3 p3 = await dataContext.Create(new ProductPartition3() { Name = (existingRows + 30000).ToString() });
 
             // Assert
-            Assert.AreEqual(existingRows + 1, p1.Id);
-            Assert.AreEqual(existingRows + 100001, p2.Id);
-            Assert.AreEqual(existingRows + + 30000, p3.Id);
+            Assert.That(p1.Id, Is.EqualTo(existingRows + 1));
+            Assert.That(p2.Id, Is.EqualTo(existingRows + 100001));
+            Assert.That(p3.Id, Is.EqualTo(existingRows + +30000));
         }
     }
 }

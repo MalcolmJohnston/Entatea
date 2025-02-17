@@ -34,8 +34,8 @@ namespace Entatea.Tests.Predicates
             IEnumerable<Product2> products = await dataContext.ReadList<Product2>(Equal<Product2>(x => x.Updated, now));
 
             // Assert
-            Assert.AreEqual(1, products.Count());
-            Assert.AreEqual(now, products.ElementAt(0).Updated);
+            Assert.That(products.Count(), Is.EqualTo(1));
+            Assert.That(products.ElementAt(0).Updated, Is.EqualTo(now));
         }
 
         [TestCase(typeof(InMemoryDataContext))]
@@ -54,8 +54,8 @@ namespace Entatea.Tests.Predicates
             IEnumerable<Product2> products = await dataContext.ReadList<Product2>(Equal<Product2>(x => x.Updated, null));
 
             // Assert
-            Assert.AreEqual(1, products.Count());
-            Assert.AreEqual(null, products.ElementAt(0).Updated);
+            Assert.That(products.Count(), Is.EqualTo(1));
+            Assert.That(products.ElementAt(0).Updated, Is.Null);
         }
 
         [TestCase(typeof(InMemoryDataContext))]
@@ -74,8 +74,8 @@ namespace Entatea.Tests.Predicates
             IEnumerable<Product2> products = await dataContext.ReadList<Product2>(NotEqual<Product2>(x => x.Updated, now));
 
             // Assert
-            Assert.AreEqual(1, products.Count());
-            Assert.AreNotEqual(now, products.ElementAt(0).Updated);
+            Assert.That(products.Count(), Is.EqualTo(1));
+            Assert.That(products.ElementAt(0).Updated, Is.Not.EqualTo(now));
         }
 
         [TestCase(typeof(InMemoryDataContext))]
@@ -101,7 +101,7 @@ namespace Entatea.Tests.Predicates
             IEnumerable<Product2> products = await dataContext.ReadList<Product2>(In<Product2>(x => x.Updated, dates));
 
             // Assert
-            Assert.AreEqual(3, products.Count());
+            Assert.That(products.Count(), Is.EqualTo(3));
             Assert.That(dates, Is.EquivalentTo(products.Select(x => x.Updated).Distinct()));
         }
 
@@ -128,8 +128,8 @@ namespace Entatea.Tests.Predicates
             IEnumerable<Product2> products = await dataContext.ReadList<Product2>(NotIn<Product2>(x => x.Updated, dates));
 
             // Assert
-            Assert.AreEqual(1, products.Count());
-            Assert.AreEqual(today, products.ElementAt(0).Updated);
+            Assert.That(products.Count(), Is.EqualTo(1));
+            Assert.That(products.ElementAt(0).Updated, Is.EqualTo(today));
         }
 
         [TestCase(typeof(InMemoryDataContext))]
@@ -154,8 +154,8 @@ namespace Entatea.Tests.Predicates
             IEnumerable<Product2> products = await dataContext.ReadList<Product2>(GreaterThan<Product2>(x => x.Updated, today));
 
             // Assert
-            Assert.AreEqual(2, products.Count());
-            Assert.AreEqual(new[] { tomorrow }, products.Select(x => x.Updated).Distinct());
+            Assert.That(products.Count(), Is.EqualTo(2));
+            Assert.That(products.Select(x => x.Updated).Distinct(), Is.All.EqualTo(tomorrow));
         }
 
         [TestCase(typeof(InMemoryDataContext))]
@@ -180,8 +180,8 @@ namespace Entatea.Tests.Predicates
             IEnumerable<Product2> products = await dataContext.ReadList<Product2>(GreaterThanOrEqual<Product2>(x => x.Updated, today));
 
             // Assert
-            Assert.AreEqual(3, products.Count());
-            Assert.AreEqual(new[] { today, tomorrow }, products.Select(x => x.Updated).Distinct());
+            Assert.That(products.Count(), Is.EqualTo(3));
+            Assert.That(products.Select(x => x.Updated).Distinct(), Is.EquivalentTo(new[] { today, tomorrow }));
         }
 
         [TestCase(typeof(InMemoryDataContext))]
@@ -206,8 +206,8 @@ namespace Entatea.Tests.Predicates
             IEnumerable<Product2> products = await dataContext.ReadList<Product2>(LessThan<Product2>(x => x.Updated, today));
 
             // Assert
-            Assert.AreEqual(1, products.Count());
-            Assert.AreEqual(yesterday, products.ElementAt(0).Updated);
+            Assert.That(products.Count(), Is.EqualTo(1));
+            Assert.That(products.ElementAt(0).Updated, Is.EqualTo(yesterday));
         }
 
         [TestCase(typeof(InMemoryDataContext))]
@@ -232,8 +232,8 @@ namespace Entatea.Tests.Predicates
             IEnumerable<Product2> products = await dataContext.ReadList<Product2>(LessThanOrEqual<Product2>(x => x.Updated, today));
 
             // Assert
-            Assert.AreEqual(2, products.Count());
-            Assert.AreEqual(new[] { today, yesterday }, products.Select(x => x.Updated).Distinct());
+            Assert.That(products.Count(), Is.EqualTo(2));
+            Assert.That(products.Select(x => x.Updated).Distinct(), Is.EquivalentTo(new[] { today, yesterday }));
         }
     }
 }

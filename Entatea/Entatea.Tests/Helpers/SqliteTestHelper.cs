@@ -19,7 +19,7 @@ namespace Entatea.Tests.Helpers
     /// </summary>
     public class SqliteTestHelper
     {
-        private static readonly Dictionary<string, string> testName2DbName = new Dictionary<string, string>();
+        private static readonly Dictionary<string, string> testName2DbName = new();
 
         private static readonly string tempFolder = Path.Combine(Path.GetTempPath(), Assembly.GetExecutingAssembly().GetName().Name, "SqlLite");
 

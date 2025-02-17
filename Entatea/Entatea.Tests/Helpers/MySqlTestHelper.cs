@@ -17,7 +17,7 @@ namespace Entatea.Tests.Helpers
     /// </summary>
     public class MySqlTestHelper
     {
-        private static readonly Dictionary<string, string> testName2DbName = new Dictionary<string, string>();
+        private static readonly Dictionary<string, string> testName2DbName = new();
 
         private static readonly string tempFolder = Path.Combine(Path.GetTempPath(), Assembly.GetExecutingAssembly().GetName().Name, "MySQL");
 
@@ -44,13 +44,13 @@ namespace Entatea.Tests.Helpers
             }
 
             // create the database
-            using (MySqlConnection conn = new MySqlConnection(GetMySqlConnectionString()))
+            using (MySqlConnection conn = new(GetMySqlConnectionString()))
             {
                 conn.Open();
 
                 string sql = $"CREATE DATABASE {dbName}";
 
-                MySqlCommand command = new MySqlCommand(sql, conn);
+                MySqlCommand command = new(sql, conn);
                 command.ExecuteNonQuery();
                 conn.Close();
             }

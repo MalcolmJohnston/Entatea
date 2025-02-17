@@ -5,7 +5,7 @@ namespace Entatea.Tests.Configuration
 {
     public static class ConfigurationHelper
     {
-        private static readonly object lockObject = new object();
+        private static readonly object lockObject = new();
 
         private static TestConfiguration config;
 

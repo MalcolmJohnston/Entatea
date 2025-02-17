@@ -36,13 +36,13 @@ namespace Entatea.Tests
 
         private static async Task StopMsSqlContainer()
         {
-            ProcessStartInfo killStartInfo = new ProcessStartInfo(
+            ProcessStartInfo killStartInfo = new(
                 DOCKER_PROCESS,
                 $"exec {MS_SQL_CONTAINER_NAME} kill 1 || :");
             Process killProcess = Process.Start(killStartInfo);
             await killProcess.WaitForExitAsync();
 
-            ProcessStartInfo stopStartInfo = new ProcessStartInfo(
+            ProcessStartInfo stopStartInfo = new(
                 DOCKER_PROCESS,
                 $"container stop {MY_SQL_CONTAINER_NAME}");
             Process stopProcess = Process.Start(stopStartInfo);
@@ -51,7 +51,7 @@ namespace Entatea.Tests
 
         private static async Task StopMySqlContainer()
         {
-            ProcessStartInfo stopStartInfo = new ProcessStartInfo(
+            ProcessStartInfo stopStartInfo = new(
                 DOCKER_PROCESS,
                 $"container stop {MY_SQL_CONTAINER_NAME}");
             Process stopProcess = Process.Start(stopStartInfo);
@@ -60,7 +60,7 @@ namespace Entatea.Tests
 
         private static async Task StartMySqlContainer(int port)
         {
-            ProcessStartInfo startInfo = new ProcessStartInfo(
+            ProcessStartInfo startInfo = new(
                 DOCKER_PROCESS,
                 $"run --rm --name {MY_SQL_CONTAINER_NAME} -p {port}:3306 -e MYSQL_ALLOW_EMPTY_PASSWORD=yes -e TZ=Europe/London -d mysql:latest --max-connections=1000");
             Process startProcess = Process.Start(startInfo);
@@ -86,7 +86,7 @@ namespace Entatea.Tests
 
         private static async Task StartSqlServerContainer(string password, int port)
         {
-            ProcessStartInfo startInfo = new ProcessStartInfo(
+            ProcessStartInfo startInfo = new(
                 DOCKER_PROCESS,
                 $"run --rm -e \"ACCEPT_EULA=Y\" -e \"SA_PASSWORD={password}\" -e \"MSSQL_PID=Express\" -e \"TZ=Europe/London\" -p {port}:1433 -d --name={MS_SQL_CONTAINER_NAME} mcr.microsoft.com/mssql/server:2019-latest");
             Process startProcess = Process.Start(startInfo);
