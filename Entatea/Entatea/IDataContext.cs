@@ -39,5 +39,11 @@ namespace Entatea
         Task DeleteList<T>(object whereConditions) where T : class;
 
         Task DeleteList<T>(params IPredicate[] predicates) where T : class;
+
+        Task HardDelete<T>(object id) where T : class;
+
+        Task HardDeleteList<T>(object whereConditions) where T : class;
+
+        Task HardDeleteList<T>(params IPredicate[] predicates) where T : class;
     }
 }

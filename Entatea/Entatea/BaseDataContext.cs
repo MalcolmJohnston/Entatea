@@ -65,6 +65,10 @@ namespace Entatea
             // set value on insert on any soft delete properties
             if (classMap.IsSoftDelete)
             {
+                // TODO: if this is also an assigned key, then HardDelete this record first
+                // bit brute force as it might not exist (classMap.HasAssignedKeys)
+
+
                 classMap.SoftDeleteProperty.PropertyInfo.SetValue(
                     entity,
                     Convert.ChangeType(
