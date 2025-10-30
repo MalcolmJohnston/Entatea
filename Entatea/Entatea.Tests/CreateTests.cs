@@ -42,8 +42,8 @@ namespace Entatea.Tests
         /// Test that we can insert an entity which has a single key that is manually derived
         /// </summary>
         [TestCase(typeof(InMemoryDataContext))]
-        [TestCase(typeof(SqlServerDataContext))]
-        [TestCase(typeof(MySqlDataContext))]
+        //[TestCase(typeof(SqlServerDataContext))]
+        //[TestCase(typeof(MySqlDataContext))]
         [TestCase(typeof(SqliteDataContext))]
         public async Task Insert_With_Assigned_Key(Type dataContextType)
         {

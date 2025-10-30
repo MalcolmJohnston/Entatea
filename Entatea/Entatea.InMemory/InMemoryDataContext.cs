@@ -632,5 +632,63 @@ namespace Entatea.InMemory
         {
             return;
         }
+
+        public Task HardDelete<T>(object id) where T : class
+        {
+            // get the existing object
+            T obj = this.Read<T>(id).GetAwaiter().GetResult();
+
+            // check the object is not null (i.e. it exists in the collection)
+            if (obj != null)
+            {
+                // remove the object from the collection
+                IList<T> list = this.GetData<T>();
+                list.Remove(obj);
+            }
+
+            return Task.CompletedTask;
+        }
+
+        public Task HardDeleteList<T>(object whereConditions) where T : class
+        {
+            // check we have some conditions
+            IDictionary<string, object> whereDict = ClassMapper.GetClassMap<T>().CoalesceToDictionary(whereConditions);
+            if (whereDict.Count == 0)
+            {
+                throw new ArgumentException("Please pass where conditions.");
+            }
+
+            IEnumerable<T> objects = new List<T>(this.ReadList<T>(whereDict).GetAwaiter().GetResult());
+            if (objects.Count() > 0)
+            {
+                IList<T> list = this.GetData<T>();
+                foreach (T obj in objects)
+                {
+                    list.Remove(obj);
+                }
+            }
+
+            return Task.CompletedTask;
+        }
+
+        public Task HardDeleteList<T>(params IPredicate[] predicates) where T : class
+        {
+            if (predicates == null || predicates.Length == 0)
+            {
+                throw new ArgumentException("Please pass where conditions.");
+            }
+
+            IEnumerable<T> objects = new List<T>(this.ReadList<T>(predicates).GetAwaiter().GetResult());
+            if (objects.Count() > 0)
+            {
+                IList<T> list = this.GetData<T>();
+                foreach (T obj in objects)
+                {
+                    list.Remove(obj);
+                }
+            }
+
+            return Task.CompletedTask;
+        }
     }
 }

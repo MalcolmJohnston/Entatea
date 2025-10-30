@@ -104,6 +104,12 @@ namespace Entatea.SqlBuilder
             return $"DELETE FROM {this.GetTableIdentifier(classMap)} {this.GetWhereClause(whereConditions)}";
         }
 
+        public virtual string GetHardDeleteWhereSql<T>(IEnumerable<IPredicate> whereConditions) where T : class
+        {
+            ClassMap classMap = ClassMapper.GetClassMap<T>();
+            return $"DELETE FROM {this.GetTableIdentifier(classMap)} {this.GetWhereClause(whereConditions)}";
+        }
+
         public abstract string GetInsertSql<T>() where T : class;
 
         public virtual string GetSelectAllSql<T>() where T : class

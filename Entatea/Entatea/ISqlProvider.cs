@@ -20,7 +20,7 @@ namespace Entatea
 
         string GetDeleteWhereSql<T>(IEnumerable<IPredicate> whereConditions) where T : class;
 
-        string GetHardDeleteSql<T>(IEnumerable<IPredicate> whereConditions) where T : class;
+        string GetHardDeleteWhereSql<T>(IEnumerable<IPredicate> whereConditions) where T : class;
 
         string GetSelectNextIdSql<T>() where T : class;
     }
