@@ -65,9 +65,14 @@ namespace Entatea
             // set value on insert on any soft delete properties
             if (classMap.IsSoftDelete)
             {
-                // TODO: if this is also an assigned key, then HardDelete this record first
-                // bit brute force as it might not exist (classMap.HasAssignedKeys)
-
+                if (classMap.HasAssignedKeys)
+                {
+                    IDictionary<string, object> keyDictionary = classMap.CoalesceKeyToDictionary(entity);
+                    await this.Connection.QueryAsync<T>(
+                        sqlProvider.GetHardDeleteWhereSql<T>(classMap.ValidateKeyProperties<T>(keyDictionary)),
+                        keyDictionary,
+                        this.Transaction).ConfigureAwait(false);
+                }
 
                 classMap.SoftDeleteProperty.PropertyInfo.SetValue(
                     entity,
