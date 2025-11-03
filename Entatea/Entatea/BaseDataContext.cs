@@ -65,6 +65,11 @@ namespace Entatea
             // set value on insert on any soft delete properties
             if (classMap.IsSoftDelete)
             {
+                if (classMap.HasAssignedKeys)
+                {
+                    await this.HardDelete<T>(entity);
+                }
+
                 classMap.SoftDeleteProperty.PropertyInfo.SetValue(
                     entity,
                     Convert.ChangeType(
@@ -284,6 +289,48 @@ namespace Entatea
             await this.DeleteList<T>(predicates.AsEnumerable(), @params);
         }
 
+        public async Task HardDelete<T>(object id) where T : class
+        {
+            ClassMap classMap = ClassMapper.GetClassMap<T>();
+
+            // validate the key properties
+            IList<IPredicate> predicates = classMap.ValidateKeyProperties<T>(id);
+            predicates = classMap.AddDefaultPredicates<T>(predicates, true);
+
+            IDictionary<string, object> @params = predicates.GetParameters();
+
+            await this.Connection.QueryAsync<T>(sqlProvider.GetHardDeleteWhereSql<T>(predicates), @params, this.Transaction)
+                                 .ConfigureAwait(false);
+        }
+
+        public async Task HardDeleteList<T>(object whereConditions) where T : class
+        {
+            if (whereConditions == null)
+            {
+                throw new ArgumentException("Please pass where conditions");
+            }
+
+            // validate the properties
+            ClassMap classMap = ClassMapper.GetClassMap<T>();
+            IList<IPredicate> predicates = classMap.ValidateWhereProperties<T>(whereConditions);
+
+            IDictionary<string, object> @params = new Dictionary<string, object>();
+
+            await this.DeleteHardList<T>(predicates, @params);
+        }
+
+        public async Task HardDeleteList<T>(params IPredicate[] predicates) where T : class
+        {
+            if (predicates == null || predicates.Length == 0)
+            {
+                throw new ArgumentException("Please pass where conditions");
+            }
+
+            IDictionary<string, object> @params = new Dictionary<string, object>();
+
+            await this.DeleteList<T>(predicates.AsEnumerable(), @params);
+        }
+
         private async Task<IEnumerable<T>> ReadList<T>(IEnumerable<IPredicate> predicates) where T : class
         {
             ClassMap classMap = ClassMapper.GetClassMap<T>();
@@ -341,6 +388,24 @@ namespace Entatea
             await this.Connection.QueryAsync<T>(
                 sqlProvider.GetDeleteWhereSql<T>(predicates), 
                 @params, 
+                this.Transaction).ConfigureAwait(false);
+        }
+
+        private async Task DeleteHardList<T>(IEnumerable<IPredicate> predicates, IDictionary<string, object> @params) where T : class
+        {
+            if (predicates.Count() == 0)
+            {
+                throw new ArgumentException("Please pass where conditions.");
+            }
+
+            ClassMap classMap = ClassMapper.GetClassMap<T>();
+            predicates = classMap.AddDefaultPredicates<T>(predicates);
+
+            @params = predicates.GetParameters(@params);
+
+            await this.Connection.QueryAsync<T>(
+                sqlProvider.GetHardDeleteWhereSql<T>(predicates),
+                @params,
                 this.Transaction).ConfigureAwait(false);
         }
 

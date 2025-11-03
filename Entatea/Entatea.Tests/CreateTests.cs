@@ -58,6 +58,28 @@ namespace Entatea.Tests
             Assert.That(city.CityName, Is.EqualTo("Brighton"));
         }
 
+        [TestCase(typeof(InMemoryDataContext))]
+        [TestCase(typeof(SqlServerDataContext))]
+        [TestCase(typeof(MySqlDataContext))]
+        [TestCase(typeof(SqliteDataContext))]
+        public async Task Insert_With_Assigned_Key_Overwrite_Soft_Deleted(Type dataContextType)
+        {
+            // Arrange
+            using IDataContext dataContext = DataContextTestHelper.SetupDataContext(dataContextType);
+            SoftDeleteAssigned val1 = await dataContext.Create(
+                new SoftDeleteAssigned() { Code = "XXX", Value = "YYY" });
+
+            await dataContext.Delete<SoftDeleteAssigned>(new { Code = val1.Code });
+
+            // Act
+            SoftDeleteAssigned val2 = await dataContext.Create(
+                new SoftDeleteAssigned() { Code = "XXX", Value = "ZZZ" });
+
+            // Assert
+            Assert.That(val2.Code, Is.EqualTo("XXX"));
+            Assert.That(val2.Value, Is.EqualTo("ZZZ"));
+        }
+
         /// <summary>
         /// Test that we can insert an entity which has a sequentially calculated key
         /// </summary>

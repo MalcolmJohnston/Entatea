@@ -73,5 +73,10 @@ namespace Entatea
 
             return sql;
         }
+
+        public string GetHardDeleteWhereSql<T>(IEnumerable<IPredicate> whereConditions) where T : class
+        {
+            return builder.GetHardDeleteWhereSql<T>(whereConditions);
+        }
     }
 }

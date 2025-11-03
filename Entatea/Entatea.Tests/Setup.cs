@@ -25,7 +25,7 @@ namespace Entatea.Tests
             TestConfiguration config = ConfigurationHelper.GetTestConfiguration();
             Task mySqlTask = StartMySqlContainer(config.MySqlPort);
             Task msSqlTask = StartSqlServerContainer(config.MsSqlPassword, config.MsSqlPort);
-            await Task.WhenAll(mySqlTask, msSqlTask);
+            await Task.WhenAll(mySqlTask);
         }
 
         [OneTimeTearDown]

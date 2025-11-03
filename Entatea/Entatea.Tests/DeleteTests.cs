@@ -17,6 +17,7 @@ using Entatea.Tests.Entities;
 using Dapper;
 using MySql.Data.MySqlClient;
 using NUnit.Framework;
+using System.Net.WebSockets;
 
 namespace Entatea.Tests
 {
@@ -158,29 +159,40 @@ namespace Entatea.Tests
             // Assert
             Assert.That(await dataContext.Read<SoftDelete>(new { softDelete.SoftDeleteId }), Is.Null);
 
-            if (DataContextTestHelper.IsSqlServer(dataContextType))
+            if (dataContextType == typeof(InMemoryDataContext))
             {
-                using SqlConnection conn = new(DataContextTestHelper.GetTestConnectionString(dataContextType));
-                conn.Open();
+                InMemoryDataContext inMemoryData = (InMemoryDataContext)dataContext;
 
-                SoftDeleteShort deleted = (await conn.QueryAsync<SoftDeleteShort>(
-                    "SELECT * FROM [Entatea].[SoftDeleteTest] WHERE SoftDeleteId = @SoftDeleteId",
-                        new { softDelete.SoftDeleteId })).Single();
-
-                Assert.That(deleted.RecordStatus, Is.EqualTo(0));
+                var noAttResult = inMemoryData.GetRawData<SoftDelete>().SingleOrDefault(x => x.SoftDeleteId == softDelete.SoftDeleteId);
+                Assert.That(noAttResult, Is.Not.Null);
+                Assert.That(noAttResult.RecordStatus, Is.EqualTo(0));
             }
-
-            if (DataContextTestHelper.IsMySql(dataContextType))
+            else
             {
-                using MySqlConnection conn = new(DataContextTestHelper.GetTestConnectionString(dataContextType));
-                conn.Open();
-
-                SoftDeleteShort deleted = (await conn.QueryAsync<SoftDeleteShort>(
-                    "SELECT * FROM SoftDeleteTest WHERE SoftDeleteId = @SoftDeleteId",
-                        new { softDelete.SoftDeleteId })).Single();
-
-                Assert.That(deleted.RecordStatus, Is.EqualTo(0));
+                var noAttResult = await dataContext.Read<SoftDeleteNoAttribute>(softDelete.SoftDeleteId);
+                Assert.That(noAttResult.RecordStatus, Is.EqualTo(0));
             }
+        }
+
+        /// <summary>
+        /// Test that we can hard delete a single entity.
+        /// </summary>
+        [TestCase(typeof(InMemoryDataContext))]
+        [TestCase(typeof(SqlServerDataContext))]
+        [TestCase(typeof(MySqlDataContext))]
+        [TestCase(typeof(SqliteDataContext))]
+        public async Task Hard_Delete_Entity(Type dataContextType)
+        {
+            // Arrange
+            using IDataContext dataContext = DataContextTestHelper.SetupDataContext(dataContextType);
+            SoftDeleteNoAttribute value = await dataContext.Create(new SoftDeleteNoAttribute());
+
+            // Act
+            await dataContext.Delete<SoftDeleteNoAttribute>(new { value.SoftDeleteId, });
+
+            // Assert
+            var result = await dataContext.Read<SoftDeleteNoAttribute>(new { value.SoftDeleteId });
+            Assert.That(result, Is.Null);       
         }
 
         /// <summary>
@@ -201,30 +213,40 @@ namespace Entatea.Tests
 
             // Assert
             Assert.That(await dataContext.Read<SoftDeleteShort>(new { softDelete.SoftDeleteId }), Is.Null);
-            
-            if (DataContextTestHelper.IsSqlServer(dataContextType))
+
+            if (dataContextType == typeof(InMemoryDataContext))
             {
-                using SqlConnection conn = new(DataContextTestHelper.GetTestConnectionString(dataContextType));
-                conn.Open();
+                InMemoryDataContext inMemoryData = (InMemoryDataContext)dataContext;
 
-                SoftDeleteShort deleted = (await conn.QueryAsync<SoftDeleteShort>(
-                    "SELECT COUNT(*) FROM SoftDeleteShortTest WHERE SoftDeleteId = @SoftDeleteId",
-                        new { softDelete.SoftDeleteId })).Single();
-
-                Assert.That(deleted.RecordStatus, Is.EqualTo(0));
+                var noAttResult = inMemoryData.GetRawData<SoftDeleteShort>().SingleOrDefault(x => x.SoftDeleteId == softDelete.SoftDeleteId);
+                Assert.That(noAttResult, Is.Not.Null);
+                Assert.That(noAttResult.RecordStatus, Is.EqualTo(0));
             }
-
-            if (DataContextTestHelper.IsMySql(dataContextType))
+            else
             {
-                using MySqlConnection conn = new(DataContextTestHelper.GetTestConnectionString(dataContextType));
-                conn.Open();
-
-                SoftDeleteShort deleted = (await conn.QueryAsync<SoftDeleteShort>(
-                    "SELECT COUNT(*) FROM SoftDeleteShortTest WHERE SoftDeleteId = @SoftDeleteId",
-                        new { softDelete.SoftDeleteId })).Single();
-
-                Assert.That(deleted.RecordStatus, Is.EqualTo(0));
+                var noAttResult = await dataContext.Read<SoftDeleteShortNoAttribute>(softDelete.SoftDeleteId);
+                Assert.That(noAttResult.RecordStatus, Is.EqualTo(0));
             }
+        }
+
+        /// <summary>
+        /// Test that we can hard delete a single entity.
+        /// </summary>
+        [TestCase(typeof(InMemoryDataContext))]
+        [TestCase(typeof(SqlServerDataContext))]
+        [TestCase(typeof(MySqlDataContext))]
+        [TestCase(typeof(SqliteDataContext))]
+        public async Task Hard_Delete_Short_Entity(Type dataContextType)
+        {
+            // Arrange
+            using IDataContext dataContext = DataContextTestHelper.SetupDataContext(dataContextType);
+            SoftDeleteShortNoAttribute value = await dataContext.Create(new SoftDeleteShortNoAttribute());
+
+            // Act
+            await dataContext.Delete<SoftDeleteShortNoAttribute>(new { value.SoftDeleteId, });
+
+            // Assert
+            Assert.That(await dataContext.Read<SoftDeleteShortNoAttribute>(new { value.SoftDeleteId }), Is.Null);
         }
 
         /// <summary>
@@ -252,29 +274,48 @@ namespace Entatea.Tests
                 Is.EqualTo(0));
             Assert.That((await dataContext.ReadAll<SoftDelete>()).Count(), Is.EqualTo(1));
 
-            if (DataContextTestHelper.IsSqlServer(dataContextType))
+            if (DataContextTestHelper.IsInMemory(dataContextType)) 
             {
-                using SqlConnection conn = new(DataContextTestHelper.GetTestConnectionString(dataContextType));
-                conn.Open();
+                InMemoryDataContext inMemory = (InMemoryDataContext)dataContext;
+                var softDeleted = inMemory.GetRawData<SoftDelete>()
+                    .Where(x => x.SoftDeleteId == sd2.SoftDeleteId || x.SoftDeleteId == sd3.SoftDeleteId)
+                    .AsList();
 
-                IEnumerable<SoftDelete> deleted = await conn.QueryAsync<SoftDelete>(
-                    "SELECT * FROM [Entatea].[SoftDeleteTest] WHERE SoftDeleteId IN @SoftDeleteIds",
-                        new { SoftDeleteIds = new int [ sd2.SoftDeleteId, sd3.SoftDeleteId ]});
-
+                Assert.That(softDeleted.Select(x => x.RecordStatus), Is.All.EqualTo(0));
+            }
+            else
+            {
+                IEnumerable<SoftDeleteNoAttribute> deleted = await dataContext.ReadList<SoftDeleteNoAttribute>(
+                    In<SoftDeleteNoAttribute>(x => x.SoftDeleteId, new[] { sd2.SoftDeleteId, sd3.SoftDeleteId }));
                 Assert.That(deleted.Select(x => x.RecordStatus), Is.All.EqualTo(0));
             }
+        }
 
-            if (DataContextTestHelper.IsMySql(dataContextType))
-            {
-                using MySqlConnection conn = new(DataContextTestHelper.GetTestConnectionString(dataContextType));
-                conn.Open();
+        /// <summary>
+        /// Test that we can hard delete a multiple entities using a where condition.
+        /// </summary>
+        [TestCase(typeof(InMemoryDataContext))]
+        [TestCase(typeof(SqlServerDataContext))]
+        [TestCase(typeof(MySqlDataContext))]
+        [TestCase(typeof(SqliteDataContext))]
+        public async Task Hard_Delete_List_Of_Entities(Type dataContextType)
+        {
+            // Arrange
+            using IDataContext dataContext = DataContextTestHelper.SetupDataContext(dataContextType);
+            SoftDeleteNoAttribute sd1 = await dataContext.Create(new SoftDeleteNoAttribute());
+            SoftDeleteNoAttribute sd2 = await dataContext.Create(new SoftDeleteNoAttribute());
+            SoftDeleteNoAttribute sd3 = await dataContext.Create(new SoftDeleteNoAttribute());
 
-                IEnumerable<SoftDelete> deleted = await conn.QueryAsync<SoftDelete>(
-                    "SELECT * FROM SoftDeleteTest WHERE SoftDeleteId IN @SoftDeleteIds",
-                        new { SoftDeleteIds = new int[sd2.SoftDeleteId, sd3.SoftDeleteId] });
+            // Act
+            await dataContext.DeleteList<SoftDeleteNoAttribute>(
+                In<SoftDeleteNoAttribute>(x => x.SoftDeleteId, new int[] { sd2.SoftDeleteId, sd3.SoftDeleteId }));
 
-                Assert.That(deleted.Select(x => x.RecordStatus), Is.All.EqualTo(0));
-            }
+            // Assert
+            Assert.That((await dataContext.ReadList<SoftDeleteNoAttribute>(
+                In<SoftDeleteNoAttribute>(x => x.SoftDeleteId, new int[] { sd2.SoftDeleteId, sd3.SoftDeleteId }))).Count(),
+                Is.EqualTo(0));
+            Assert.That((await dataContext.ReadAll<SoftDeleteNoAttribute>()).Count(), Is.EqualTo(1));
+
         }
 
         /// <summary>

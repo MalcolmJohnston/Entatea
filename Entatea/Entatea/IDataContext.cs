@@ -33,11 +33,17 @@ namespace Entatea
         Task<PagedList<T>> ReadList<T>(object sortOrders, int pageSize, int pageNumber, params IPredicate[] predicates) where T : class;
 
         Task<T> Update<T>(object properties) where T : class;
-
+            
         Task Delete<T>(object id) where T : class;
 
         Task DeleteList<T>(object whereConditions) where T : class;
 
         Task DeleteList<T>(params IPredicate[] predicates) where T : class;
+
+        Task HardDelete<T>(object id) where T : class;
+
+        Task HardDeleteList<T>(object whereConditions) where T : class;
+
+        Task HardDeleteList<T>(params IPredicate[] predicates) where T : class;
     }
 }

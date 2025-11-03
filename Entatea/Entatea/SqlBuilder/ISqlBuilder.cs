@@ -42,6 +42,8 @@ namespace Entatea.SqlBuilder
 
         string GetDeleteWhereSql<T>(IEnumerable<IPredicate> whereConditions) where T : class;
 
+        string GetHardDeleteWhereSql<T>(IEnumerable<IPredicate> whereConditions) where T : class;
+
         string GetSelectNextIdSql<T>() where T : class;
     }
 }

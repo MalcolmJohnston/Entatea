@@ -1,17 +1,15 @@
-﻿using System;
+﻿using Entatea.Model;
+using Entatea.Predicate;
+using System;
 using System.Collections;
 using System.Collections.Concurrent;
 using System.Collections.Generic;
-
 using System.Linq;
 using System.Linq.Dynamic.Core;
 using System.Linq.Expressions;
-
 using System.Reflection;
 using System.Threading.Tasks;
-
-using Entatea.Model;
-using Entatea.Predicate;
+using static Dapper.SqlMapper;
 
 namespace Entatea.InMemory
 {
@@ -23,8 +21,6 @@ namespace Entatea.InMemory
     public class InMemoryDataContext : IDataContext
     {
         private readonly ConcurrentDictionary<string, IList> dataStore = new ConcurrentDictionary<string, IList>();
-
-        private readonly ConcurrentDictionary<string, IList> transactionCreatedItems = new ConcurrentDictionary<string, IList>();
 
         private readonly Type iEnumerableType = typeof(IEnumerable);
 
@@ -39,6 +35,11 @@ namespace Entatea.InMemory
         public void AddOrUpdate<T>(IEnumerable<T> data) where T : class
         {
             this.dataStore[typeof(T).FullName] = new List<T>(data);
+        }
+
+        public IList<T> GetRawData<T>() where T: class
+        {
+            return this.GetData<T>();
         }
 
         /// <inheritdoc />
@@ -162,9 +163,23 @@ namespace Entatea.InMemory
             // check the object is not null (i.e. it exists in the collection)
             if (obj != null)
             {
-                // remove the object from the collection
-                IList<T> list = this.GetData<T>();
-                list.Remove(obj);
+                ClassMap classMap = ClassMapper.GetClassMap<T>();
+                
+                // soft delete
+                if (classMap.IsSoftDelete)
+                {
+                    classMap.SoftDeleteProperty.PropertyInfo.SetValue(
+                        obj,
+                        Convert.ChangeType(
+                            classMap.SoftDeleteProperty.ValueOnDelete,
+                            classMap.SoftDeleteProperty.PropertyInfo.PropertyType));
+                }
+                else
+                {
+                    // remove the object from the collection
+                    IList<T> list = this.GetData<T>();
+                    list.Remove(obj);
+                }
             }
 
             return Task.CompletedTask;
@@ -186,7 +201,7 @@ namespace Entatea.InMemory
                 IList<T> list = this.GetData<T>();
                 foreach (T obj in objects)
                 {
-                    list.Remove(obj);
+                    this.Delete<T>(obj);
                 }
             }
 
@@ -206,7 +221,7 @@ namespace Entatea.InMemory
                 IList<T> list = this.GetData<T>();
                 foreach (T obj in objects)
                 {
-                    list.Remove(obj);
+                    this.Delete<T>(obj);
                 }
             }
 
@@ -252,12 +267,7 @@ namespace Entatea.InMemory
         /// <inheritdoc />
         public Task<IEnumerable<T>> ReadAll<T>() where T : class
         {
-            if (this.dataStore.ContainsKey(typeof(T).FullName))
-            {
-                return Task.FromResult((IEnumerable<T>)this.dataStore[typeof(T).FullName]);
-            }
-
-            return Task.FromResult(new T[0].AsEnumerable());
+            return Task.FromResult(this.ReadWhere<T>(Array.Empty<IPredicate>()));
         }
 
         /// <inheritdoc />
@@ -471,12 +481,38 @@ namespace Entatea.InMemory
 
         private IEnumerable<T> Filter<T>(IEnumerable<T> items, IEnumerable<IPredicate> predicates) where T : class
         {
-            return items.AsQueryable<T>().Where(this.GetExpression<T>(predicates)).AsEnumerable<T>();
+            ClassMap classMap = ClassMapper.GetClassMap<T>();
+
+            List<IPredicate> allPredicates = new List<IPredicate>(predicates);
+
+            // and soft delete predicate
+            if (classMap.IsSoftDelete)
+            {
+                allPredicates.Add(PredicateBuilder.Equal<T>(classMap.SoftDeleteProperty.PropertyName, classMap.SoftDeleteProperty.ValueOnInsert));
+            }
+
+            // add discrimator predicates
+            if (classMap.DiscriminatorProperties.Any())
+            {
+                foreach (PropertyMap discriminatorProperty in classMap.DiscriminatorProperties)
+                {
+                    allPredicates.Add(PredicateBuilder.Equal<T>(discriminatorProperty.PropertyName, discriminatorProperty.ValueOnInsert));
+                }
+            }
+
+
+            return items.AsQueryable<T>().Where(this.GetExpression<T>(allPredicates)).AsEnumerable<T>();
         }
 
         private Expression<Func<T, bool>> GetExpression<T>(IEnumerable<IPredicate> predicates) where T : class
         {
             ClassMap classMap = ClassMapper.GetClassMap<T>();
+
+            if (!predicates.Any())
+            {
+                Expression<Func<T, bool>> returnTrue = item => true;
+                return returnTrue;
+            }
 
             // x =>
             ParameterExpression parameter = Expression.Parameter(typeof(T), "x");
@@ -631,6 +667,64 @@ namespace Entatea.InMemory
         public void Dispose()
         {
             return;
+        }
+
+        public Task HardDelete<T>(object id) where T : class
+        {
+            // get the existing object
+            T obj = this.Read<T>(id).GetAwaiter().GetResult();
+
+            // check the object is not null (i.e. it exists in the collection)
+            if (obj != null)
+            {
+                // remove the object from the collection
+                IList<T> list = this.GetData<T>();
+                list.Remove(obj);
+            }
+
+            return Task.CompletedTask;
+        }
+
+        public Task HardDeleteList<T>(object whereConditions) where T : class
+        {
+            // check we have some conditions
+            IDictionary<string, object> whereDict = ClassMapper.GetClassMap<T>().CoalesceToDictionary(whereConditions);
+            if (whereDict.Count == 0)
+            {
+                throw new ArgumentException("Please pass where conditions.");
+            }
+
+            IEnumerable<T> objects = new List<T>(this.ReadList<T>(whereDict).GetAwaiter().GetResult());
+            if (objects.Count() > 0)
+            {
+                IList<T> list = this.GetData<T>();
+                foreach (T obj in objects)
+                {
+                    list.Remove(obj);
+                }
+            }
+
+            return Task.CompletedTask;
+        }
+
+        public Task HardDeleteList<T>(params IPredicate[] predicates) where T : class
+        {
+            if (predicates == null || predicates.Length == 0)
+            {
+                throw new ArgumentException("Please pass where conditions.");
+            }
+
+            IEnumerable<T> objects = new List<T>(this.ReadList<T>(predicates).GetAwaiter().GetResult());
+            if (objects.Count() > 0)
+            {
+                IList<T> list = this.GetData<T>();
+                foreach (T obj in objects)
+                {
+                    list.Remove(obj);
+                }
+            }
+
+            return Task.CompletedTask;
         }
     }
 }
