@@ -19,20 +19,20 @@ namespace Entatea.Tests
         private const string MS_SQL_CONTAINER_NAME  = "entatea-sqlserver";
         private const string DOCKER_PROCESS         = "docker";
 
-        //[OneTimeSetUp]
-        //public async Task FixtureSetup()
-        //{
-        //    TestConfiguration config = ConfigurationHelper.GetTestConfiguration();
-        //    Task mySqlTask = StartMySqlContainer(config.MySqlPort);
-        //    //Task msSqlTask = StartSqlServerContainer(config.MsSqlPassword, config.MsSqlPort);
-        //    await Task.WhenAll(mySqlTask);
-        //}
+        [OneTimeSetUp]
+        public async Task FixtureSetup()
+        {
+            TestConfiguration config = ConfigurationHelper.GetTestConfiguration();
+            Task mySqlTask = StartMySqlContainer(config.MySqlPort);
+            Task msSqlTask = StartSqlServerContainer(config.MsSqlPassword, config.MsSqlPort);
+            await Task.WhenAll(mySqlTask);
+        }
 
-        //[OneTimeTearDown]
-        //public async Task FixtureTearDown()
-        //{
-        //    await Task.WhenAll(StopMsSqlContainer(), StopMySqlContainer());
-        //}
+        [OneTimeTearDown]
+        public async Task FixtureTearDown()
+        {
+            await Task.WhenAll(StopMsSqlContainer(), StopMySqlContainer());
+        }
 
         private static async Task StopMsSqlContainer()
         {

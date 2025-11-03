@@ -67,11 +67,7 @@ namespace Entatea
             {
                 if (classMap.HasAssignedKeys)
                 {
-                    IDictionary<string, object> keyDictionary = classMap.CoalesceKeyToDictionary(entity);
-                    await this.Connection.QueryAsync<T>(
-                        sqlProvider.GetHardDeleteWhereSql<T>(classMap.ValidateKeyProperties<T>(keyDictionary)),
-                        keyDictionary,
-                        this.Transaction).ConfigureAwait(false);
+                    await this.HardDelete<T>(entity);
                 }
 
                 classMap.SoftDeleteProperty.PropertyInfo.SetValue(
@@ -299,7 +295,7 @@ namespace Entatea
 
             // validate the key properties
             IList<IPredicate> predicates = classMap.ValidateKeyProperties<T>(id);
-            predicates = classMap.AddDefaultPredicates<T>(predicates);
+            predicates = classMap.AddDefaultPredicates<T>(predicates, true);
 
             IDictionary<string, object> @params = predicates.GetParameters();
 

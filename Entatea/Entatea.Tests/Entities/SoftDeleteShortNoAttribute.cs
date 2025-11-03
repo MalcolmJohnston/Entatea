@@ -2,15 +2,14 @@
 
 namespace Entatea.Tests.Entities
 {
-    [Table("HardDeleteShortTest")]
-    public class HardDeleteShort
+    [Table("SoftDeleteShortTest")]
+    public class SoftDeleteShortNoAttribute
     {
         [KeyType(KeyType.Identity)]
-        public int HardDeleteId { get; set; }
+        public int SoftDeleteId { get; set; }
 
         public string Value { get; set; } = "Test";
 
-        [SoftDelete(1, 0)]
         public short RecordStatus { get; set; }
     }
 }

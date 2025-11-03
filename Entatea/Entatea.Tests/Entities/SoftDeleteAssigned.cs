@@ -2,11 +2,11 @@
 
 namespace Entatea.Tests.Entities
 {
-    [Table("HardDeleteTest", Schema = "Entatea")]
-    public class HardDelete
+    [Table("SoftDeleteAssigned", Schema = "Entatea")]
+    public class SoftDeleteAssigned
     {
-        [KeyType(KeyType.Identity)]
-        public int HardDeleteId { get; set; }
+        [KeyType(KeyType.Assigned)]
+        public string Code { get; set; }
 
         public string Value { get; set; } = "Test";
 

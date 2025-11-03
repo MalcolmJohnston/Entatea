@@ -451,10 +451,18 @@ namespace Entatea.Model
             return whereOperations;
         }
 
-        public IList<IPredicate> AddDefaultPredicates<T>(IEnumerable<IPredicate> predicates) where T : class
+        public IList<IPredicate> AddDefaultPredicates<T>(IEnumerable<IPredicate> predicates, bool forHardDelete = false) where T : class
         {
             List<IPredicate> newPredicates = predicates.ToList();
-            newPredicates.AddRange(this.GetDefaultPredicates<T>());
+            if (forHardDelete)
+            {
+                newPredicates.AddRange(this.GetDefaultHardDeletePredicates<T>());
+            }
+            else
+            {
+                newPredicates.AddRange(this.GetDefaultPredicates<T>());
+            }
+
             return newPredicates;
         }
 
@@ -482,9 +490,11 @@ namespace Entatea.Model
         }
 
         private IList<IFieldPredicate> defaultPredicates = null;
-        public IList<IFieldPredicate> GetDefaultPredicates<T>() where T : class
+        private IList<IFieldPredicate> defaultHardDeletePredicates = null;
+
+        public IList<IFieldPredicate> GetDefaultHardDeletePredicates<T>() where T : class
         {
-            if (defaultPredicates == null)
+            if (defaultHardDeletePredicates == null)
             {
                 List<IFieldPredicate> predicates = new List<IFieldPredicate>();
                 if (this.DiscriminatorProperties.Any())
@@ -495,14 +505,28 @@ namespace Entatea.Model
                         predicates.Add(p);
                     }
                 }
+
+                // add partition predicates
+                predicates.AddRange(this.GetSequentialPartitionPredicates<T>());
+
+                defaultHardDeletePredicates = predicates;
+            }
+            return defaultHardDeletePredicates;
+        }
+
+        public IList<IFieldPredicate> GetDefaultPredicates<T>() where T : class
+        {
+            if (defaultPredicates == null)
+            {
+                List<IFieldPredicate> predicates = new List<IFieldPredicate>();
+                predicates.AddRange(GetDefaultHardDeletePredicates<T>());
+                
+                // do not include soft delete in predicates when we are performing a hard delete
                 if (this.SoftDeleteProperty != null)
                 {
                     FieldPredicate<T> p = PredicateBuilder.Equal<T>(this.SoftDeleteProperty.PropertyName, this.SoftDeleteProperty.ValueOnInsert) as FieldPredicate<T>;
                     predicates.Add(p);
                 }
-
-                // add partition predicates
-                predicates.AddRange(this.GetSequentialPartitionPredicates<T>());
 
                 defaultPredicates = predicates;
             }
