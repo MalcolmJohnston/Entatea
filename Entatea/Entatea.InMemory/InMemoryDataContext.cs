@@ -473,13 +473,13 @@ namespace Entatea.InMemory
             IEnumerable<T> data = this.GetData<T>();
             if (!data.Any())
             {
-                return Array.Empty<T>();
+                return Enumerable.Empty<T>();
             }
 
             return this.Filter<T>(data, predicates);
         }
 
-        private IEnumerable<T> Filter<T>(IEnumerable<T> items, IEnumerable<IPredicate> predicates) where T : class
+        private List<T> Filter<T>(IEnumerable<T> items, IEnumerable<IPredicate> predicates) where T : class
         {
             ClassMap classMap = ClassMapper.GetClassMap<T>();
 
@@ -501,7 +501,7 @@ namespace Entatea.InMemory
             }
 
 
-            return items.AsQueryable<T>().Where(this.GetExpression<T>(allPredicates)).AsEnumerable<T>();
+            return items.AsQueryable<T>().Where(this.GetExpression<T>(allPredicates)).ToList<T>();
         }
 
         private Expression<Func<T, bool>> GetExpression<T>(IEnumerable<IPredicate> predicates) where T : class
