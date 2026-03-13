@@ -1,8 +1,9 @@
-﻿using System;
+﻿using Entatea.Model;
+using Entatea.SqlBuilder;
+using System;
+using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
-using Entatea.Model;
-using Entatea.SqlBuilder;
 
 namespace Entatea.Predicate
 {
@@ -38,7 +39,20 @@ namespace Entatea.Predicate
             foreach (IPredicate predicate in predicates)
             {
                 var kvps = predicate.GetParameters(parameterIndex, out int parameterCount).ToList();
-                kvps.ForEach(x => nonIndexedParameters.Add(x.Key, x.Value));
+
+                if (predicate.IsInOperator() && kvps.Where(x => x.Value is IEnumerable && !(x.Value is String)).Sum(x => ((IEnumerable)x.Value).Cast<object>().Count()) > 1)
+                {
+                    var nonNullValues = kvps.Select(kvp => new KeyValuePair<string, object>(
+                                kvp.Key, (kvp.Value as IEnumerable)?
+                                    .Cast<object>().Where(x => x != null).ToList()
+                            )).ToList();
+
+                    nonNullValues.ForEach(x => nonIndexedParameters.Add(x.Key, x.Value));
+                } 
+                else
+                {
+                    kvps.ForEach(x => nonIndexedParameters.Add(x.Key, x.Value));
+                }
 
                 parameterIndex += parameterCount;
             }

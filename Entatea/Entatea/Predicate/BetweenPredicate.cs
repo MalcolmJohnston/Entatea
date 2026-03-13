@@ -24,6 +24,11 @@ namespace Entatea.Predicate
             return $"{sqlBuilder.GetColumnName<T>(PropertyName)} {GetOperatorString()} @p{parameterIndex} AND @p{parameterIndex+1}";
         }
 
+        public bool IsInOperator()
+        {
+            return false;
+        }
+
         public IEnumerable<KeyValuePair<string, object>> GetParameters(int parameterIndex, out int parameterCount)
         {
             parameterCount = 2;

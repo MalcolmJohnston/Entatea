@@ -99,6 +99,65 @@ namespace Entatea.Tests.Predicates
             Assert.That(products.Select(x => x.Stock).Distinct(), Is.EquivalentTo(stock));
         }
 
+        [TestCase(typeof(SqlServerDataContext))]
+        [TestCase(typeof(MySqlDataContext))]
+        [TestCase(typeof(SqliteDataContext))]
+        public async Task Read_With_NullableInt_In_Predicate_IncludesNullValue(Type dataContextType)
+        {
+            // Arrange
+            using IDataContext dataContext = DataContextTestHelper.SetupDataContext(dataContextType);
+            await dataContext.Create(new Product2() { Stock = null });
+            await dataContext.Create(new Product2() { Stock = 11 });
+            await dataContext.Create(new Product2() { Stock = 12 });
+
+            // Act
+            var stockIds = new List<int?>() { 11, 12, null };
+            IEnumerable<Product2> products = await dataContext.ReadList<Product2>(In<Product2>(x => x.Stock, stockIds));
+
+            // Assert
+            Assert.That(products.Count(), Is.EqualTo(3));
+            Assert.That(products.Select(x => x.Stock).Distinct(), Is.EquivalentTo(stockIds));
+        }
+
+        [TestCase(typeof(SqlServerDataContext))]
+        [TestCase(typeof(MySqlDataContext))]
+        [TestCase(typeof(SqliteDataContext))]
+        public async Task Read_With_NullableInt_In_Predicate_NotIncludesNullValue(Type dataContextType)
+        {
+            // Arrange
+            using IDataContext dataContext = DataContextTestHelper.SetupDataContext(dataContextType);
+            await dataContext.Create(new Product2() { Stock = null });
+            await dataContext.Create(new Product2() { Stock = 11 });
+            await dataContext.Create(new Product2() { Stock = 12 });
+
+            // Act
+            var stockIds = new List<int?>() { 11, null };
+            IEnumerable<Product2> products = await dataContext.ReadList<Product2>(NotIn<Product2>(x => x.Stock, stockIds));
+
+            // Assert
+            Assert.That(products.Count(), Is.EqualTo(1));
+            Assert.That(products.First().Stock, Is.EqualTo(12));
+        }
+
+        [TestCase(typeof(SqlServerDataContext))]
+        [TestCase(typeof(MySqlDataContext))]
+        [TestCase(typeof(SqliteDataContext))]
+        public async Task Read_With_NullableInt_In_Predicate_OnlyNullValue(Type dataContextType)
+        {
+            // Arrange
+            using IDataContext dataContext = DataContextTestHelper.SetupDataContext(dataContextType);
+            await dataContext.Create(new Product2() { Stock = null });
+            await dataContext.Create(new Product2() { Stock = 11 });
+            await dataContext.Create(new Product2() { Stock = 12 });
+
+            var stockIds = new List<int?>() { null };
+
+            // Act / Assert
+            var exception = Assert.ThrowsAsync<InvalidOperationException>(() => dataContext.ReadList<Product2>(In<Product2>(x => x.Stock, stockIds)));
+
+            Assert.That(exception.Message, Is.EqualTo("Using IN with just null is not supported. Use EQUAL"));
+        }
+
         [TestCase(typeof(InMemoryDataContext))]
         [TestCase(typeof(SqlServerDataContext))]
         [TestCase(typeof(MySqlDataContext))]

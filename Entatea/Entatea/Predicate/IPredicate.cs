@@ -9,5 +9,7 @@ namespace Entatea.Predicate
         string GetSql(ISqlBuilder sqlBuilder, int parameterIndex , out int parameterCount);
 
         IEnumerable<KeyValuePair<string, object>> GetParameters(int parameterIndex, out int parameterCount);
+
+        bool IsInOperator();
     }
 }
