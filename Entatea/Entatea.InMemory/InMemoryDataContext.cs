@@ -585,16 +585,29 @@ namespace Entatea.InMemory
 
                     IEnumerable enumerable = predicate.Value as IEnumerable;
                     int index = 0;
+
+                    if (enumerable.ToDynamicList().Count() == 1 && enumerable.ToDynamicList().First() == null)
+                    {
+                        throw new InvalidOperationException("Using IN with just null is not supported. Use EQUAL");
+                    }
+
                     foreach (object value in enumerable)
                     {
                         Expression nextExpr;
-                        if (underlyingType != null)
+                        if (value == null)
                         {
-                            nextExpr = Expression.Equal(member, Expression.Convert(Expression.Constant(value, underlyingType), type));
+                            nextExpr = Expression.Equal(member, Expression.Convert(Expression.Constant(value), pm.PropertyInfo.PropertyType));
                         }
                         else
                         {
-                            nextExpr = Expression.Equal(member, Expression.Constant(value, type));
+                            if (underlyingType != null)
+                            {
+                                nextExpr = Expression.Equal(member, Expression.Convert(Expression.Constant(value, underlyingType), type));
+                            }
+                            else
+                            {
+                                nextExpr = Expression.Equal(member, Expression.Constant(value, type));
+                            }
                         }
 
                         if (index == 0)

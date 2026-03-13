@@ -99,6 +99,7 @@ namespace Entatea.Tests.Predicates
             Assert.That(products.Select(x => x.Stock).Distinct(), Is.EquivalentTo(stock));
         }
 
+        [TestCase(typeof(InMemoryDataContext))]
         [TestCase(typeof(SqlServerDataContext))]
         [TestCase(typeof(MySqlDataContext))]
         [TestCase(typeof(SqliteDataContext))]
@@ -119,6 +120,7 @@ namespace Entatea.Tests.Predicates
             Assert.That(products.Select(x => x.Stock).Distinct(), Is.EquivalentTo(stockIds));
         }
 
+        [TestCase(typeof(InMemoryDataContext))]
         [TestCase(typeof(SqlServerDataContext))]
         [TestCase(typeof(MySqlDataContext))]
         [TestCase(typeof(SqliteDataContext))]
@@ -139,6 +141,7 @@ namespace Entatea.Tests.Predicates
             Assert.That(products.First().Stock, Is.EqualTo(12));
         }
 
+        [TestCase(typeof(InMemoryDataContext))]
         [TestCase(typeof(SqlServerDataContext))]
         [TestCase(typeof(MySqlDataContext))]
         [TestCase(typeof(SqliteDataContext))]
