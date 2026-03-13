@@ -1,6 +1,6 @@
 ### Build Status
 
-[![.NET Core](https://github.com/MalcolmJohnston/Entatea/actions/workflows/dotnet-core.yml/badge.svg)](https://github.com/MalcolmJohnston/Entatea/actions/workflows/dotnet-core.yml)
+[![.NET Core](https://github.com/MalcolmJohnston/Entatea/actions/workflows/build-and-publish.yml/badge.svg)](https://github.com/MalcolmJohnston/Entatea/actions/workflows/build-and-publish.yml)
 
 ### NuGet Packages
 | Package | Version |
