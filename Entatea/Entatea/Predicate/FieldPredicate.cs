@@ -1,8 +1,8 @@
-﻿using System.Collections;
+﻿using Entatea.SqlBuilder;
+using System;
+using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
-
-using Entatea.SqlBuilder;
 
 namespace Entatea.Predicate
 {
@@ -36,6 +36,15 @@ namespace Entatea.Predicate
             }
             else if (this.Operator == Operator.In)
             {
+                bool includeNull = false;
+                int valueCount = 0;
+
+                if (this.Value is IEnumerable enumerable)
+                {
+                    valueCount = enumerable.Cast<object>().Count();
+                    includeNull = enumerable.Cast<object>().ToList().Any(x => x == null);
+                }
+
                 var valueType = this.Value.GetType();
                 var iEnumType = typeof(IEnumerable);
 
@@ -44,8 +53,24 @@ namespace Entatea.Predicate
                 {
                     return $"{columnName} = @p{parameterIndex}";
                 }
+
+                if (includeNull)
+                {
+                    if (valueCount == 1)
+                    {
+                        throw new InvalidOperationException("Using IN with just null is not supported. Use EQUAL");
+                    }
+
+                    return $"{columnName} IS {(Not ? "NOT " : string.Empty)}NULL {(Not ? "AND " : "OR ")} {columnName} {GetOperatorString()} @p{parameterIndex}";
+                }
             }
+
             return $"{columnName} {GetOperatorString()} @p{parameterIndex}";
+        }
+
+        public bool IsInOperator()
+        {
+            return this.Operator == Operator.In;
         }
 
         public IEnumerable<KeyValuePair<string, object>> GetParameters(int parameterIndex, out int parameterCount)
