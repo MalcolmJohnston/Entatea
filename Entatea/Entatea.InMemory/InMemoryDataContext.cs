@@ -48,6 +48,9 @@ namespace Entatea.InMemory
             // get the type map
             ClassMap classMap = ClassMapper.GetClassMap<T>();
 
+            // copy the entity
+            T copied = ShallowCopy.Of(entity);
+
             // get the current list for this type
             IList<T> list = this.GetData<T>();
             IQueryable<T> linqList = list.AsQueryable();
@@ -64,7 +67,7 @@ namespace Entatea.InMemory
                 // check for existing entities
                 if (list.Any())
                 {
-                    List<IPredicate> predicates = classMap.ValidateAssignedKeyProperties<T>(entity).ToList();
+                    List<IPredicate> predicates = classMap.ValidateAssignedKeyProperties<T>(copied).ToList();
                     predicates.AddRange(classMap.GetSequentialPartitionPredicates<T>());
 
                     IList<T> existingEntities = new List<T>(list);
@@ -88,7 +91,7 @@ namespace Entatea.InMemory
                     keyValue = classMap.CoalesceNextSequentialPartitionId(keyValue);
                 }
 
-                pi.SetValue(entity, keyValue);
+                pi.SetValue(copied, keyValue);
             }
             else if (classMap.HasIdentityKey)
             {
@@ -98,7 +101,7 @@ namespace Entatea.InMemory
                 // deal with guids
                 if (pi.PropertyType == typeof(Guid))
                 {
-                    pi.SetValue(entity, Guid.NewGuid());
+                    pi.SetValue(copied, Guid.NewGuid());
                 }
                 else // assume some form of integer
                 {
@@ -111,7 +114,7 @@ namespace Entatea.InMemory
 
                     // increment and set the key value on the object
                     Expression incrementExpr = Expression.Increment(Expression.Constant(keyValue));
-                    pi.SetValue(entity, Expression.Lambda(incrementExpr).Compile().DynamicInvoke());
+                    pi.SetValue(copied, Expression.Lambda(incrementExpr).Compile().DynamicInvoke());
                 }
             }
 
@@ -121,7 +124,7 @@ namespace Entatea.InMemory
                 DateTime timeStamp = DateTime.Now;
                 foreach (PropertyMap dateStampProperty in classMap.DateStampProperties)
                 {
-                    dateStampProperty.PropertyInfo.SetValue(entity, timeStamp);
+                    dateStampProperty.PropertyInfo.SetValue(copied, timeStamp);
                 }
             }
 
@@ -129,7 +132,7 @@ namespace Entatea.InMemory
             if (classMap.IsSoftDelete)
             {
                 classMap.SoftDeleteProperty.PropertyInfo.SetValue(
-                    entity,
+                    copied,
                     Convert.ChangeType(
                         classMap.SoftDeleteProperty.ValueOnInsert,
                         classMap.SoftDeleteProperty.PropertyInfo.PropertyType));
@@ -141,7 +144,7 @@ namespace Entatea.InMemory
                 foreach (PropertyMap discriminatorProperty in classMap.DiscriminatorProperties)
                 {
                     discriminatorProperty.PropertyInfo.SetValue(
-                        entity,
+                        copied,
                         Convert.ChangeType(
                             discriminatorProperty.ValueOnInsert,
                             discriminatorProperty.PropertyInfo.PropertyType));
@@ -149,9 +152,9 @@ namespace Entatea.InMemory
             }
 
             // finally add the item to the list
-            list.Add(entity);
+            list.Add(copied);
 
-            return Task.FromResult(entity);
+            return Task.FromResult(ShallowCopy.Of(copied));
         }
 
         /// <inheritdoc />
@@ -164,7 +167,7 @@ namespace Entatea.InMemory
             if (obj != null)
             {
                 ClassMap classMap = ClassMapper.GetClassMap<T>();
-                
+
                 // soft delete
                 if (classMap.IsSoftDelete)
                 {
